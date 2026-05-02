@@ -1,3 +1,4 @@
+import { AddNewLeadFlow } from "@/components/crm/add-new-lead-flow";
 import { PipelineShell } from "@/components/crm/pipeline-shell";
 import { listAgentsForAgency } from "@/lib/queries/agency-members";
 import { listLeadsForAgency } from "@/lib/queries/leads";
@@ -32,6 +33,8 @@ export default async function CrmLeadsPipelinePage() {
       </header>
 
       <PipelineShell initialLeads={initialLeads} agents={agents} />
+
+      <AddNewLeadFlow />
     </div>
   );
 }
