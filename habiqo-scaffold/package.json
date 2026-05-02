@@ -1,0 +1,29 @@
+{
+  "name": "habiqo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HABIQO — Smart living. Smart real estate. Italian PropTech AI platform.",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:types": "supabase gen types typescript --local > packages/database/src/types.ts",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,70 @@
+import Link from "next/link";
+import { initials } from "@habiqo/utils";
+
+type SidebarProps = {
+  userName: string;
+  avatarUrl: string | null;
+};
+
+const NAV = [
+  { href: "/dashboard", label: "Dashboard overview" },
+  { href: "/properties", label: "Properties" },
+  { href: "/crm", label: "Leads" },
+  { href: "/deals", label: "Deals" },
+  { href: "/ai-assistant", label: "AI Assistant" },
+] as const;
+
+export function Sidebar({ userName, avatarUrl }: SidebarProps) {
+  return (
+    <aside
+      className="w-[220px] shrink-0 border-r border-[var(--border-subtle)] flex flex-col"
+      style={{ background: "var(--bg-elevated)" }}
+    >
+      <div className="px-5 py-6 border-b border-[var(--border-subtle)]">
+        <Link href="/dashboard" className="block">
+          <span className="font-display text-[20px] tracking-tight">HABIQO</span>
+          <span className="block font-mono text-[9px] tracking-[0.20em] uppercase text-[var(--fg-muted)] mt-0.5">
+            Smart real estate
+          </span>
+        </Link>
+      </div>
+
+      <nav className="flex-1 px-3 py-4">
+        <ul className="space-y-0.5">
+          {NAV.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="block px-3 py-2 rounded-md text-[13px] text-[var(--fg-secondary)] hover:bg-[var(--bg-sunken)] hover:text-[var(--fg-primary)] transition-colors"
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div className="px-3 py-4 border-t border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center font-display text-[12px]"
+            style={{
+              background: "var(--color-onyx-900)",
+              color: "var(--color-brass-soft)",
+            }}
+          >
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover rounded-full" />
+            ) : (
+              initials(userName)
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12px] font-medium truncate">{userName}</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
