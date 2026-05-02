@@ -29,13 +29,29 @@ export const PIPELINE_COLUMNS: readonly PipelineColumnMeta[] = [
   { id: "lost", label: "Persi", shortLabel: "Persi" },
 ] as const;
 
+export type LeadPriority = "low" | "medium" | "high" | "critical";
+
 export type PipelineLead = {
   id: string;
   fullName: string;
+  phone: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  budgetMinEur: number | null;
+  budgetMaxEur: number | null;
+  preferredZones: string[];
+  propertyType: string | null;
+  leadPriority: LeadPriority;
+  insightUrgency: string | null;
+  source: string;
+  sourceDetail: string | null;
+  lastContactAt: string | null;
+  updatedAt: string | null;
+  assignedToId: string | null;
+  assignedToName: string | null;
   status: string;
   temperature: string;
   aiScore: number | null;
-  lastActivityAt: string | null;
 };
 
 const COLUMN_SET = new Set<string>(PIPELINE_COLUMN_IDS);

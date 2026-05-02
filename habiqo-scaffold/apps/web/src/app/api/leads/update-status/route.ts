@@ -25,6 +25,22 @@ export async function POST(req: Request) {
 
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: leadRow } = await supabase
+    .from("leads")
+    .select("agency_id, status")
+    .eq("id", leadId)
+    .single();
+
+  if (!leadRow) {
+    return NextResponse.json({ error: "Lead non trovato" }, { status: 404 });
+  }
+
+  const previousStatus = leadRow.status;
+
   const { error } = await supabase
     .from("leads")
     .update({
@@ -34,6 +50,18 @@ export async function POST(req: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (previousStatus !== status) {
+    await supabase.from("lead_events").insert({
+      lead_id: leadId,
+      agency_id: leadRow.agency_id,
+      type: "status_change",
+      title: "Stato aggiornato",
+      detail: `${previousStatus} → ${status}`,
+      actor_id: user?.id ?? null,
+      occurred_at: new Date().toISOString(),
+    });
   }
 
   return NextResponse.json({

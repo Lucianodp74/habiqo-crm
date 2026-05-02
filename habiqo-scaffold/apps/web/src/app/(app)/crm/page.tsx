@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Suspense } from "react";
+import { listLeadsForAgency } from "@/lib/queries/leads";
 import { Pill, Skeleton } from "@habiqo/ui";
 import { formatRelative, initials } from "@habiqo/utils";
-import { listLeadsForAgency } from "@/lib/queries/leads";
+import Link from "next/link";
+import { Suspense } from "react";
 
 export const metadata = { title: "CRM" };
 
@@ -54,9 +54,7 @@ async function PipelineBoard() {
         >
           <header className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-[12px] font-medium">{col.label}</h2>
-            <span className="font-mono text-[10px] text-[var(--fg-muted)]">
-              {col.leads.length}
-            </span>
+            <span className="font-mono text-[10px] text-[var(--fg-muted)]">{col.leads.length}</span>
           </header>
           <ul className="space-y-2">
             {col.leads.length === 0 ? (
@@ -83,8 +81,8 @@ async function PipelineBoard() {
                       <div className="min-w-0 flex-1">
                         <div className="text-[13px] font-medium truncate">{lead.fullName}</div>
                         <div className="text-[11px] text-[var(--fg-muted)] truncate">
-                          {lead.lastActivityAt
-                            ? formatRelative(lead.lastActivityAt)
+                          {lead.lastContactAt
+                            ? formatRelative(lead.lastContactAt)
                             : "Nessuna attività"}
                         </div>
                       </div>

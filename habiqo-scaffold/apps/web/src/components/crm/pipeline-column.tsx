@@ -27,11 +27,11 @@ export function PipelineColumn({
   return (
     <section
       ref={setNodeRef}
-      className={`min-w-[min(100%,280px)] w-[280px] shrink-0 snap-start flex flex-col rounded-2xl border transition-[box-shadow,border-color] duration-200 ease-out ${
+      className={`min-w-[min(100%,280px)] w-[280px] shrink-0 snap-start flex flex-col rounded-2xl transition-[box-shadow,border-color,background] duration-300 ease-out glass-panel ${
         isOver
           ? "border-[var(--color-brass-soft)] shadow-[0_8px_30px_-12px_rgba(24,20,16,0.35)] ring-1 ring-[var(--color-brass)]/35"
-          : "border-[var(--border-subtle)]"
-      } bg-[var(--bg-elevated)]`}
+          : ""
+      }`}
     >
       <header className="flex items-center justify-between gap-2 px-3 pt-3 pb-2 border-b border-[var(--border-subtle)]/80">
         <div className="min-w-0">

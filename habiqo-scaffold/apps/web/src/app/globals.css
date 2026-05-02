@@ -73,6 +73,11 @@
     color: var(--fg-primary);
   }
 
+  .dark ::selection {
+    background: rgba(203, 166, 119, 0.35);
+    color: var(--fg-primary);
+  }
+
   .font-display {
     font-family: var(--font-display);
     font-feature-settings: "ss01", "ss03";
@@ -100,5 +105,24 @@
   }
   *::-webkit-scrollbar-track {
     background: transparent;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    border-color: var(--bg-canvas);
+    background: var(--color-onyx-700);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-edge);
+    box-shadow: var(--shadow-card);
+  }
+
+  .animate-in-card {
+    animation: fade-up 480ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
   }
 }

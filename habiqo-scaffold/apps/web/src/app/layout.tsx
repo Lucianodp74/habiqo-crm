@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
+import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -41,8 +42,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body>
-        {children}
+      <body className="transition-colors duration-300">
+        <AppProviders>{children}</AppProviders>
         <Toaster
           position="bottom-right"
           toastOptions={{

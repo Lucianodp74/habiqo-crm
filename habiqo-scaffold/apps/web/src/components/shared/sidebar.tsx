@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { initials } from "@habiqo/utils";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 type SidebarProps = {
   userName: string;
@@ -44,7 +45,10 @@ export function Sidebar({ userName, avatarUrl }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="px-3 py-4 border-t border-[var(--border-subtle)]">
+      <div className="px-3 py-4 border-t border-[var(--border-subtle)] space-y-3">
+        <div className="flex justify-center px-2">
+          <ThemeToggle />
+        </div>
         <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center font-display text-[12px]"
