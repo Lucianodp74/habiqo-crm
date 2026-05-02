@@ -1,5 +1,5 @@
-import { Suspense } from "react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Pill, Skeleton } from "@habiqo/ui";
 import { formatRelative, initials } from "@habiqo/utils";
 import { listLeadsForAgency } from "@/lib/queries/leads";
@@ -16,13 +16,19 @@ const COLUMNS = [
 export default function CrmPage() {
   return (
     <div className="px-8 py-8">
-      <header className="mb-8 flex items-baseline justify-between">
+      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-mono text-[10px] tracking-[0.20em] uppercase text-[var(--fg-muted)] mb-2">
             Pipeline
           </p>
           <h1 className="font-display text-[32px] leading-tight">CRM</h1>
         </div>
+        <Link
+          href="/crm/leads"
+          className="text-[12px] font-medium text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 bg-[var(--bg-elevated)] transition-colors self-start sm:self-auto"
+        >
+          Vista Kanban
+        </Link>
       </header>
 
       <Suspense fallback={<PipelineBoardSkeleton />}>

@@ -9,7 +9,7 @@ type SidebarProps = {
 const NAV = [
   { href: "/dashboard", label: "Dashboard overview" },
   { href: "/properties", label: "Properties" },
-  { href: "/crm", label: "Leads" },
+  { href: "/crm/leads", label: "Leads" },
   { href: "/deals", label: "Deals" },
   { href: "/ai-assistant", label: "AI Assistant" },
 ] as const;

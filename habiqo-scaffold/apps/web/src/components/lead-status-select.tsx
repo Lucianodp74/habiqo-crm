@@ -46,8 +46,10 @@ export function LeadStatusSelect({ leadId, currentStatus }: LeadStatusSelectProp
     >
       <option value="new">Nuovo</option>
       <option value="qualified">Qualificato</option>
-      <option value="negotiation">In trattativa</option>
-      <option value="won">Chiuso</option>
+      <option value="visit_scheduled">Visita programmata</option>
+      <option value="in_negotiation">In trattativa</option>
+      <option value="won">Chiuso vinto</option>
+      <option value="lost">Perso</option>
     </select>
   );
 }
