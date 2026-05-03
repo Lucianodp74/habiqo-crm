@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { initials } from "@habiqo/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { initials } from "@habiqo/utils";
+import Link from "next/link";
 
 type SidebarProps = {
   userName: string;

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Button, Pill } from "@habiqo/ui";
+import Link from "next/link";
 import { AiValuationWidget } from "./valuation-widget";
 
 export const metadata = { title: "Dashboard" };
@@ -63,9 +63,11 @@ function leadTone(status: LeadStatus): "neutral" | "warm" | "positive" | "danger
 }
 
 export default function DashboardPage() {
-  const today = new Intl.DateTimeFormat("it-IT", { weekday: "long", day: "2-digit", month: "long" }).format(
-    new Date(),
-  );
+  const today = new Intl.DateTimeFormat("it-IT", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  }).format(new Date());
 
   return (
     <div className="px-5 py-6 lg:px-10 lg:py-8">
@@ -80,7 +82,8 @@ export default function DashboardPage() {
               <span className="italic text-[var(--accent-deep)]">.</span>
             </h1>
             <p className="text-[14px] text-[var(--fg-secondary)] mt-2 max-w-2xl">
-              Una vista premium su immobili, lead e attività. Dati realistici demo, UI pronta per collegarsi al DB.
+              Una vista premium su immobili, lead e attività. Dati realistici demo, UI pronta per
+              collegarsi al DB.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -114,10 +117,14 @@ export default function DashboardPage() {
               }}
             />
             <div className="relative">
-              <p className="font-mono text-[10px] tracking-[0.20em] uppercase text-[var(--fg-muted)]">{s.label}</p>
+              <p className="font-mono text-[10px] tracking-[0.20em] uppercase text-[var(--fg-muted)]">
+                {s.label}
+              </p>
               <div className="flex items-end justify-between mt-3">
                 <div className="font-display text-[28px] leading-none">{s.value}</div>
-                <Pill tone={s.tone}>{s.tone === "positive" ? "in crescita" : s.tone === "brass" ? "oggi" : "—"}</Pill>
+                <Pill tone={s.tone}>
+                  {s.tone === "positive" ? "in crescita" : s.tone === "brass" ? "oggi" : "—"}
+                </Pill>
               </div>
               <p className="text-[12.5px] text-[var(--fg-secondary)] mt-2">{s.hint}</p>
             </div>
@@ -130,10 +137,15 @@ export default function DashboardPage() {
         <section className="xl:col-span-8">
           <div className="flex items-end justify-between mb-3">
             <div>
-              <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[var(--fg-muted)]">Leads</p>
+              <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[var(--fg-muted)]">
+                Leads
+              </p>
               <h2 className="font-display text-[22px] leading-tight mt-1">Recent leads</h2>
             </div>
-            <Link href="/crm" className="text-[13px] text-[var(--accent-deep)] underline underline-offset-4">
+            <Link
+              href="/crm"
+              className="text-[13px] text-[var(--accent-deep)] underline underline-offset-4"
+            >
               Apri CRM
             </Link>
           </div>
@@ -169,8 +181,12 @@ export default function DashboardPage() {
                           {l.status}
                         </Pill>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-[var(--fg-secondary)]">{l.source}</td>
-                      <td className="px-4 py-3 text-[13px] text-[var(--fg-muted)]">{l.lastTouch}</td>
+                      <td className="px-4 py-3 text-[13px] text-[var(--fg-secondary)]">
+                        {l.source}
+                      </td>
+                      <td className="px-4 py-3 text-[13px] text-[var(--fg-muted)]">
+                        {l.lastTouch}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -184,7 +200,9 @@ export default function DashboardPage() {
           <AiValuationWidget />
 
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4">
-            <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[var(--fg-muted)]">Next actions</p>
+            <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[var(--fg-muted)]">
+              Next actions
+            </p>
             <h3 className="font-display text-[20px] leading-tight mt-1">Oggi</h3>
             <div className="mt-3 grid grid-cols-1 gap-2">
               {[
@@ -206,4 +224,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

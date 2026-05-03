@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { Button } from "@habiqo/ui";
+import { useEffect } from "react";
 
 export default function GlobalError({
   error,
@@ -30,9 +30,7 @@ export default function GlobalError({
         </Button>
       </div>
       {error.digest ? (
-        <p className="font-mono text-[10px] text-[var(--fg-muted)] mt-6">
-          ref: {error.digest}
-        </p>
+        <p className="font-mono text-[10px] text-[var(--fg-muted)] mt-6">ref: {error.digest}</p>
       ) : null}
     </div>
   );

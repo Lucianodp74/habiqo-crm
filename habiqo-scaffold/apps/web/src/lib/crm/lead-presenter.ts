@@ -1,7 +1,8 @@
+import { NON_SPECIFICATO } from "@/lib/crm/missing-value";
 import type { PipelineLead } from "./pipeline";
 
 export function formatCurrencyEur(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
+  if (n == null || Number.isNaN(n)) return NON_SPECIFICATO;
   return new Intl.NumberFormat("it-IT", {
     style: "currency",
     currency: "EUR",
@@ -14,13 +15,13 @@ export function formatBudgetRange(
 ): string {
   const min = lead.budgetMinEur;
   const max = lead.budgetMaxEur;
-  if (min == null && max == null) return "—";
+  if (min == null && max == null) return NON_SPECIFICATO;
   if (min != null && max != null) return `${formatCurrencyEur(min)} – ${formatCurrencyEur(max)}`;
   return formatCurrencyEur(min ?? max);
 }
 
 export function formatZones(zones: string[], max = 2): string {
-  if (!zones.length) return "—";
+  if (!zones.length) return NON_SPECIFICATO;
   const shown = zones.slice(0, max);
   return shown.join(", ") + (zones.length > max ? "…" : "");
 }
@@ -52,7 +53,7 @@ const PROPERTY_TYPE_LABELS: Record<string, string> = {
 };
 
 export function formatPropertyType(raw: string | null): string {
-  if (!raw) return "—";
+  if (!raw) return NON_SPECIFICATO;
   const key = raw.toLowerCase();
   return PROPERTY_TYPE_LABELS[key] ?? raw;
 }

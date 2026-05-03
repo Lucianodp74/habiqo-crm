@@ -1,6 +1,6 @@
+import { updateSession } from "@/lib/supabase/middleware";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
 /**
  * Root middleware. Three responsibilities:

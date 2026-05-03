@@ -1,9 +1,9 @@
 "use server";
 
+import { createClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@habiqo/types";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
-import type { ActionResult } from "@habiqo/types";
-import { createClient } from "@/lib/supabase/server";
 
 const leadStatus = z.enum(["new", "qualified", "in_negotiation", "won", "lost"]);
 
@@ -15,9 +15,7 @@ const updateLeadSchema = z.object({
   assignedTo: z.string().uuid().nullable().optional(),
 });
 
-export async function updateLead(
-  input: unknown,
-): Promise<ActionResult<{ id: string }>> {
+export async function updateLead(input: unknown): Promise<ActionResult<{ id: string }>> {
   const parsed = updateLeadSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -70,9 +68,7 @@ const createLeadSchema = z.object({
   notes: z.string().max(5000).nullable().optional(),
 });
 
-export async function createLead(
-  input: unknown,
-): Promise<ActionResult<{ id: string }>> {
+export async function createLead(input: unknown): Promise<ActionResult<{ id: string }>> {
   const parsed = createLeadSchema.safeParse(input);
   if (!parsed.success) {
     return {

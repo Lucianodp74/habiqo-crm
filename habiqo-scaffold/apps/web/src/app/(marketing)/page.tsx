@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Button } from "@habiqo/ui";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -26,12 +26,12 @@ export default function HomePage() {
           Per agenzie immobiliari italiane
         </p>
         <h1 className="font-display text-[64px] leading-[1.02] mb-6">
-          L'intelligenza che <span className="italic text-[var(--accent-deep)]">chiude</span>{" "}
-          la vendita.
+          L'intelligenza che <span className="italic text-[var(--accent-deep)]">chiude</span> la
+          vendita.
         </h1>
         <p className="text-[17px] leading-relaxed text-[var(--fg-secondary)] max-w-xl mb-10">
-          CRM, valutazione AI istantanea, voice AI in italiano e generazione contenuti.
-          Un solo prodotto al posto di cinque. Conforme GDPR by design.
+          CRM, valutazione AI istantanea, voice AI in italiano e generazione contenuti. Un solo
+          prodotto al posto di cinque. Conforme GDPR by design.
         </p>
         <div className="flex items-center gap-3">
           <Link href="/register">

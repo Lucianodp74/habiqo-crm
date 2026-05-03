@@ -2,69 +2,86 @@ import { columnIdToDbStatus, isPipelineColumnId } from "@/lib/crm/pipeline";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-/** Accepts Kanban column ids and legacy DB value `in_negotiation`. */
 function normalizeIncomingStatus(raw: string): string | null {
-  if (raw === "in_negotiation") return "in_negotiation";
-  if (isPipelineColumnId(raw)) return columnIdToDbStatus(raw);
+  if (raw === "in_negotiation") {
+    return "in_negotiation";
+  }
+
+  if (isPipelineColumnId(raw)) {
+    return columnIdToDbStatus(raw);
+  }
+
   return null;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string): boolean {
+  return UUID_RE.test(value);
+}
+
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const { leadId, status: rawStatus } = body;
+    const leadId = body?.leadId;
+    const rawStatus = body?.status;
 
-  if (typeof leadId !== "string" || typeof rawStatus !== "string") {
-    return NextResponse.json({ error: "leadId e status richiesti" }, { status: 400 });
-  }
+    if (typeof leadId !== "string") {
+      return NextResponse.json({ error: "leadId richiesto" }, { status: 400 });
+    }
 
-  const status = normalizeIncomingStatus(rawStatus);
-  if (!status) {
-    return NextResponse.json({ error: "Stato non valido" }, { status: 400 });
-  }
+    if (typeof rawStatus !== "string") {
+      return NextResponse.json({ error: "status richiesto" }, { status: 400 });
+    }
 
-  const supabase = await createClient();
+    if (!isUuid(leadId)) {
+      return NextResponse.json({ error: "Identificativo lead non valido" }, { status: 400 });
+    }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const status = normalizeIncomingStatus(rawStatus);
 
-  const { data: leadRow } = await supabase
-    .from("leads")
-    .select("agency_id, status")
-    .eq("id", leadId)
-    .single();
+    if (!status) {
+      return NextResponse.json({ error: "Stato non valido" }, { status: 400 });
+    }
 
-  if (!leadRow) {
-    return NextResponse.json({ error: "Lead non trovato" }, { status: 404 });
-  }
+    const supabase = await createClient();
 
-  const previousStatus = leadRow.status;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const { error } = await supabase
-    .from("leads")
-    .update({
-      status,
-    })
-    .eq("id", leadId);
+    if (!user) {
+      return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
+    }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  if (previousStatus !== status) {
-    await supabase.from("lead_events").insert({
-      lead_id: leadId,
-      agency_id: leadRow.agency_id,
-      type: "status_change",
-      title: "Stato aggiornato",
-      detail: `${previousStatus} → ${status}`,
-      actor_id: user?.id ?? null,
-      occurred_at: new Date().toISOString(),
+    const { error } = await supabase.rpc("update_lead_status_with_event", {
+      p_lead_id: leadId,
+      p_new_status: status,
     });
-  }
 
-  return NextResponse.json({
-    success: true,
-  });
+    if (error) {
+      console.error("[update-status]", error);
+
+      return NextResponse.json(
+        {
+          error: error.message || "Accesso negato",
+        },
+        { status: 403 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error("[update-status]", error);
+
+    return NextResponse.json(
+      {
+        error: "Errore interno",
+      },
+      { status: 500 },
+    );
+  }
 }

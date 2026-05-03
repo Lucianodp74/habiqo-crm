@@ -1,7 +1,7 @@
-import { LoginForm } from "./login-form";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { LoginForm } from "./login-form";
 
 export const metadata = { title: "Accedi" };
 
@@ -19,7 +19,8 @@ export default async function LoginPage() {
       <aside
         className="hidden lg:flex flex-col justify-between p-12 relative"
         style={{
-          background: "linear-gradient(135deg, var(--color-onyx-900) 0%, var(--color-onyx-950) 100%)",
+          background:
+            "linear-gradient(135deg, var(--color-onyx-900) 0%, var(--color-onyx-950) 100%)",
         }}
       >
         <Link href="/" className="font-display text-[22px] text-[var(--color-brass-soft)]">
@@ -27,8 +28,8 @@ export default async function LoginPage() {
         </Link>
         <blockquote className="max-w-md">
           <p className="font-display text-[24px] leading-snug text-[var(--color-surface)] mb-4">
-            "Da quando usiamo HABIQO chiudiamo il 40% di trattative in più con lo stesso
-            numero di agenti."
+            "Da quando usiamo HABIQO chiudiamo il 40% di trattative in più con lo stesso numero di
+            agenti."
           </p>
           <footer className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-brass-soft)]">
             Giulia Romano · Studio Romano Immobiliare, Milano

@@ -1,6 +1,6 @@
+import { AppProviders } from "@/components/providers/app-providers";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
-import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
 export const metadata: Metadata = {

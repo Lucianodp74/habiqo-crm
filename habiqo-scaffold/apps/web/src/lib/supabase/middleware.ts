@@ -1,9 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
-  if (!value || value === "REPLACE_ME" || value === "demo-key" || value.includes("demo.supabase.co")) {
+  if (
+    !value ||
+    value === "REPLACE_ME" ||
+    value === "demo-key" ||
+    value.includes("demo.supabase.co")
+  ) {
     throw new Error(
       `Supabase env misconfigured: ${name}. Set apps/web/.env.local with real values (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY).`,
     );
@@ -28,7 +33,11 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(
-          cookiesToSet: Array<{ name: string; value: string; options?: Parameters<typeof response.cookies.set>[2] }>,
+          cookiesToSet: Array<{
+            name: string;
+            value: string;
+            options?: Parameters<typeof response.cookies.set>[2];
+          }>,
         ) {
           for (const { name, value } of cookiesToSet) {
             request.cookies.set(name, value);

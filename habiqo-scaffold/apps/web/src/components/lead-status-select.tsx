@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState, type ChangeEvent } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 
 type LeadStatusSelectProps = {
   leadId: string;

@@ -1,5 +1,5 @@
-import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@habiqo/database";
+import { createBrowserClient } from "@supabase/ssr";
 
 /**
  * Supabase client for Client Components (Realtime subscriptions,

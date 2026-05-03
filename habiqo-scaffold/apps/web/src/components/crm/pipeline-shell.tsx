@@ -1,12 +1,13 @@
 "use client";
 
 import type { PipelineLead } from "@/lib/crm/pipeline";
-import { computePipelineStats, filterStatusToDbStatus } from "@/lib/crm/pipeline-analytics";
+import { computePipelineStats } from "@/lib/crm/pipeline-analytics";
+import { leadMatchesPipelineFilters } from "@/lib/crm/pipeline-filter-match";
 import type { AgencyAgentOption } from "@/lib/queries/agency-members";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useCallback, useMemo } from "react";
 import { PipelineAnalyticsBar } from "./pipeline-analytics-bar";
-import { PipelineBoard } from "./pipeline-board";
+import { PipelineBoard } from "./pipeline-board-client";
 import { type PipelineFilterValues, PipelineFilters } from "./pipeline-filters";
 
 type Props = {
@@ -60,47 +61,17 @@ export function PipelineShell({ initialLeads, agents }: Props) {
   const stats = useMemo(() => computePipelineStats(initialLeads), [initialLeads]);
 
   const filteredLeads = useMemo(() => {
-    return initialLeads.filter((lead) => {
-      if (filterValues.q.trim()) {
-        const s = filterValues.q.toLowerCase().trim();
-        const match =
-          lead.fullName.toLowerCase().includes(s) ||
-          lead.email?.toLowerCase().includes(s) ||
-          (lead.phone?.includes(s) ?? false) ||
-          (lead.whatsapp?.includes(s) ?? false);
-        if (!match) return false;
-      }
-      if (filterValues.agentId && lead.assignedToId !== filterValues.agentId) return false;
-      if (filterValues.source && lead.source !== filterValues.source) return false;
-      if (filterValues.status) {
-        const db = filterStatusToDbStatus(filterValues.status);
-        if (lead.status !== db) return false;
-      }
-      if (filterValues.city.trim()) {
-        const c = filterValues.city.toLowerCase().trim();
-        if (!lead.preferredZones.some((z) => z.toLowerCase().includes(c))) return false;
-      }
-      if (
-        filterValues.budgetMin != null &&
-        (lead.budgetMaxEur == null || lead.budgetMaxEur < filterValues.budgetMin)
-      ) {
-        return false;
-      }
-      if (
-        filterValues.budgetMax != null &&
-        (lead.budgetMinEur == null || lead.budgetMinEur > filterValues.budgetMax)
-      ) {
-        return false;
-      }
-      return true;
-    });
+    return initialLeads.filter((lead) => leadMatchesPipelineFilters(lead, filterValues));
   }, [initialLeads, filterValues]);
 
   return (
     <>
       <PipelineAnalyticsBar stats={stats} />
       <PipelineFilters agents={agents} values={filterValues} onChange={onFilterChange} />
-      <PipelineBoard initialLeads={filteredLeads} />
+      <PipelineBoard
+        initialLeads={filteredLeads}
+        includeLeadInBoard={(lead) => leadMatchesPipelineFilters(lead, filterValues)}
+      />
     </>
   );
 }

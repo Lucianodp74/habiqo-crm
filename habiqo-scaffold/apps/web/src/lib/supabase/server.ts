@@ -3,7 +3,12 @@ import { cookies } from "next/headers";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
-  if (!value || value === "REPLACE_ME" || value === "demo-key" || value.includes("demo.supabase.co")) {
+  if (
+    !value ||
+    value === "REPLACE_ME" ||
+    value === "demo-key" ||
+    value.includes("demo.supabase.co")
+  ) {
     throw new Error(
       `Supabase env misconfigured: ${name}. Set apps/web/.env.local with real values (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY).`,
     );
@@ -29,7 +34,11 @@ export async function createClient() {
           return cookieStore.getAll();
         },
         setAll(
-          cookiesToSet: Array<{ name: string; value: string; options?: Parameters<typeof cookieStore.set>[2] }>,
+          cookiesToSet: Array<{
+            name: string;
+            value: string;
+            options?: Parameters<typeof cookieStore.set>[2];
+          }>,
         ) {
           try {
             for (const { name, value, options } of cookiesToSet) {

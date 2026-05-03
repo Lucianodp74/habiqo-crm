@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { generateStream, leadInsightsPrompt } from "@habiqo/ai";
 import { getLeadById, listEventsForLead } from "@/lib/queries/leads";
 import { createClient } from "@/lib/supabase/server";
+import { generateStream, leadInsightsPrompt } from "@habiqo/ai";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;

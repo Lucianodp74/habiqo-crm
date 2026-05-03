@@ -17,6 +17,8 @@ import Link from "next/link";
 
 type LeadCardProps = {
   lead: PipelineLead;
+  /** Brief highlight when the card lands in a new column via realtime sync. */
+  surfacePulse?: boolean;
 };
 
 function stopDrag(e: React.SyntheticEvent) {
@@ -39,7 +41,7 @@ function sourceStyles(): string {
   return "bg-[var(--bg-sunken)]/90 text-[var(--fg-secondary)] border-[var(--border-subtle)]";
 }
 
-export function LeadCard({ lead }: LeadCardProps) {
+export function LeadCard({ lead, surfacePulse = false }: LeadCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: lead.id,
   });
@@ -68,10 +70,12 @@ export function LeadCard({ lead }: LeadCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group rounded-2xl border border-[var(--glass-edge)] glass-panel transition-all duration-300 ease-out ${
+      className={`group rounded-2xl border border-[var(--glass-edge)] glass-panel transition-[transform,box-shadow,ring-color,opacity] duration-300 ease-out ${
         isDragging
           ? "opacity-95 shadow-2xl ring-1 ring-[var(--color-brass)]/40 z-20 scale-[1.01]"
-          : "hover:shadow-[var(--shadow-floating)] hover:border-[var(--color-brass)]/20"
+          : surfacePulse
+            ? "ring-2 ring-[var(--color-brass)]/50 shadow-[0_0_28px_-10px_rgba(200,160,96,0.45)]"
+            : "hover:shadow-[var(--shadow-floating)] hover:border-[var(--color-brass)]/20"
       }`}
     >
       <div className="flex gap-1.5 p-2 sm:p-2.5">

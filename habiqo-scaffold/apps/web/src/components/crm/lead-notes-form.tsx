@@ -38,15 +38,19 @@ export function LeadNotesForm({ leadId }: Props) {
   }, [leadId, router, text]);
 
   return (
-    <div className="glass-panel rounded-2xl p-4 sm:p-5">
+    <div
+      id="lead-notes-section"
+      className="glass-panel rounded-2xl p-4 sm:p-5 scroll-mt-28 transition-shadow duration-300 hover:shadow-[0_12px_40px_-24px_rgba(24,20,16,0.15)]"
+    >
       <h3 className="font-display text-[18px] text-[var(--fg-primary)] mb-3">Aggiungi nota</h3>
       <textarea
+        id="lead-note-input"
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
         placeholder="Scrivi un aggiornamento visibile al team…"
         disabled={pending}
-        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/70 px-3 py-2.5 text-[13px] text-[var(--fg-primary)] placeholder:text-[var(--fg-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brass)]/35 resize-y min-h-[88px] disabled:opacity-60"
+        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/70 px-3 py-2.5 text-[13px] text-[var(--fg-primary)] placeholder:text-[var(--fg-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brass)]/35 resize-y min-h-[88px] disabled:opacity-60 transition-[border-color,box-shadow] duration-200"
       />
       <div className="mt-3 flex justify-end">
         <button

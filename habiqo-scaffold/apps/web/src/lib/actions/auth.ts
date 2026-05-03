@@ -1,10 +1,10 @@
 "use server";
 
+import { createClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@habiqo/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import type { ActionResult } from "@habiqo/types";
-import { createClient } from "@/lib/supabase/server";
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Inserisci un'email valida" }),
@@ -34,8 +34,12 @@ export async function signIn(input: unknown): Promise<ActionResult<{ userId: str
     };
   }
 
-  let data: Awaited<ReturnType<(Awaited<ReturnType<typeof createClient>>)["auth"]["signInWithPassword"]>>["data"];
-  let error: Awaited<ReturnType<(Awaited<ReturnType<typeof createClient>>)["auth"]["signInWithPassword"]>>["error"];
+  let data: Awaited<
+    ReturnType<Awaited<ReturnType<typeof createClient>>["auth"]["signInWithPassword"]>
+  >["data"];
+  let error: Awaited<
+    ReturnType<Awaited<ReturnType<typeof createClient>>["auth"]["signInWithPassword"]>
+  >["error"];
   try {
     const supabase = await createClient();
     ({ data, error } = await supabase.auth.signInWithPassword(parsed.data));
@@ -82,8 +86,10 @@ export async function signUp(input: unknown): Promise<ActionResult<{ userId: str
     };
   }
 
-  let data: Awaited<ReturnType<(Awaited<ReturnType<typeof createClient>>)["auth"]["signUp"]>>["data"];
-  let error: Awaited<ReturnType<(Awaited<ReturnType<typeof createClient>>)["auth"]["signUp"]>>["error"];
+  let data: Awaited<ReturnType<Awaited<ReturnType<typeof createClient>>["auth"]["signUp"]>>["data"];
+  let error: Awaited<
+    ReturnType<Awaited<ReturnType<typeof createClient>>["auth"]["signUp"]>
+  >["error"];
   try {
     const supabase = await createClient();
     ({ data, error } = await supabase.auth.signUp({
@@ -153,7 +159,7 @@ export async function signInAndRedirect(
     }
 
     revalidatePath("/", "layout");
-    redirect(next && next.startsWith("/") ? next : "/dashboard");
+    redirect(next?.startsWith("/") ? next : "/dashboard");
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return {

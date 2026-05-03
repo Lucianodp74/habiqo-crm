@@ -1,6 +1,6 @@
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { RegisterForm } from "./register-form";
 
 export const metadata = { title: "Registrati" };
@@ -18,7 +18,8 @@ export default async function RegisterPage() {
       <aside
         className="hidden lg:flex flex-col justify-between p-12 relative"
         style={{
-          background: "linear-gradient(135deg, var(--color-onyx-900) 0%, var(--color-onyx-950) 100%)",
+          background:
+            "linear-gradient(135deg, var(--color-onyx-900) 0%, var(--color-onyx-950) 100%)",
         }}
       >
         <Link href="/" className="font-display text-[22px] text-[var(--color-brass-soft)]">
@@ -26,7 +27,8 @@ export default async function RegisterPage() {
         </Link>
         <blockquote className="max-w-md">
           <p className="font-display text-[24px] leading-snug text-[var(--color-surface)] mb-4">
-            "Il nostro team usa HABIQO per anticipare le obiezioni e portare più trattative fino al rogito."
+            "Il nostro team usa HABIQO per anticipare le obiezioni e portare più trattative fino al
+            rogito."
           </p>
           <footer className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-brass-soft)]">
             Luca Conti · Conti Real Estate, Roma
@@ -56,4 +58,3 @@ export default async function RegisterPage() {
     </main>
   );
 }
-

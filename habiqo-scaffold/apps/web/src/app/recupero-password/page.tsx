@@ -1,7 +1,7 @@
+import { createClient } from "@/lib/supabase/server";
+import { Button } from "@habiqo/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@habiqo/ui";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Recupero password" };
 
@@ -33,4 +33,3 @@ export default async function PasswordRecoveryPage() {
     </main>
   );
 }
-

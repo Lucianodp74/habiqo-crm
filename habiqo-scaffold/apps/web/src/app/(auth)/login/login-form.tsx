@@ -1,9 +1,9 @@
 "use client";
 
+import { signInAndRedirect } from "@/lib/actions/auth";
 import { Button } from "@habiqo/ui";
 import { useSearchParams } from "next/navigation";
 import { useActionState, useMemo } from "react";
-import { signInAndRedirect } from "@/lib/actions/auth";
 
 export function LoginForm() {
   const searchParams = useSearchParams();

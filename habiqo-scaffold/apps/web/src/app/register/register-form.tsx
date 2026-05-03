@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { Button } from "@habiqo/ui";
 import { signUpAndRedirect } from "@/lib/actions/auth";
+import { Button } from "@habiqo/ui";
+import { useActionState } from "react";
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(signUpAndRedirect, undefined);
@@ -82,4 +82,3 @@ function Field({
     </div>
   );
 }
-
