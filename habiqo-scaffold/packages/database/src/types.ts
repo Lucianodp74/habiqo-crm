@@ -55,6 +55,7 @@ type LeadsRow = {
 type LeadEventsRow = {
   id: string;
   lead_id: string;
+  agency_id: string;
   type: string;
   title: string;
   detail: string | null;
@@ -86,7 +87,12 @@ export type Database = {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      update_lead_status_with_event: {
+        Args: { p_lead_id: string; p_new_status: string };
+        Returns: undefined;
+      };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };
