@@ -50,3 +50,5 @@ supabase/migrations/*.local.sql
 # Logs
 logs
 *.log
+
+.cursor/
