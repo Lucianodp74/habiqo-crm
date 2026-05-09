@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -22,7 +22,7 @@ export async function GET() {
 
   const result = (members ?? []).map((m) => ({
     user_id: m.user_id,
-    full_name: (m.profiles as { full_name: string | null } | null)?.full_name ?? null,
+    full_name: (m.profiles as unknown as { full_name: string | null } | null)?.full_name ?? null,
   }));
 
   return NextResponse.json(result);

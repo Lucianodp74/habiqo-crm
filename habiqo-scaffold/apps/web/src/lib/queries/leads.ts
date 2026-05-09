@@ -89,13 +89,12 @@ async function enrichLeads(supabase: Awaited<ReturnType<typeof createClient>>, r
   );
 }
 
-export async function listLeadsForAgency(): Promise<PipelineLead[]> {
+export async function listLeadsForAgency(options?: { assignedTo?: string }): Promise<PipelineLead[]> {
   const supabase = await createClient();
 
-  const { data: rows, error } = await supabase
-    .from("leads")
-    .select("*")
-    .order("created_at", { ascending: false });
+  let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
+  if (options?.assignedTo) { query = query.eq("assigned_to", options.assignedTo); }
+  const { data: rows, error } = await query;
 
   if (error) {
     console.error("SUPABASE ERROR:", error.message);

@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { AddNewLeadFlow } from "@/components/crm/add-new-lead-flow";
 import { PipelineShell } from "@/components/crm/pipeline-shell";
 import { listAgentsForAgency } from "@/lib/queries/agency-members";
@@ -6,8 +7,23 @@ import Link from "next/link";
 
 export const metadata = { title: "Pipeline · CRM" };
 
-export default async function CrmLeadsPipelinePage() {
-  const [initialLeads, agents] = await Promise.all([listLeadsForAgency(), listAgentsForAgency()]);
+interface Props {
+  searchParams: Promise<{ filter?: string }>;
+}
+
+export default async function CrmLeadsPipelinePage({ searchParams }: Props) {
+  const { filter } = await searchParams;
+  const isMineFilter = filter === "mine";
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [initialLeads, agents] = await Promise.all([
+    listLeadsForAgency(isMineFilter && user ? { assignedTo: user.id } : undefined),
+    listAgentsForAgency(),
+  ]);
 
   return (
     <div className="px-4 sm:px-8 py-8 max-w-[1920px] mx-auto">
@@ -24,16 +40,41 @@ export default async function CrmLeadsPipelinePage() {
             in tempo reale.
           </p>
         </div>
-        <Link
-          href="/crm"
-          className="text-[12px] font-medium text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 bg-[var(--bg-elevated)] transition-colors self-start sm:self-auto"
-        >
-          Vista elenco
-        </Link>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex rounded-xl border border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-elevated)] text-[12px] font-medium">
+            <Link
+              href="/crm/leads"
+              className={`px-4 py-2.5 transition-colors ${
+                !isMineFilter
+                  ? "bg-[var(--color-onyx-900)] text-white"
+                  : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]"
+              }`}
+            >
+              Tutti
+            </Link>
+            <Link
+              href="/crm/leads?filter=mine"
+              className={`px-4 py-2.5 transition-colors ${
+                isMineFilter
+                  ? "bg-[var(--color-onyx-900)] text-white"
+                  : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]"
+              }`}
+            >
+              I miei
+            </Link>
+          </div>
+
+          <Link
+            href="/crm"
+            className="text-[12px] font-medium text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 bg-[var(--bg-elevated)] transition-colors"
+          >
+            Vista elenco
+          </Link>
+        </div>
       </header>
 
       <PipelineShell initialLeads={initialLeads} agents={agents} />
-
       <AddNewLeadFlow />
     </div>
   );
