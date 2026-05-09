@@ -200,3 +200,91 @@ export async function revokeInvitation(
   revalidatePath("/admin/team");
   return { ok: true };
 }
+
+// -----------------------------------------------------------------------------
+// Accept invitation (nuovo utente)
+// -----------------------------------------------------------------------------
+
+const acceptInvitationSchema = z.object({
+  token: z.string().min(1),
+  fullName: z.string().trim().min(2, "Nome troppo corto"),
+  password: z.string().min(8, "Password minimo 8 caratteri"),
+});
+
+export async function acceptInvitation(
+  input: z.infer<typeof acceptInvitationSchema>
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const parsed = acceptInvitationSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.errors[0]?.message ?? "Dati non validi" };
+  }
+
+  const { token, fullName, password } = parsed.data;
+  const supabase = await createClient();
+
+  // 1. Valida il token
+  const { data: invitation, error: invError } = await supabase
+    .from("agency_invitations")
+    .select("id, email, role, agency_id, status, expires_at")
+    .eq("token", token)
+    .eq("status", "pending")
+    .gt("expires_at", new Date().toISOString())
+    .single();
+
+  if (invError || !invitation) {
+    return { ok: false, error: "Invito non valido o scaduto" };
+  }
+
+  // 2. Crea l'utente auth
+  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    email: invitation.email,
+    password,
+    options: { data: { full_name: fullName } },
+  });
+
+  if (signUpError || !authData.user) {
+    console.error("[acceptInvitation] signUp error:", signUpError);
+    if (signUpError?.message?.includes("already registered")) {
+      return { ok: false, error: "Email già registrata. Accedi con il tuo account esistente." };
+    }
+    return { ok: false, error: "Errore durante la creazione dell'account" };
+  }
+
+  const userId = authData.user.id;
+
+  // 3. Inserisci il profilo
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .insert({ id: userId, full_name: fullName });
+
+  if (profileError) {
+    console.error("[acceptInvitation] profile error:", profileError);
+    // Non blocchiamo: il trigger Supabase potrebbe già averlo creato
+  }
+
+  // 4. Aggiungi a agency_members
+  const { error: memberError } = await supabase
+    .from("agency_members")
+    .insert({
+      agency_id: invitation.agency_id,
+      user_id: userId,
+      role: invitation.role,
+    });
+
+  if (memberError) {
+    console.error("[acceptInvitation] member error:", memberError);
+    return { ok: false, error: "Errore nell'aggiunta al team" };
+  }
+
+  // 5. Marca l'invito come accettato
+  await supabase
+    .from("agency_invitations")
+    .update({
+      status: "accepted",
+      accepted_at: new Date().toISOString(),
+      accepted_by: userId,
+    })
+    .eq("id", invitation.id);
+
+  return { ok: true };
+}
