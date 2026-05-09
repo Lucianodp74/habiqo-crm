@@ -39,6 +39,10 @@ export const newLeadFormSchema = z
     }),
     status: z.string().min(1, "Seleziona uno stato"),
     notes: z.string().max(8000).optional().default(""),
+    assigned_to: z
+      .string()
+      .optional()
+      .transform((v) => (v === "" ? undefined : v)),
   })
   .superRefine((data, ctx) => {
     const email = data.email?.trim() ?? "";
@@ -71,4 +75,5 @@ export const newLeadDefaultValues: NewLeadFormValues = {
   source: "manual",
   status: "new",
   notes: "",
+  assigned_to: undefined,
 };

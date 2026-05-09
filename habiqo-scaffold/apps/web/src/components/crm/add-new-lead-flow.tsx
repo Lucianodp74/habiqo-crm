@@ -37,9 +37,12 @@ const SOURCE_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
 };
 
+type TeamMember = { user_id: string; full_name: string | null };
+
 export function AddNewLeadFlow() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [members, setMembers] = useState<TeamMember[]>([]);
 
   const form = useForm<NewLeadFormValues>({
     resolver: zodResolver(newLeadFormSchema),
@@ -60,6 +63,15 @@ export function AddNewLeadFlow() {
     }
   }, [open, reset]);
 
+  useEffect(() => {
+    if (open && members.length === 0) {
+      fetch("/api/team/members")
+        .then((r) => r.json())
+        .then((data: TeamMember[]) => setMembers(data))
+        .catch(() => {});
+    }
+  }, [open, members.length]);
+
   const onSubmit = useCallback(
     async (values: NewLeadFormValues) => {
       const res = await fetch("/api/leads", {
@@ -75,7 +87,9 @@ export function AddNewLeadFlow() {
       const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        toast.error(typeof body.error === "string" ? body.error : "Impossibile creare il lead");
+        toast.error(
+          typeof body.error === "string" ? body.error : "Impossibile creare il lead",
+        );
         return;
       }
 
@@ -85,6 +99,9 @@ export function AddNewLeadFlow() {
     },
     [router],
   );
+
+  const selectClassName =
+    "flex h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/80 px-3 text-[13px] text-[var(--fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]/35";
 
   return (
     <>
@@ -123,7 +140,9 @@ export function AddNewLeadFlow() {
                 {...register("full_name")}
               />
               {errors.full_name ? (
-                <p className="text-[12px] text-[var(--color-danger)]">{errors.full_name.message}</p>
+                <p className="text-[12px] text-[var(--color-danger)]">
+                  {errors.full_name.message}
+                </p>
               ) : null}
             </div>
 
@@ -139,7 +158,9 @@ export function AddNewLeadFlow() {
                   {...register("email")}
                 />
                 {errors.email ? (
-                  <p className="text-[12px] text-[var(--color-danger)]">{errors.email.message}</p>
+                  <p className="text-[12px] text-[var(--color-danger)]">
+                    {errors.email.message}
+                  </p>
                 ) : null}
               </div>
               <div className="grid gap-2">
@@ -152,7 +173,9 @@ export function AddNewLeadFlow() {
                   {...register("phone")}
                 />
                 {errors.phone ? (
-                  <p className="text-[12px] text-[var(--color-danger)]">{errors.phone.message}</p>
+                  <p className="text-[12px] text-[var(--color-danger)]">
+                    {errors.phone.message}
+                  </p>
                 ) : null}
               </div>
             </div>
@@ -165,7 +188,7 @@ export function AddNewLeadFlow() {
                   type="number"
                   min={1}
                   step={1000}
-                  placeholder="—"
+                  placeholder="€ …"
                   aria-invalid={!!errors.budget_min}
                   {...register("budget_min")}
                 />
@@ -182,7 +205,7 @@ export function AddNewLeadFlow() {
                   type="number"
                   min={1}
                   step={1000}
-                  placeholder="—"
+                  placeholder="€ …"
                   aria-invalid={!!errors.budget_max}
                   {...register("budget_max")}
                 />
@@ -208,7 +231,7 @@ export function AddNewLeadFlow() {
                 <Label htmlFor="new-lead-source">Fonte *</Label>
                 <select
                   id="new-lead-source"
-                  className="flex h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/80 px-3 text-[13px] text-[var(--fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]/35"
+                  className={selectClassName}
                   aria-invalid={!!errors.source}
                   {...register("source")}
                 >
@@ -219,14 +242,16 @@ export function AddNewLeadFlow() {
                   ))}
                 </select>
                 {errors.source ? (
-                  <p className="text-[12px] text-[var(--color-danger)]">{errors.source.message}</p>
+                  <p className="text-[12px] text-[var(--color-danger)]">
+                    {errors.source.message}
+                  </p>
                 ) : null}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="new-lead-status">Stato iniziale *</Label>
                 <select
                   id="new-lead-status"
-                  className="flex h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/80 px-3 text-[13px] text-[var(--fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]/35"
+                  className={selectClassName}
                   aria-invalid={!!errors.status}
                   {...register("status")}
                 >
@@ -237,9 +262,27 @@ export function AddNewLeadFlow() {
                   ))}
                 </select>
                 {errors.status ? (
-                  <p className="text-[12px] text-[var(--color-danger)]">{errors.status.message}</p>
+                  <p className="text-[12px] text-[var(--color-danger)]">
+                    {errors.status.message}
+                  </p>
                 ) : null}
               </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="new-lead-assigned">Assegna a</Label>
+              <select
+                id="new-lead-assigned"
+                className={selectClassName}
+                {...register("assigned_to")}
+              >
+                <option value="">— Nessun agente —</option>
+                {members.map((m) => (
+                  <option key={m.user_id} value={m.user_id}>
+                    {m.full_name ?? m.user_id}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid gap-2">
@@ -250,7 +293,9 @@ export function AddNewLeadFlow() {
                 {...register("notes")}
               />
               {errors.notes ? (
-                <p className="text-[12px] text-[var(--color-danger)]">{errors.notes.message}</p>
+                <p className="text-[12px] text-[var(--color-danger)]">
+                  {errors.notes.message}
+                </p>
               ) : null}
             </div>
 

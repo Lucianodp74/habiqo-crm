@@ -21,6 +21,7 @@ export async function POST(req: Request) {
           source: body.source,
           status: body.status || "new",
           notes: body.notes,
+          assigned_to: body.assigned_to ?? null,
         },
       ])
       .select()
@@ -28,14 +29,12 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error(error);
-
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (err) {
     console.error(err);
-
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
