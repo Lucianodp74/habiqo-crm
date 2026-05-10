@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0001_init
+-- HABIQUO · 0001_init
 -- Initial schema. Tables, enums, indexes, triggers.
 -- RLS policies are in 0002_rls.sql.
 -- ════════════════════════════════════════════════════════════════

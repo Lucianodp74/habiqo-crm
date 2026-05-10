@@ -1,9 +1,9 @@
-# HABIQO
+# HABIQUO
 
 > *Smart living. Smart real estate.*
 > AI-native CRM for Italian real estate agencies.
 
-This is the HABIQO monorepo. It contains the Next.js 15 web app, shared
+This is the HABIQUO monorepo. It contains the Next.js 15 web app, shared
 packages (UI, AI, auth, database, types, utils), and Supabase migrations.
 
 ---
@@ -69,7 +69,7 @@ These are enforced by code review. Violations are blockers.
 2. **Type safety end-to-end.** No `any`, no untyped Supabase queries.
 3. **RLS is the lock, not the app.** Never filter by `agency_id` in app code
    for security purposes.
-4. **All AI calls go through `@habiqo/ai`.** Never import `@ai-sdk/anthropic`
+4. **All AI calls go through `@habiquo/ai`.** Never import `@ai-sdk/anthropic`
    directly outside that package.
 5. **Server Actions return `ActionResult<T>` (discriminated union).** Callers
    must handle both `ok: true` and `ok: false` branches.

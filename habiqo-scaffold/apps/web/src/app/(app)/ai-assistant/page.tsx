@@ -1,4 +1,4 @@
-import { Button } from "@habiqo/ui";
+import { Button } from "@habiquo/ui";
 import Link from "next/link";
 
 export const metadata = { title: "AI Assistant" };

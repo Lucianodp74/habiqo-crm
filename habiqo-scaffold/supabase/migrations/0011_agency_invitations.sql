@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0011_agency_invitations
+-- HABIQUO · 0011_agency_invitations
 -- Tabella per gestire gli inviti di nuovi agenti a un'agenzia.
 -- L'admin invia un invito → sistema genera token → l'invitato apre
 -- il link → fa signup → viene aggiunto come membro.

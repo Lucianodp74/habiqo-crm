@@ -1,7 +1,7 @@
 "use client";
 
 import { signInAndRedirect } from "@/lib/actions/auth";
-import { Button } from "@habiqo/ui";
+import { Button } from "@habiquo/ui";
 import { useSearchParams } from "next/navigation";
 import { useActionState, useMemo } from "react";
 

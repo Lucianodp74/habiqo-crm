@@ -42,7 +42,7 @@ export const leadInsightsSchema = z.object({
 
 export type LeadInsightsOutput = z.infer<typeof leadInsightsSchema>;
 
-export const SYSTEM_PROMPT = `Sei un analista senior di un CRM immobiliare italiano (HABIQO).
+export const SYSTEM_PROMPT = `Sei un analista senior di un CRM immobiliare italiano (HABIQUO).
 Il tuo compito è analizzare il profilo di un lead e i suoi eventi di interazione per produrre
 insight azionabili per l'agente immobiliare.
 

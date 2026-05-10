@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0003_auth_triggers
+-- HABIQUO · 0003_auth_triggers
 -- Auto-provision profile + agency on signup.
 -- The first user becomes the owner of a new "personal" agency;
 -- they can rename it later or be invited into another one.

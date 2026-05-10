@@ -11,7 +11,7 @@ import {
 import type { PipelineLead } from "@/lib/crm/pipeline";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { formatRelative } from "@habiqo/utils";
+import { formatRelative } from "@habiquo/utils";
 import { ArrowRight, GripVertical, Mail, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
 

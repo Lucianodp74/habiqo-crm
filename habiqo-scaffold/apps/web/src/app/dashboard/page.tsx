@@ -1,4 +1,4 @@
-import { Button, Pill } from "@habiqo/ui";
+import { Button, Pill } from "@habiquo/ui";
 import Link from "next/link";
 import { AiValuationWidget } from "./valuation-widget";
 

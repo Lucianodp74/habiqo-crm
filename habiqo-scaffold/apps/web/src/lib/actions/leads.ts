@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ActionResult } from "@habiqo/types";
+import type { ActionResult } from "@habiquo/types";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 

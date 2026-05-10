@@ -1,6 +1,6 @@
 import { getLeadById, listEventsForLead } from "@/lib/queries/leads";
 import { createClient } from "@/lib/supabase/server";
-import { generateStream, leadInsightsPrompt } from "@habiqo/ai";
+import { generateStream, leadInsightsPrompt } from "@habiquo/ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 

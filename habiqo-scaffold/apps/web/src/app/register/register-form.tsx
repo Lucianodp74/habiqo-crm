@@ -1,7 +1,7 @@
 "use client";
 
 import { signUpAndRedirect } from "@/lib/actions/auth";
-import { Button } from "@habiqo/ui";
+import { Button } from "@habiquo/ui";
 import { useActionState } from "react";
 
 export function RegisterForm() {

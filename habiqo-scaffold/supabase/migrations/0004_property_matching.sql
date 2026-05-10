@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0004_property_matching
+-- HABIQUO · 0004_property_matching
 -- pgvector similarity function called by RAG layer.
 -- ════════════════════════════════════════════════════════════════
 

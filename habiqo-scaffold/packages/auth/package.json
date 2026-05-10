@@ -1,5 +1,5 @@
 {
-  "name": "@habiqo/auth",
+  "name": "@habiquo/auth",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@habiqo/types": "workspace:*"
+    "@habiquo/types": "workspace:*"
   },
   "devDependencies": {
     "@habiqo/config": "workspace:*",

@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0009_fix_rpc_agency_membership_check
+-- HABIQUO · 0009_fix_rpc_agency_membership_check
 -- Membership check inside SECURITY DEFINER must not query agency_members
 -- directly: RLS is still evaluated with the invoker session, and the
 -- agency_members SELECT policy depends on current_agency_ids(), which can

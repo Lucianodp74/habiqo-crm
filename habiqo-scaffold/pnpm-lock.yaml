@@ -29,25 +29,25 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.0.0)
-      '@habiqo/ai':
-        specifier: workspace:*
-        version: link:../../packages/ai
-      '@habiqo/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
       '@habiqo/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@habiqo/database':
+      '@habiquo/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
+      '@habiquo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@habiquo/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@habiqo/types':
+      '@habiquo/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@habiqo/ui':
+      '@habiquo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@habiqo/utils':
+      '@habiquo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       '@hookform/resolvers':
@@ -126,6 +126,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.14)
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       tailwindcss:
         specifier: ^4.0.0-beta.0
         version: 4.2.4
@@ -141,7 +144,7 @@ importers:
       '@ai-sdk/openai':
         specifier: ^1.0.0
         version: 1.3.24(zod@3.25.76)
-      '@habiqo/types':
+      '@habiquo/types':
         specifier: workspace:*
         version: link:../types
       ai:
@@ -160,7 +163,7 @@ importers:
 
   packages/auth:
     dependencies:
-      '@habiqo/types':
+      '@habiquo/types':
         specifier: workspace:*
         version: link:../types
     devDependencies:
@@ -1487,8 +1490,7 @@ snapshots:
     dependencies:
       react-hook-form: 7.74.0(react@19.0.0)
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.34.5':
     optionalDependencies:
@@ -2176,8 +2178,7 @@ snapshots:
 
   secure-json-parse@2.7.0: {}
 
-  semver@7.7.4:
-    optional: true
+  semver@7.7.4: {}
 
   sharp@0.34.5:
     dependencies:
@@ -2209,7 +2210,6 @@ snapshots:
       '@img/sharp-win32-arm64': 0.34.5
       '@img/sharp-win32-ia32': 0.34.5
       '@img/sharp-win32-x64': 0.34.5
-    optional: true
 
   sonner@1.7.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export const metadata = { title: "Admin · HABIQO" };
+export const metadata = { title: "Admin · HABIQUO" };
 
 type AgentKpi = {
   userId: string;

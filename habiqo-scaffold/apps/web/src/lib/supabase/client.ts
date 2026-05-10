@@ -1,4 +1,4 @@
-import type { Database } from "@habiqo/database";
+import type { Database } from "@habiquo/database";
 import { createBrowserClient } from "@supabase/ssr";
 
 /**

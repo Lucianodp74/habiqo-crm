@@ -31,7 +31,7 @@ export function AcceptInviteForm({ token, email }: Props) {
       return;
     }
 
-    toast.success("Account creato! Benvenuto in HABIQO 🎉");
+    toast.success("Account creato! Benvenuto in HABIQUO 🎉");
     router.push("/dashboard");
   }
 

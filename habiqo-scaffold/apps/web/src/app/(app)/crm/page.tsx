@@ -1,6 +1,6 @@
 import { listLeadsForAgency } from "@/lib/queries/leads";
-import { Pill, Skeleton } from "@habiqo/ui";
-import { formatRelative, initials } from "@habiqo/utils";
+import { Pill, Skeleton } from "@habiquo/ui";
+import { formatRelative, initials } from "@habiquo/utils";
 import Link from "next/link";
 import { Suspense } from "react";
 

@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · seed
+-- HABIQUO · seed
 -- Local dev seed. Inserts a demo agency + leads when run against
 -- a fresh local Supabase.
 --

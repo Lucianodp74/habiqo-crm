@@ -1,11 +1,11 @@
-import { Button } from "@habiqo/ui";
+import { Button } from "@habiquo/ui";
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen px-6 py-12 lg:px-12">
       <header className="flex items-center justify-between mb-24">
-        <span className="font-display text-[20px]">HABIQO</span>
+        <span className="font-display text-[20px]">HABIQUO</span>
         <nav className="flex items-center gap-3">
           <Link
             href="/login"
@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <Link href="/register">
             <Button intent="primary" size="lg">
-              Prova HABIQO gratis
+              Prova HABIQUO gratis
             </Button>
           </Link>
           <Link href="/valutazione">

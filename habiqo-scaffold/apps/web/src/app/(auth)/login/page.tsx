@@ -24,11 +24,11 @@ export default async function LoginPage() {
         }}
       >
         <Link href="/" className="font-display text-[22px] text-[var(--color-brass-soft)]">
-          HABIQO
+          HABIQUO
         </Link>
         <blockquote className="max-w-md">
           <p className="font-display text-[24px] leading-snug text-[var(--color-surface)] mb-4">
-            "Da quando usiamo HABIQO chiudiamo il 40% di trattative in più con lo stesso numero di
+            "Da quando usiamo HABIQUO chiudiamo il 40% di trattative in più con lo stesso numero di
             agenti."
           </p>
           <footer className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-brass-soft)]">
