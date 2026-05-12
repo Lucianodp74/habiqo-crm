@@ -52,7 +52,7 @@ export async function updateLead(input: unknown): Promise<ActionResult<{ id: str
 
   revalidatePath(`/crm/leads/${id}`);
   revalidatePath("/crm");
-  revalidateTag(`lead-${id}`);
+  revalidateTag(`lead-${id}`, 'max');
 
   return { ok: true, data: { id } };
 }
