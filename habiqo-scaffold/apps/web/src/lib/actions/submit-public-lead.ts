@@ -15,7 +15,7 @@ export type SubmitLeadResult =
   | { ok: true; leadId: string }
   | { ok: false; error: string };
 
-const ERROR_MESSAGES: Record<string, string> = {
+const ERROR_MESSAGES = {
   ERR_VALIDATION_NAME: "Il nome è obbligatorio (almeno 2 caratteri).",
   ERR_VALIDATION_NAME_LENGTH: "Il nome è troppo lungo.",
   ERR_VALIDATION_CONTACT: "Inserisci almeno una email o un telefono.",
