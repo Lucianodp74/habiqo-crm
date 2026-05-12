@@ -1,10 +1,10 @@
 /**
- * HABIQO domain types
+ * HABIQUO domain types
  * ─────────────────────────────────────────────────────────────
  * These mirror the Postgres schema but live separately so the
  * domain model can evolve independently of generated DB types.
  *
- * For raw DB row types, import from @habiqo/database (auto-generated).
+ * For raw DB row types, import from @habiquo/database (auto-generated).
  * For domain types (with computed fields, enums-as-unions), use these.
  */
 

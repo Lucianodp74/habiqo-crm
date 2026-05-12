@@ -23,11 +23,11 @@ export default async function RegisterPage() {
         }}
       >
         <Link href="/" className="font-display text-[22px] text-[var(--color-brass-soft)]">
-          HABIQO
+          HABIQUO
         </Link>
         <blockquote className="max-w-md">
           <p className="font-display text-[24px] leading-snug text-[var(--color-surface)] mb-4">
-            "Il nostro team usa HABIQO per anticipare le obiezioni e portare più trattative fino al
+            "Il nostro team usa HABIQUO per anticipare le obiezioni e portare più trattative fino al
             rogito."
           </p>
           <footer className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-brass-soft)]">

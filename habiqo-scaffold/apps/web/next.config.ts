@@ -10,12 +10,12 @@ const config: NextConfig = {
     },
   },
   transpilePackages: [
-    "@habiqo/ai",
-    "@habiqo/auth",
-    "@habiqo/database",
-    "@habiqo/types",
-    "@habiqo/ui",
-    "@habiqo/utils",
+    "@habiquo/ai",
+    "@habiquo/auth",
+    "@habiquo/database",
+    "@habiquo/types",
+    "@habiquo/ui",
+    "@habiquo/utils",
   ],
   images: {
     formats: ["image/avif", "image/webp"],

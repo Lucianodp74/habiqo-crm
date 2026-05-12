@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0008_update_lead_status_rpc
+-- HABIQUO · 0008_update_lead_status_rpc
 -- Atomic lead status change + timeline event, with explicit
 -- agency membership checks (SECURITY DEFINER; RLS remains on tables
 -- for all direct client access).

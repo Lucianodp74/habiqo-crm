@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0002_rls
+-- HABIQUO · 0002_rls
 -- Row-Level Security. The lock at the data layer.
 -- Application code is the door; RLS is the lock.
 -- ════════════════════════════════════════════════════════════════

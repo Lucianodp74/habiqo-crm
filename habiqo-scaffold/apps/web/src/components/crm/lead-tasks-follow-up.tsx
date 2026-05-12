@@ -12,7 +12,7 @@ export type LeadTaskItem = {
   urgent?: boolean;
 };
 
-const STORAGE_PREFIX = "habiqo.leadTasks.";
+const STORAGE_PREFIX = "habiquo.leadTasks.";
 
 function defaultTasksForLead(leadId: string): LeadTaskItem[] {
   const n = leadId.charCodeAt(0) % 2;

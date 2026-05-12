@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0010_realtime_public_leads
+-- HABIQUO · 0010_realtime_public_leads
 -- Enable Supabase Realtime for public.leads (RLS still filters events).
 -- ════════════════════════════════════════════════════════════════
 

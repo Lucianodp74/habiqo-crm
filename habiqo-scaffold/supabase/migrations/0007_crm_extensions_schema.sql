@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- HABIQO · 0007_crm_extensions_schema
+-- HABIQUO · 0007_crm_extensions_schema
 -- CRM: extend lead_events + leads; add lead_notes + lead_activities.
 -- Idempotent where possible (IF NOT EXISTS / guarded DO blocks).
 -- ════════════════════════════════════════════════════════════════

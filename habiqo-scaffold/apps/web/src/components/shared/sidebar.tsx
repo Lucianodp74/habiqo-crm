@@ -1,5 +1,5 @@
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { initials } from "@habiqo/utils";
+import { initials } from "@habiquo/utils";
 import Link from "next/link";
 
 type SidebarProps = {
@@ -23,7 +23,7 @@ export function Sidebar({ userName, avatarUrl }: SidebarProps) {
     >
       <div className="px-5 py-6 border-b border-[var(--border-subtle)]">
         <Link href="/dashboard" className="block">
-          <span className="font-display text-[20px] tracking-tight">HABIQO</span>
+          <span className="font-display text-[20px] tracking-tight">HABIQUO</span>
           <span className="block font-mono text-[9px] tracking-[0.20em] uppercase text-[var(--fg-muted)] mt-0.5">
             Smart real estate
           </span>

@@ -4,7 +4,7 @@ export type { Database, Json } from "./types";
  * Helper to extract a row type for a given table name.
  *
  * @example
- *   import type { Tables } from "@habiqo/database";
+ *   import type { Tables } from "@habiquo/database";
  *   type LeadRow = Tables<"leads">;
  */
 import type { Database } from "./types";

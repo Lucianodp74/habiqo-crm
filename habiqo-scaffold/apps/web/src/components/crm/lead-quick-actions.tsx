@@ -37,7 +37,7 @@ export function LeadQuickActions({ fullName, email, phone, whatsapp }: Props) {
 
   const visitTitle = encodeURIComponent(`Visita · ${fullName}`);
   const visitDetails = encodeURIComponent(
-    "Lead HABIQO — verifica indirizzo, documentazione e agenda commerciale.",
+    "Lead HABIQUO — verifica indirizzo, documentazione e agenda commerciale.",
   );
   const calendarHref = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${visitTitle}&details=${visitDetails}`;
 

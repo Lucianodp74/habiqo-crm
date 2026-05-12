@@ -1,4 +1,4 @@
-import { Skeleton } from "@habiqo/ui";
+import { Skeleton } from "@habiquo/ui";
 
 export default function Loading() {
   return (

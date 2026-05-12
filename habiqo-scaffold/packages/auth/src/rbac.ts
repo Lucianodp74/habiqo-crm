@@ -1,4 +1,4 @@
-import type { AgencyRole } from "@habiqo/types";
+import type { AgencyRole } from "@habiquo/types";
 
 /**
  * RBAC permissions matrix.

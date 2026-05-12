@@ -12,7 +12,7 @@ import {
 } from "./router";
 
 /**
- * Single entry point for every AI call in HABIQO.
+ * Single entry point for every AI call in HABIQUO.
  *
  * Responsibilities:
  *   1. Resolve task → tier → model

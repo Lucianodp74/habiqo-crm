@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ActionResult } from "@habiqo/types";
+import type { ActionResult } from "@habiquo/types";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
@@ -52,7 +52,7 @@ export async function updateLead(input: unknown): Promise<ActionResult<{ id: str
 
   revalidatePath(`/crm/leads/${id}`);
   revalidatePath("/crm");
-  revalidateTag(`lead-${id}`);
+  revalidateTag(`lead-${id}`, 'max');
 
   return { ok: true, data: { id } };
 }

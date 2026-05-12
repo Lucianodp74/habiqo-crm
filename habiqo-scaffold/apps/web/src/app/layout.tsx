@@ -1,26 +1,34 @@
 import { AppProviders } from "@/components/providers/app-providers";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: new URL("https://habiquo.com"),
   title: {
-    default: "HABIQO — Smart living. Smart real estate.",
-    template: "%s · HABIQO",
+    default: "Habiquo — Smart living. Smart real estate.",
+    template: "%s · Habiquo",
   },
-  description:
-    "La piattaforma AI per agenzie immobiliari italiane. CRM, valutazione, voice AI e generazione contenuti in un unico prodotto.",
-  applicationName: "HABIQO",
-  authors: [{ name: "HABIQO" }],
+  description: "L'unica piattaforma di cui un'agenzia immobiliare ha bisogno.",
+  applicationName: "Habiquo",
+  authors: [{ name: "Habiquo" }],
   generator: "Next.js",
   keywords: ["immobiliare", "CRM", "AI", "valutazione immobiliare", "agenzia immobiliare"],
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+  },
   openGraph: {
     type: "website",
     locale: "it_IT",
-    siteName: "HABIQO",
+    siteName: "Habiquo",
   },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
@@ -43,7 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="transition-colors duration-300">
-        <AppProviders>{children}</AppProviders>
+        <ThemeProvider storageKey="habiquo-theme">
+          <AppProviders>{children}</AppProviders>
+        </ThemeProvider>
         <Toaster
           position="bottom-right"
           toastOptions={{

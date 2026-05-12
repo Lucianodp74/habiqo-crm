@@ -87,7 +87,7 @@ export default async function AcceptInvitePage({ searchParams }: Props) {
               letterSpacing: "0.05em",
             }}
           >
-            HABIQO
+            HABIQUO
           </p>
           <h1
             style={{

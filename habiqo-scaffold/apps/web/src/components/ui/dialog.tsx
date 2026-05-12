@@ -1,115 +1,96 @@
 "use client";
 
-import { cn } from "@/lib/utils/cn";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+/**
+ * TEMPORARY STUB · Dialog component.
+ *
+ * The original Radix-based Dialog cannot resolve its peer
+ * dependency `@radix-ui/react-dismissable-layer` because pnpm's
+ * deeply-nested symlink paths exceed Windows' 260-char MAX_PATH
+ * limit on this machine. The dep IS present in the pnpm store but
+ * the symlink inside react-dialog's node_modules fails to create.
+ *
+ * Until we move to a shorter project path or enable Windows long
+ * paths, we replace this file with a stub that compiles without
+ * any Radix dependency. The "Add new lead" modal in the CRM
+ * /leads page will render its trigger button but the modal itself
+ * won't appear. The Habita public site is unaffected (it doesn't
+ * use Dialog).
+ *
+ * RESTORE: when the dep issue is fixed, run
+ *   git checkout HEAD -- apps/web/src/components/ui/dialog.tsx
+ * to bring back the real Radix-based implementation.
+ */
 import * as React from "react";
 
-const Dialog = DialogPrimitive.Root;
-
-const DialogTrigger = DialogPrimitive.Trigger;
-
-const DialogPortal = DialogPrimitive.Portal;
-
-const DialogClose = DialogPrimitive.Close;
-
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-[var(--z-dialog)] bg-[var(--color-onyx-950)]/45 backdrop-blur-md",
-      className,
-    )}
-    {...props}
-  />
-));
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
-
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-[var(--z-dialog)] grid w-[calc(100%-1.5rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-0 rounded-2xl border border-[var(--glass-edge)] bg-[var(--glass-bg)] p-0 shadow-[var(--shadow-floating)] backdrop-blur-xl outline-none",
-        "max-h-[min(90dvh,720px)] overflow-hidden flex flex-col",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close
-        className="absolute right-3.5 top-3.5 rounded-lg p-1.5 text-[var(--fg-muted)] opacity-90 ring-offset-[var(--bg-canvas)] transition-all hover:bg-[var(--bg-sunken)] hover:text-[var(--fg-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brass)]/35 disabled:pointer-events-none"
-        aria-label="Chiudi"
-      >
-        <X className="size-4" />
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
-DialogContent.displayName = DialogPrimitive.Content.displayName;
-
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col gap-1.5 border-b border-[var(--border-subtle)]/80 px-6 py-5 pr-12",
-      className,
-    )}
-    {...props}
-  />
-);
-DialogHeader.displayName = "DialogHeader";
-
-const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse gap-2 border-t border-[var(--border-subtle)]/80 bg-[var(--bg-sunken)]/30 px-6 py-4 sm:flex-row sm:justify-end",
-      className,
-    )}
-    {...props}
-  />
-);
-DialogFooter.displayName = "DialogFooter";
-
-const DialogTitle = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn("font-display text-xl tracking-tight text-[var(--fg-primary)]", className)}
-    {...props}
-  />
-));
-DialogTitle.displayName = DialogPrimitive.Title.displayName;
-
-const DialogDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-[13px] text-[var(--fg-muted)] leading-relaxed", className)}
-    {...props}
-  />
-));
-DialogDescription.displayName = DialogPrimitive.Description.displayName;
-
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
+type DialogProps = {
+  children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  defaultOpen?: boolean;
+  modal?: boolean;
 };
+
+type WithAsChild = {
+  children?: React.ReactNode;
+  asChild?: boolean;
+};
+
+export function Dialog({ children }: DialogProps) {
+  return <>{children}</>;
+}
+
+export function DialogTrigger({ children }: WithAsChild) {
+  return <>{children}</>;
+}
+
+export function DialogPortal({
+  children: _children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return null;
+}
+
+export function DialogOverlay(_props: React.HTMLAttributes<HTMLDivElement>) {
+  return null;
+}
+
+export function DialogContent(
+  _props: React.HTMLAttributes<HTMLDivElement> & {
+    children?: React.ReactNode;
+  }
+) {
+  return null;
+}
+
+export function DialogHeader({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return <div {...props}>{children}</div>;
+}
+
+export function DialogFooter({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return <div {...props}>{children}</div>;
+}
+
+export function DialogTitle({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) {
+  return <h2 {...props}>{children}</h2>;
+}
+
+export function DialogDescription({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p {...props}>{children}</p>;
+}
+
+export function DialogClose({ children }: WithAsChild) {
+  return <>{children}</>;
+}

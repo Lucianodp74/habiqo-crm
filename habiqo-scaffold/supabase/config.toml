@@ -1,7 +1,7 @@
 # Supabase project config — local dev defaults.
 # Edit `project_id` after running `supabase init` against your project.
 
-project_id = "habiqo"
+project_id = "habiquo"
 
 [api]
 enabled = true

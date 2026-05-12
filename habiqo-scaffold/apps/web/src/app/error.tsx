@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@habiqo/ui";
+import { Button } from "@habiquo/ui";
 import { useEffect } from "react";
 
 export default function GlobalError({

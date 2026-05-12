@@ -1,7 +1,7 @@
 "use client";
 
 import type { LeadTimelineEvent } from "@/lib/queries/lead-events";
-import { formatRelative } from "@habiqo/utils";
+import { formatRelative } from "@habiquo/utils";
 import {
   Activity,
   type LucideIcon,

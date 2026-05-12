@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Pill } from "@habiqo/ui";
+import { Button, Pill } from "@habiquo/ui";
 import { useId, useState, useTransition } from "react";
 
 const zones = [

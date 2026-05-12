@@ -9,9 +9,9 @@ export function LeadInsightPanel({ synthesis }: Props) {
   const { activitySummary, conversionPct, nextAction, nextActionRationale, signals } = synthesis;
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[var(--color-brass)]/25 bg-gradient-to-b from-[var(--bg-elevated)] via-[var(--bg-elevated)] to-[var(--bg-sunken)]/50 p-5 sm:p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-[box-shadow,transform] duration-500 ease-out hover:shadow-[0_12px_40px_-20px_rgba(200,160,96,0.35)] motion-safe:animate-[habiqoInsightPulse_5s_ease-in-out_infinite]">
+    <section className="relative overflow-hidden rounded-2xl border border-[var(--color-brass)]/25 bg-gradient-to-b from-[var(--bg-elevated)] via-[var(--bg-elevated)] to-[var(--bg-sunken)]/50 p-5 sm:p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-[box-shadow,transform] duration-500 ease-out hover:shadow-[0_12px_40px_-20px_rgba(200,160,96,0.35)] motion-safe:animate-[habiquoInsightPulse_5s_ease-in-out_infinite]">
       <style>{`
-        @keyframes habiqoInsightPulse {
+        @keyframes habiquoInsightPulse {
           0%, 100% { box-shadow: inset 0 0 0 0 rgba(200, 160, 96, 0), 0 0 0 0 rgba(200, 160, 96, 0); }
           50% { box-shadow: inset 0 0 32px -24px rgba(200, 160, 96, 0.12), 0 0 0 1px rgba(200, 160, 96, 0.08); }
         }
