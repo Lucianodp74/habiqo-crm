@@ -35,18 +35,20 @@ async function loadAgencyForAdmin(): Promise<LoadResult> {
     .in("role", ["owner", "admin"])
     .limit(1);
 
-  if (!memberships || memberships.length === 0) {
-    // User is logged in but has no owner/admin role on any agency.
-    // Could be a viewer/agent, or have no memberships at all.
-    const { count } = await supabase
-      .from("agency_members")
-      .select("agency_id", { count: "exact", head: true })
-      .eq("user_id", user.id);
+    const firstMembership = memberships?.[0];
 
-    return { kind: count && count > 0 ? "forbidden" : "no_agency" };
-  }
-
-  const agencyId = memberships[0].agency_id;
+    if (!firstMembership) {
+      // User is logged in but has no owner/admin role on any agency.
+      // Could be a viewer/agent, or have no memberships at all.
+      const { count } = await supabase
+        .from("agency_members")
+        .select("agency_id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+  
+      return { kind: count && count > 0 ? "forbidden" : "no_agency" };
+    }
+  
+    const agencyId = firstMembership.agency_id;
 
   const { data: agency } = await supabase
     .from("agencies")
