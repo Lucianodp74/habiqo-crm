@@ -15,6 +15,10 @@ const NAV = [
   { href: "/ai-assistant", label: "AI Assistant" },
 ] as const;
 
+const ADMIN_NAV = [
+  { href: "/admin/agency", label: "Sito pubblico" },
+] as const;
+
 export function Sidebar({ userName, avatarUrl }: SidebarProps) {
   return (
     <aside
@@ -33,6 +37,22 @@ export function Sidebar({ userName, avatarUrl }: SidebarProps) {
       <nav className="flex-1 px-3 py-4">
         <ul className="space-y-0.5">
           {NAV.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="block px-3 py-2 rounded-md text-[13px] text-[var(--fg-secondary)] hover:bg-[var(--bg-sunken)] hover:text-[var(--fg-primary)] transition-colors"
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-6 mb-2 px-3 text-[10px] font-mono uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+          Admin
+        </div>
+        <ul className="space-y-0.5">
+          {ADMIN_NAV.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
