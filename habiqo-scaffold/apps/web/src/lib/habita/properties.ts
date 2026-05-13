@@ -31,6 +31,7 @@ export type PublicProperty = {
   hasElevator: boolean | null;
   hasGarage: boolean | null;
   publishedAt: string | null;
+  photos: string[];
 };
 
 type PropertyRow = {
@@ -51,6 +52,7 @@ type PropertyRow = {
   has_elevator: boolean | null;
   has_garage: boolean | null;
   published_at: string | null;
+  photos: string[] | null;
 };
 
 const COLUMNS = [
@@ -71,6 +73,7 @@ const COLUMNS = [
   "has_elevator",
   "has_garage",
   "published_at",
+  "photos",
 ].join(", ");
 
 function mapRow(row: PropertyRow): PublicProperty {
@@ -92,6 +95,7 @@ function mapRow(row: PropertyRow): PublicProperty {
     hasElevator: row.has_elevator,
     hasGarage: row.has_garage,
     publishedAt: row.published_at,
+    photos: row.photos ?? [],
   };
 }
 

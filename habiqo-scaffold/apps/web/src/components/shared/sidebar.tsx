@@ -17,6 +17,7 @@ const NAV = [
 
 const ADMIN_NAV = [
   { href: "/admin/agency", label: "Sito pubblico" },
+  { href: "/admin/properties", label: "Foto immobili" },
 ] as const;
 
 export function Sidebar({ userName, avatarUrl }: SidebarProps) {
