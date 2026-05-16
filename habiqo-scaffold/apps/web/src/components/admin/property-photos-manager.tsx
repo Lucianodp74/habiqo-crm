@@ -154,8 +154,8 @@ export function PropertyPhotosManager({
                   </div>
                 )}
 
-                {/* Hover overlay with actions */}
-                <div className="absolute inset-0 flex items-end justify-center bg-black/0 pb-3 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
+                {/* Desktop hover overlay with actions (md+ only) — unchanged behavior. */}
+                <div className="absolute inset-0 hidden md:flex items-end justify-center bg-black/0 pb-3 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
                   <div className="flex gap-2">
                     {!isCover && (
                       <button
@@ -176,6 +176,30 @@ export function PropertyPhotosManager({
                       Elimina
                     </button>
                   </div>
+                </div>
+
+                {/* Mobile-only action bar — always visible. Hidden on md+ where
+                     the hover overlay above takes over. Gradient ensures the
+                     buttons stay readable over any photo content. */}
+                <div className="md:hidden absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-2 pt-5 pb-2">
+                  {!isCover && (
+                    <button
+                      type="button"
+                      onClick={() => handleSetCover(path)}
+                      disabled={isPending}
+                      className="rounded bg-white px-2 py-1 text-[10px] font-medium text-neutral-900 shadow-sm disabled:opacity-50"
+                    >
+                      Imposta cover
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(path)}
+                    disabled={isPending}
+                    className="rounded bg-red-600 px-2 py-1 text-[10px] font-medium text-white shadow-sm disabled:opacity-50"
+                  >
+                    Elimina
+                  </button>
                 </div>
               </div>
             );
