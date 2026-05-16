@@ -91,7 +91,7 @@ export default async function AdminPropertiesPage() {
 
   if (properties.length === 0) {
     return (
-      <div className="mx-auto max-w-5xl px-6 py-10">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
         <header className="mb-8">
           <div className="text-xs uppercase tracking-wider text-neutral-500 mb-1">
             Impostazioni agenzia
@@ -108,8 +108,8 @@ export default async function AdminPropertiesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <header className="mb-10">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
+      <header className="mb-8 sm:mb-10">
         <div className="text-xs uppercase tracking-wider text-neutral-500 mb-1">
           Impostazioni agenzia
         </div>
@@ -128,11 +128,15 @@ export default async function AdminPropertiesPage() {
             <Link
               key={p.id}
               href={`/admin/properties/${p.id}/photos`}
-              className="block rounded-md border border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm transition"
+              className="block rounded-md border border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm transition overflow-hidden"
             >
-              <div className="flex items-stretch gap-4 p-4">
+              {/* Layout container:
+                   - Mobile (<md): vertical card (image on top, info + CTA below)
+                   - Desktop (md+): horizontal row (thumb left, info center, CTA right)
+                   No data or behavior changes — only Tailwind responsive classes. */}
+              <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-4 p-4">
                 {/* Cover thumbnail */}
-                <div className="shrink-0 w-24 h-24 rounded overflow-hidden bg-neutral-100">
+                <div className="shrink-0 w-full aspect-[16/9] md:w-24 md:h-24 md:aspect-auto rounded overflow-hidden bg-neutral-100">
                   {coverPath ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -149,7 +153,7 @@ export default async function AdminPropertiesPage() {
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="flex-1 min-w-0 flex flex-col md:justify-center">
                   <div className="text-[10px] uppercase tracking-wider text-neutral-500">
                     {p.listingType === "rent" ? "Affitto" : "Vendita"} ·{" "}
                     {p.city}
@@ -160,8 +164,8 @@ export default async function AdminPropertiesPage() {
                   <div className="mt-1 text-sm text-neutral-700">
                     {formatPrice(p.priceEur, p.listingType)}
                   </div>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
-                    <span className="truncate">{p.agencyName}</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-500">
+                    <span className="truncate max-w-full">{p.agencyName}</span>
                     <span aria-hidden>·</span>
                     <span>
                       {photoCount} {photoCount === 1 ? "foto" : "foto"}
@@ -178,10 +182,16 @@ export default async function AdminPropertiesPage() {
                       </>
                     )}
                   </div>
+
+                  {/* Mobile-only CTA — appears inline at the bottom of the
+                       info column so it stays inside the card flow. */}
+                  <div className="md:hidden mt-3 text-sm text-neutral-500">
+                    Gestisci →
+                  </div>
                 </div>
 
-                {/* Action arrow */}
-                <div className="flex items-center text-sm text-neutral-500 pl-3">
+                {/* Desktop-only CTA — right-aligned trailing column. */}
+                <div className="hidden md:flex items-center text-sm text-neutral-500 pl-3">
                   Gestisci →
                 </div>
               </div>
