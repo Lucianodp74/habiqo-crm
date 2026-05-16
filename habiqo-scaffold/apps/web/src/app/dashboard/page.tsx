@@ -77,7 +77,7 @@ export default function DashboardPage() {
             <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[var(--fg-muted)]">
               Dashboard · {today}
             </p>
-            <h1 className="font-display text-[34px] leading-[1.05] tracking-tight mt-2">
+            <h1 className="font-display text-[28px] sm:text-[34px] leading-[1.05] tracking-tight mt-2">
               Real estate performance
               <span className="italic text-[var(--accent-deep)]">.</span>
             </h1>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
       </section>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        {/* Recent leads table */}
+        {/* Recent leads */}
         <section className="xl:col-span-8">
           <div className="flex items-end justify-between mb-3">
             <div>
@@ -150,7 +150,8 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] overflow-hidden">
+          {/* Desktop: table — visible from md (768px) and above. */}
+          <div className="hidden md:block rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-[760px] w-full">
                 <thead>
@@ -193,6 +194,34 @@ export default function DashboardPage() {
               </table>
             </div>
           </div>
+
+          {/* Mobile: editorial card list — visible below md. */}
+          <ul className="md:hidden space-y-2">
+            {recentLeads.map((l) => (
+              <li
+                key={l.name}
+                className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-medium truncate">{l.name}</p>
+                    <p className="text-[12px] text-[var(--fg-muted)] mt-0.5 truncate">
+                      {l.city} · {l.lastTouch}
+                    </p>
+                  </div>
+                  <Pill tone={leadTone(l.status)} dot>
+                    {l.status}
+                  </Pill>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)]">
+                  <span className="text-[13px] text-[var(--fg-secondary)]">{l.budget}</span>
+                  <span className="font-mono uppercase tracking-[0.18em] text-[10px] text-[var(--fg-muted)]">
+                    {l.source}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* AI valuation widget */}
