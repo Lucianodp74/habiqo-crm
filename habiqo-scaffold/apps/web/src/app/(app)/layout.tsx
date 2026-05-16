@@ -1,3 +1,4 @@
+import { AppShell } from "@/components/shared/app-shell";
 import { Sidebar } from "@/components/shared/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -18,12 +19,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .single();
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar
-        userName={profile?.full_name ?? user.email ?? ""}
-        avatarUrl={profile?.avatar_url ?? null}
-      />
-      <main className="flex-1 min-w-0 bg-[var(--bg-canvas)]">{children}</main>
-    </div>
+    <AppShell
+      sidebar={
+        <Sidebar
+          userName={profile?.full_name ?? user.email ?? ""}
+          avatarUrl={profile?.avatar_url ?? null}
+        />
+      }
+    >
+      {children}
+    </AppShell>
   );
 }
