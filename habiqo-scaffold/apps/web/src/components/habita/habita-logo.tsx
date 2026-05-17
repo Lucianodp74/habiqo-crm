@@ -23,7 +23,7 @@ export function HabitaLogo({ className = "" }: Props) {
     <img
       src="/habitami-logo.jpeg"
       alt="HabitaMi"
-      className={`h-12 w-auto ${className}`}
+      className={`h-16 w-auto ${className}`}
     />
   );
 }
