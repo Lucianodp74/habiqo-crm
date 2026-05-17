@@ -3,32 +3,27 @@ import type { PublicAgency } from "@/lib/habita/tenant";
 /**
  * Habita · brand logo for an agency's public site.
  *
- * Composition:
- *   "Habita" (constant, regular Fraunces, onyx)
- *   + space
- *   + agency.city (variable, italic Fraunces, brass-deep)
+ * Renders the unified HabitaMi wordmark (SVG at /habitami-logo.svg).
+ * The `agency` prop is preserved for backward compatibility with existing
+ * callers but is no longer rendered — HabitaMi is now the brand
+ * independent of agency city.
  *
- * If `agency.city` is null/empty, only "Habita" is shown.
- * Size and weight are inherited from the parent via `className`,
- * so this component can be reused in header, footer, hero, etc.
+ * Size is controlled by the `className` prop. Default: h-10 (40px tall).
+ * Width auto-scales to maintain the SVG aspect ratio.
  */
 type Props = {
-  agency: Pick<PublicAgency, "city">;
+  /** @deprecated agency.city is no longer rendered; kept for back-compat. */
+  agency?: Pick<PublicAgency, "city">;
   className?: string;
 };
 
-export function HabitaLogo({ agency, className = "" }: Props) {
+export function HabitaLogo({ className = "" }: Props) {
   return (
-    <span className={`font-display tracking-tight ${className}`}>
-      <span className="text-[var(--fg-primary)]">Habita</span>
-      {agency.city ? (
-        <>
-          {" "}
-          <span className="italic text-[var(--accent-deep)]">
-            {agency.city}
-          </span>
-        </>
-      ) : null}
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/habitami-logo.svg"
+      alt="HabitaMi"
+      className={`h-10 w-auto ${className}`}
+    />
   );
 }

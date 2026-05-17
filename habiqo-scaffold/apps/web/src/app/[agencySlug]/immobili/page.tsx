@@ -18,9 +18,6 @@ export default async function HabitaListingsPage({
   return (
     <div className="container mx-auto px-6 py-16 max-w-6xl">
       <div className="mb-12">
-        <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-3">
-          Habita · {agency.slug}
-        </p>
         <h1 className="font-display text-5xl md:text-6xl text-[var(--fg-primary)] mb-4 leading-tight">
           Immobili
         </h1>

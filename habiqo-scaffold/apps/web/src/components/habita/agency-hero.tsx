@@ -5,9 +5,6 @@ export function AgencyHero({ agency }: { agency: PublicAgency }) {
   return (
     <section className="border-b border-[var(--border-subtle)]">
       <div className="container mx-auto px-6 py-24 md:py-32 max-w-4xl">
-        <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-4">
-          Habita · {agency.slug}
-        </p>
         <h1 className="font-display text-5xl md:text-7xl leading-tight text-[var(--fg-primary)] mb-6">
           {agency.name}
         </h1>
