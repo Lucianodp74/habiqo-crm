@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
+
+import { createDraftProperty } from "@/lib/actions/create-draft-property";
+import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
 
 // ──────────────────────────────────────────────────────────────────────
 // Types & constants
@@ -13,7 +16,7 @@ type FormData = {
   contractType: ContractType | null;
   propertyType: string;
   city: string;
-  price: string; // kept as string for controlled input
+  price: string;
   sqm: string;
   bedrooms: number;
   bathrooms: number;
@@ -58,9 +61,13 @@ const PROPERTY_TYPES = [
 export function PropertyCreateAIFlow() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<FormData>(INITIAL_DATA);
+  const [propertyId, setPropertyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+    if (error) setError(null);
   };
 
   const isStep1Valid =
@@ -70,7 +77,43 @@ export function PropertyCreateAIFlow() {
     Number(formData.price) > 0 &&
     Number(formData.sqm) > 0;
 
-  const canAdvance = currentStep === 1 ? isStep1Valid : true;
+  const canAdvance =
+    !isPending && (currentStep === 1 ? isStep1Valid : true);
+
+  const handleAdvance = () => {
+    setError(null);
+
+    // Step 1 → 2: create draft property in DB, then advance
+    if (currentStep === 1 && !propertyId) {
+      startTransition(async () => {
+        const result = await createDraftProperty({
+          contractType: formData.contractType!,
+          propertyType: formData.propertyType,
+          city: formData.city.trim(),
+          price: Number(formData.price),
+          sqm: Number(formData.sqm),
+          bedrooms: formData.bedrooms,
+          bathrooms: formData.bathrooms,
+        });
+
+        if (result.ok) {
+          setPropertyId(result.data.propertyId);
+          setCurrentStep(2);
+        } else {
+          setError(result.error.message);
+        }
+      });
+      return;
+    }
+
+    // Other transitions: just advance
+    setCurrentStep((s) => Math.min(4, s + 1));
+  };
+
+  const handleBack = () => {
+    setError(null);
+    setCurrentStep((s) => Math.max(1, s - 1));
+  };
 
   return (
     <div className="space-y-12">
@@ -136,16 +179,20 @@ export function PropertyCreateAIFlow() {
         })}
       </ol>
 
+      {/* ─── Error banner ──────────────────────────────────────────── */}
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
+
       {/* ─── Step content ───────────────────────────────────────────── */}
       <div className="min-h-[400px]">
         {currentStep === 1 && (
           <Step1Form formData={formData} update={update} />
         )}
-        {currentStep === 2 && (
-          <Placeholder
-            title="Foto"
-            subtitle="Caricamento foto immobile · In arrivo"
-          />
+        {currentStep === 2 && propertyId && (
+          <Step2Photos propertyId={propertyId} />
         )}
         {currentStep === 3 && (
           <Placeholder
@@ -166,8 +213,9 @@ export function PropertyCreateAIFlow() {
         {currentStep > 1 ? (
           <button
             type="button"
-            onClick={() => setCurrentStep((s) => s - 1)}
-            className="text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors"
+            onClick={handleBack}
+            disabled={isPending}
+            className="text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ← Indietro
           </button>
@@ -177,11 +225,13 @@ export function PropertyCreateAIFlow() {
         {currentStep < 4 ? (
           <button
             type="button"
-            onClick={() => setCurrentStep((s) => s + 1)}
+            onClick={handleAdvance}
             disabled={!canAdvance}
             className="px-8 py-3 bg-[var(--fg-primary)] text-[var(--bg-canvas)] rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Avanti →
+            {isPending && currentStep === 1
+              ? "Creazione bozza…"
+              : "Avanti →"}
           </button>
         ) : (
           <button
@@ -213,7 +263,6 @@ function Step1Form({
 
   return (
     <div className="space-y-10">
-      {/* Contract type — segmented */}
       <Field label="Tipo di contratto">
         <div className="grid grid-cols-2 gap-3">
           {(["vendita", "affitto"] as const).map((option) => {
@@ -236,7 +285,6 @@ function Step1Form({
         </div>
       </Field>
 
-      {/* Property type — dropdown */}
       <Field label="Tipologia">
         <select
           value={formData.propertyType}
@@ -254,7 +302,6 @@ function Step1Form({
         </select>
       </Field>
 
-      {/* City */}
       <Field label="Città">
         <input
           type="text"
@@ -265,7 +312,6 @@ function Step1Form({
         />
       </Field>
 
-      {/* Price + sqm */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Field label={priceLabel}>
           <SuffixedInput
@@ -285,9 +331,8 @@ function Step1Form({
         </Field>
       </div>
 
-      {/* Bedrooms + bathrooms */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Field label="Camere da letto">
+        <Field label="Camere">
           <RoomCount
             value={formData.bedrooms}
             onChange={(v) => update("bedrooms", v)}
@@ -302,6 +347,30 @@ function Step1Form({
           />
         </Field>
       </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Step 2 — Photo upload (wraps existing PropertyPhotosManager)
+// ──────────────────────────────────────────────────────────────────────
+
+function Step2Photos({ propertyId }: { propertyId: string }) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-widest text-[var(--fg-secondary)] mb-2">
+          Step 2
+        </p>
+        <h2 className="font-display text-3xl text-[var(--fg-primary)] mb-3">
+          Foto immobile
+        </h2>
+        <p className="text-sm text-[var(--fg-secondary)]">
+          Carica le foto dell'immobile. La prima foto caricata diventa
+          automaticamente la cover; puoi cambiarla in qualsiasi momento.
+        </p>
+      </div>
+      <PropertyPhotosManager propertyId={propertyId} initialPhotos={[]} />
     </div>
   );
 }

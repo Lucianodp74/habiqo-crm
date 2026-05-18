@@ -1,6 +1,7 @@
 "use server";
 
 import { openai } from "@/lib/ai/openai";
+import type { ActionResult } from "@habiquo/types";
 
 // ──────────────────────────────────────────────────────────────────────
 // Types
@@ -8,9 +9,9 @@ import { openai } from "@/lib/ai/openai";
 
 export type PropertyAIInput = {
   contractType: "vendita" | "affitto";
-  propertyType: string; // es. "appartamento", "villa", "trilocale"
+  propertyType: string;
   city: string;
-  price: number; // EUR (totale per vendita, mensile per affitto)
+  price: number;
   sqm: number;
   bedrooms: number;
   bathrooms: number;
@@ -24,9 +25,19 @@ export type PropertyAIContent = {
   socialCaption: string;
 };
 
-type Result =
-  | { ok: true; data: PropertyAIContent }
-  | { ok: false; error: { message: string } };
+type GenerateResult = ActionResult<PropertyAIContent>;
+
+// ──────────────────────────────────────────────────────────────────────
+// Messages
+// ──────────────────────────────────────────────────────────────────────
+
+const MSG = {
+  VALIDATION: "Dati immobile incompleti per generare il contenuto.",
+  EMPTY_RESPONSE: "Risposta AI vuota. Riprova.",
+  INVALID_JSON: "Risposta AI non in JSON valido. Riprova.",
+  INVALID_FORMAT: "Risposta AI con formato incompleto. Riprova.",
+  API_ERROR: "Errore di comunicazione con l'AI. Riprova.",
+} as const;
 
 // ──────────────────────────────────────────────────────────────────────
 // Prompt building
@@ -57,7 +68,7 @@ Dati:
 - Città: ${input.city}
 - Prezzo: ${priceFormatted}
 - Metratura: ${input.sqm} mq
-- Camere da letto: ${input.bedrooms}
+- Camere: ${input.bedrooms}
 - Bagni: ${input.bathrooms}
 
 Restituisci ESCLUSIVAMENTE un oggetto JSON valido (senza markdown, senza testo prima o dopo) con esattamente questi campi:
@@ -75,17 +86,21 @@ Restituisci ESCLUSIVAMENTE un oggetto JSON valido (senza markdown, senza testo p
 // Validation helpers
 // ──────────────────────────────────────────────────────────────────────
 
-function validateInput(input: PropertyAIInput): string | null {
-  if (!input.city?.trim()) return "Città richiesta";
-  if (!input.propertyType?.trim()) return "Tipologia richiesta";
-  if (!input.contractType) return "Tipo di contratto richiesto";
-  if (input.price <= 0) return "Prezzo deve essere positivo";
-  if (input.sqm <= 0) return "Metratura deve essere positiva";
-  if (input.bedrooms < 0 || input.bathrooms < 0) return "Camere/bagni non validi";
-  return null;
+function isInputValid(input: PropertyAIInput): boolean {
+  return (
+    !!input.city?.trim() &&
+    !!input.propertyType?.trim() &&
+    !!input.contractType &&
+    Number.isFinite(input.price) &&
+    input.price > 0 &&
+    Number.isFinite(input.sqm) &&
+    input.sqm > 0 &&
+    input.bedrooms >= 0 &&
+    input.bathrooms >= 0
+  );
 }
 
-function validateOutput(raw: unknown): raw is PropertyAIContent {
+function isContentValid(raw: unknown): raw is PropertyAIContent {
   if (!raw || typeof raw !== "object") return false;
   const o = raw as Record<string, unknown>;
   return (
@@ -106,16 +121,18 @@ function validateOutput(raw: unknown): raw is PropertyAIContent {
  * Generates AI property listing content from minimal form data.
  * Uses GPT-4o via OpenAI API. Form-data only (no photo vision).
  *
- * Returns Italian copy: title, description, amenities, SEO title, social caption.
- * The caller is responsible for displaying the result to the user for review
- * and persisting it to the database after confirmation.
+ * Returns Italian copy: title, description, amenities, SEO title,
+ * social caption. The caller is responsible for displaying the result
+ * for review and persisting it after confirmation.
  */
 export async function generatePropertyContent(
-  input: PropertyAIInput
-): Promise<Result> {
-  const validationError = validateInput(input);
-  if (validationError) {
-    return { ok: false, error: { message: validationError } };
+  input: PropertyAIInput,
+): Promise<GenerateResult> {
+  if (!isInputValid(input)) {
+    return {
+      ok: false,
+      error: { code: "validation_error", message: MSG.VALIDATION },
+    };
   }
 
   try {
@@ -131,7 +148,10 @@ export async function generatePropertyContent(
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {
-      return { ok: false, error: { message: "Risposta AI vuota" } };
+      return {
+        ok: false,
+        error: { code: "unknown", message: MSG.EMPTY_RESPONSE },
+      };
     }
 
     let parsed: unknown;
@@ -140,20 +160,23 @@ export async function generatePropertyContent(
     } catch {
       return {
         ok: false,
-        error: { message: "Risposta AI non in JSON valido" },
+        error: { code: "unknown", message: MSG.INVALID_JSON },
       };
     }
 
-    if (!validateOutput(parsed)) {
+    if (!isContentValid(parsed)) {
       return {
         ok: false,
-        error: { message: "Risposta AI con formato incompleto o errato" },
+        error: { code: "unknown", message: MSG.INVALID_FORMAT },
       };
     }
 
     return { ok: true, data: parsed };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Errore sconosciuto";
-    return { ok: false, error: { message: `Errore AI: ${message}` } };
+    console.error("generatePropertyContent: API error", err);
+    return {
+      ok: false,
+      error: { code: "unknown", message: MSG.API_ERROR },
+    };
   }
 }
