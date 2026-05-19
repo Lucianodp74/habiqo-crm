@@ -15,8 +15,11 @@ const MSG = {
 const WRITE_ROLES = ["owner", "admin", "agent"] as const;
 
 export type CreateDraftPropertyInput = {
-  /** Maps to properties.listing_type — enum value */
-  contractType: "vendita" | "affitto";
+  /**
+   * Maps to properties.listing_type (enum: property_listing_type).
+   * Valid values: "sale" | "rent".
+   */
+  contractType: "sale" | "rent";
   /** Used in placeholder title until AI generation rewrites it */
   propertyType: string;
   city: string;
@@ -36,7 +39,7 @@ type CreateResult = ActionResult<{ propertyId: string }>;
  * The property is inserted with:
  *   - status = 'draft' (schema default)
  *   - is_public = false (schema default)
- *   - photos = []  (schema default)
+ *   - photos = [] (schema default)
  *   - placeholder title and address (NOT NULL, filled later by AI/manual edit)
  *
  * Returns the new property's id so the client can pass it to the photo

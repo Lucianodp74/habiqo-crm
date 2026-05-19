@@ -8,7 +8,8 @@ import type { ActionResult } from "@habiquo/types";
 // ──────────────────────────────────────────────────────────────────────
 
 export type PropertyAIInput = {
-  contractType: "vendita" | "affitto";
+  /** Valid values match property_listing_type enum */
+  contractType: "sale" | "rent";
   propertyType: string;
   city: string;
   price: number;
@@ -55,15 +56,18 @@ Linee guida:
 - Stile diretto, non rivolgersi al lettore in seconda persona singolare`;
 
 function buildUserPrompt(input: PropertyAIInput): string {
+  // Translate internal contract type to Italian for the AI prompt,
+  // so generated copy uses Italian real estate terminology.
+  const contractDisplay = input.contractType === "sale" ? "vendita" : "affitto";
   const priceFormatted =
-    input.contractType === "vendita"
+    input.contractType === "sale"
       ? `${input.price.toLocaleString("it-IT")} €`
       : `${input.price.toLocaleString("it-IT")} €/mese`;
 
   return `Genera contenuto per questo immobile.
 
 Dati:
-- Contratto: ${input.contractType}
+- Contratto: ${contractDisplay}
 - Tipologia: ${input.propertyType}
 - Città: ${input.city}
 - Prezzo: ${priceFormatted}

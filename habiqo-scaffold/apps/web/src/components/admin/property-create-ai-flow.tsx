@@ -10,7 +10,7 @@ import { PropertyPhotosManager } from "@/components/admin/property-photos-manage
 // Types & constants
 // ──────────────────────────────────────────────────────────────────────
 
-type ContractType = "vendita" | "affitto";
+type ContractType = "sale" | "rent";
 
 type FormData = {
   contractType: ContractType | null;
@@ -38,6 +38,13 @@ const STEPS = [
   { id: 3, label: "AI" },
   { id: 4, label: "Avanzati" },
 ] as const;
+
+// Internal value (matches property_listing_type enum) → Italian display label
+const CONTRACT_OPTIONS: ReadonlyArray<{ value: ContractType; label: string }> =
+  [
+    { value: "sale", label: "Vendita" },
+    { value: "rent", label: "Affitto" },
+  ];
 
 const PROPERTY_TYPES = [
   "Appartamento",
@@ -259,26 +266,26 @@ function Step1Form({
   update: <K extends keyof FormData>(key: K, value: FormData[K]) => void;
 }) {
   const priceLabel =
-    formData.contractType === "affitto" ? "Prezzo (€/mese)" : "Prezzo (€)";
+    formData.contractType === "rent" ? "Prezzo (€/mese)" : "Prezzo (€)";
 
   return (
     <div className="space-y-10">
       <Field label="Tipo di contratto">
         <div className="grid grid-cols-2 gap-3">
-          {(["vendita", "affitto"] as const).map((option) => {
-            const isSelected = formData.contractType === option;
+          {CONTRACT_OPTIONS.map(({ value, label }) => {
+            const isSelected = formData.contractType === value;
             return (
               <button
-                key={option}
+                key={value}
                 type="button"
-                onClick={() => update("contractType", option)}
-                className={`px-6 py-4 border rounded-md text-sm font-medium capitalize transition-all ${
+                onClick={() => update("contractType", value)}
+                className={`px-6 py-4 border rounded-md text-sm font-medium transition-all ${
                   isSelected
                     ? "border-[var(--fg-primary)] bg-[var(--fg-primary)] text-[var(--bg-canvas)]"
                     : "border-[var(--border-subtle)] text-[var(--fg-primary)] hover:border-[var(--fg-primary)]/40"
                 }`}
               >
-                {option}
+                {label}
               </button>
             );
           })}
