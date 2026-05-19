@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
+import { getAnonClient } from "@/lib/habita/supabase-anon";
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 interface HeroProperty {
@@ -16,7 +16,7 @@ interface HeroProperty {
 }
 
 async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
-  const supabase = await createClient();
+  const supabase = getAnonClient();
   const { data } = await supabase
     .from("properties")
     .select("id, title, price_eur, city, surface_sqm, bedrooms, photos, listing_type, slug")
@@ -58,15 +58,12 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
             <h1 className="font-display text-5xl md:text-6xl leading-tight text-[var(--fg-primary)] mb-4">
               {agency.name}
             </h1>
-
             <p className="font-display italic text-xl md:text-2xl text-[var(--fg-secondary)] mb-3 leading-snug">
               {agency.tagline ?? "Case selezionate con attenzione."}
             </p>
-
             <p className="text-sm text-[var(--fg-secondary)] mb-8 leading-relaxed max-w-sm">
               {subtitle}
             </p>
-
             <div className="flex flex-wrap gap-3 mb-5">
               <Link
                 href={`/${agency.slug}/immobili`}
@@ -83,7 +80,6 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
                 </a>
               ) : null}
             </div>
-
             <p className="text-xs tracking-widest uppercase text-[var(--fg-secondary)] opacity-50">
               Tecnologia Habiquo
             </p>
@@ -96,7 +92,6 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
               className="group block"
             >
               <div className="overflow-hidden rounded-sm border border-[var(--border-subtle)]">
-                {/* Image */}
                 <div className="aspect-[4/3] relative bg-[var(--bg-canvas)]">
                   <div className="absolute top-3 left-3 z-10">
                     <span className="px-2.5 py-1 text-xs font-medium tracking-wide bg-[var(--bg-canvas)]/90 text-[var(--fg-primary)] rounded-sm backdrop-blur-sm">
@@ -120,17 +115,13 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
                     </div>
                   )}
                 </div>
-
-                {/* Details */}
                 <div className="p-5 border-t border-[var(--border-subtle)]">
                   <p className="font-display text-2xl text-[var(--fg-primary)] mb-1">
                     {formatPrice(featured.price_eur, featured.listing_type)}
                   </p>
                   <p className="text-sm text-[var(--fg-secondary)] mb-3">
                     {featured.city}
-                    {featured.surface_sqm
-                      ? ` · ${featured.surface_sqm} m²`
-                      : ""}
+                    {featured.surface_sqm ? ` · ${featured.surface_sqm} m²` : ""}
                     {featured.bedrooms ? ` · ${featured.bedrooms} camere` : ""}
                   </p>
                   <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] group-hover:opacity-60 transition-opacity">

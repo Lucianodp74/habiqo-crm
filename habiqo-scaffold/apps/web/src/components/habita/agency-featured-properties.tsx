@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
+import { getAnonClient } from "@/lib/habita/supabase-anon";
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 interface FeaturedProperty {
@@ -17,7 +17,7 @@ interface FeaturedProperty {
 async function getAgencyFeaturedProperties(
   agencyId: string
 ): Promise<FeaturedProperty[]> {
-  const supabase = await createClient();
+  const supabase = getAnonClient();
   const { data } = await supabase
     .from("properties")
     .select("id, title, price_eur, city, surface_sqm, photos, listing_type, slug")
@@ -26,7 +26,6 @@ async function getAgencyFeaturedProperties(
     .eq("is_public", true)
     .order("created_at", { ascending: false })
     .limit(3);
-
   return data ?? [];
 }
 
@@ -45,12 +44,11 @@ export async function AgencyFeaturedProperties({
   agency: PublicAgency;
 }) {
   const properties = await getAgencyFeaturedProperties(agency.id);
-
   if (properties.length === 0) return null;
 
   return (
     <section className="border-b border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-16 max-w-4xl">
+      <div className="container mx-auto px-6 py-16 max-w-5xl">
         <div className="flex items-baseline justify-between mb-10">
           <div>
             <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-2">
