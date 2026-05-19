@@ -9,6 +9,7 @@ import {
   type PropertyAIContent,
 } from "@/lib/actions/generate-property-content";
 import { updatePropertyContent } from "@/lib/actions/update-property-content";
+import { publishProperty } from "@/lib/actions/publish-property";
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
 
 // ──────────────────────────────────────────────────────────────────────
@@ -27,6 +28,22 @@ type FormData = {
   bathrooms: number;
 };
 
+type AdvancedData = {
+  address: string;
+  postalCode: string;
+  region: string;
+  floor: string; // string for controlled input
+  hasElevator: boolean;
+  hasGarage: boolean;
+  energyClass: string;
+};
+
+type PublishedRefs = {
+  propertyId: string;
+  propertySlug: string;
+  agencySlug: string;
+};
+
 const INITIAL_DATA: FormData = {
   contractType: null,
   propertyType: "",
@@ -35,6 +52,16 @@ const INITIAL_DATA: FormData = {
   sqm: "",
   bedrooms: 2,
   bathrooms: 1,
+};
+
+const INITIAL_ADVANCED: AdvancedData = {
+  address: "",
+  postalCode: "",
+  region: "",
+  floor: "",
+  hasElevator: false,
+  hasGarage: false,
+  energyClass: "",
 };
 
 const STEPS = [
@@ -65,6 +92,19 @@ const PROPERTY_TYPES = [
   "Box / Garage",
 ];
 
+const ENERGY_CLASSES = [
+  "A4",
+  "A3",
+  "A2",
+  "A1",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+];
+
 // ──────────────────────────────────────────────────────────────────────
 // Main component
 // ──────────────────────────────────────────────────────────────────────
@@ -74,6 +114,9 @@ export function PropertyCreateAIFlow() {
   const [formData, setFormData] = useState<FormData>(INITIAL_DATA);
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [aiContent, setAiContent] = useState<PropertyAIContent | null>(null);
+  const [advancedData, setAdvancedData] =
+    useState<AdvancedData>(INITIAL_ADVANCED);
+  const [published, setPublished] = useState<PublishedRefs | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -81,6 +124,24 @@ export function PropertyCreateAIFlow() {
     setFormData((prev) => ({ ...prev, [key]: value }));
     if (error) setError(null);
   };
+
+  const updateAdvanced = <K extends keyof AdvancedData>(
+    key: K,
+    value: AdvancedData[K],
+  ) => {
+    setAdvancedData((prev) => ({ ...prev, [key]: value }));
+    if (error) setError(null);
+  };
+
+  // If we've published, show success view immediately and skip the form
+  if (published) {
+    return (
+      <SuccessView
+        propertySlug={published.propertySlug}
+        agencySlug={published.agencySlug}
+      />
+    );
+  }
 
   const isStep1Valid =
     formData.contractType !== null &&
@@ -99,10 +160,11 @@ export function PropertyCreateAIFlow() {
       ? aiContent !== null
       : true);
 
+  const canPublish = !isPending && propertyId !== null;
+
   const handleAdvance = () => {
     setError(null);
 
-    // Step 1 → 2: create draft property in DB
     if (currentStep === 1 && !propertyId) {
       startTransition(async () => {
         const result = await createDraftProperty({
@@ -114,7 +176,6 @@ export function PropertyCreateAIFlow() {
           bedrooms: formData.bedrooms,
           bathrooms: formData.bathrooms,
         });
-
         if (result.ok) {
           setPropertyId(result.data.propertyId);
           setCurrentStep(2);
@@ -125,7 +186,6 @@ export function PropertyCreateAIFlow() {
       return;
     }
 
-    // Step 3 → 4: persist AI content to DB
     if (currentStep === 3 && propertyId && aiContent) {
       startTransition(async () => {
         const result = await updatePropertyContent({
@@ -136,7 +196,6 @@ export function PropertyCreateAIFlow() {
           seoTitle: aiContent.seoTitle,
           socialCaption: aiContent.socialCaption,
         });
-
         if (result.ok) {
           setCurrentStep(4);
         } else {
@@ -146,8 +205,35 @@ export function PropertyCreateAIFlow() {
       return;
     }
 
-    // Other transitions: simple advance
     setCurrentStep((s) => Math.min(4, s + 1));
+  };
+
+  const handlePublish = () => {
+    if (!propertyId) return;
+    setError(null);
+
+    startTransition(async () => {
+      const floorNum = advancedData.floor.trim()
+        ? Number(advancedData.floor)
+        : null;
+
+      const result = await publishProperty({
+        propertyId,
+        address: advancedData.address.trim() || undefined,
+        postalCode: advancedData.postalCode.trim() || undefined,
+        region: advancedData.region.trim() || undefined,
+        floor: Number.isFinite(floorNum) ? (floorNum as number) : null,
+        hasElevator: advancedData.hasElevator,
+        hasGarage: advancedData.hasGarage,
+        energyClass: advancedData.energyClass || undefined,
+      });
+
+      if (result.ok) {
+        setPublished(result.data);
+      } else {
+        setError(result.error.message);
+      }
+    });
   };
 
   const handleBack = () => {
@@ -249,9 +335,9 @@ export function PropertyCreateAIFlow() {
           />
         )}
         {currentStep === 4 && (
-          <Placeholder
-            title="Dati avanzati"
-            subtitle="Classe energetica, anno, piano, riscaldamento · In arrivo"
+          <Step4Advanced
+            data={advancedData}
+            update={updateAdvanced}
           />
         )}
       </div>
@@ -282,10 +368,11 @@ export function PropertyCreateAIFlow() {
         ) : (
           <button
             type="button"
-            disabled
-            className="px-8 py-3 bg-[var(--fg-primary)] text-[var(--bg-canvas)] rounded-md text-sm font-medium opacity-40 cursor-not-allowed"
+            onClick={handlePublish}
+            disabled={!canPublish}
+            className="px-8 py-3 bg-[var(--fg-primary)] text-[var(--bg-canvas)] rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Pubblica · In arrivo
+            {isPending ? "Pubblicazione…" : "Pubblica"}
           </button>
         )}
       </div>
@@ -459,7 +546,6 @@ function Step3AI({
     });
   };
 
-  // Initial state: nothing generated yet
   if (!content && !isGenerating) {
     return (
       <div className="space-y-6">
@@ -492,7 +578,6 @@ function Step3AI({
     );
   }
 
-  // Generating state
   if (isGenerating) {
     return (
       <div className="rounded-md border border-dashed border-[var(--border-subtle)] py-20 px-8 text-center animate-pulse">
@@ -506,7 +591,6 @@ function Step3AI({
     );
   }
 
-  // Generated content — editable form
   if (content) {
     return (
       <div className="space-y-8">
@@ -590,7 +674,166 @@ function Step3AI({
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Amenities tag editor (used in Step 3)
+// Step 4 — Advanced data (all optional, "Publish first, complete later")
+// ──────────────────────────────────────────────────────────────────────
+
+function Step4Advanced({
+  data,
+  update,
+}: {
+  data: AdvancedData;
+  update: <K extends keyof AdvancedData>(key: K, value: AdvancedData[K]) => void;
+}) {
+  return (
+    <div className="space-y-10">
+      <div>
+        <p className="text-xs uppercase tracking-widest text-[var(--fg-secondary)] mb-2">
+          Step 4
+        </p>
+        <h2 className="font-display text-3xl text-[var(--fg-primary)] mb-3">
+          Dati avanzati
+        </h2>
+        <p className="text-sm text-[var(--fg-secondary)]">
+          Tutti i campi sono opzionali. Puoi pubblicare ora e completare
+          questi dettagli in seguito dall'admin.
+        </p>
+      </div>
+
+      <Field label="Indirizzo completo">
+        <input
+          type="text"
+          value={data.address}
+          onChange={(e) => update("address", e.target.value)}
+          placeholder="es. Via Roma 24"
+          className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base placeholder:text-[var(--fg-secondary)]/50 focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
+        />
+      </Field>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <Field label="CAP">
+          <input
+            type="text"
+            value={data.postalCode}
+            onChange={(e) => update("postalCode", e.target.value)}
+            placeholder="es. 72100"
+            className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base placeholder:text-[var(--fg-secondary)]/50 focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
+          />
+        </Field>
+        <Field label="Regione">
+          <input
+            type="text"
+            value={data.region}
+            onChange={(e) => update("region", e.target.value)}
+            placeholder="es. Puglia"
+            className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base placeholder:text-[var(--fg-secondary)]/50 focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
+          />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <Field label="Piano">
+          <input
+            type="number"
+            inputMode="numeric"
+            value={data.floor}
+            onChange={(e) => update("floor", e.target.value)}
+            placeholder="es. 2"
+            className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base placeholder:text-[var(--fg-secondary)]/50 focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
+          />
+        </Field>
+        <Field label="Classe energetica">
+          <select
+            value={data.energyClass}
+            onChange={(e) => update("energyClass", e.target.value)}
+            className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
+          >
+            <option value="">Non specificata</option>
+            {ENERGY_CLASSES.map((cls) => (
+              <option key={cls} value={cls}>
+                {cls}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      <Field label="Servizi">
+        <div className="space-y-3">
+          <Toggle
+            label="Ascensore"
+            value={data.hasElevator}
+            onChange={(v) => update("hasElevator", v)}
+          />
+          <Toggle
+            label="Garage / Box auto"
+            value={data.hasGarage}
+            onChange={(v) => update("hasGarage", v)}
+          />
+        </div>
+      </Field>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Success view — shown after publish
+// ──────────────────────────────────────────────────────────────────────
+
+function SuccessView({
+  propertySlug,
+  agencySlug,
+}: {
+  propertySlug: string;
+  agencySlug: string;
+}) {
+  const publicUrl = `/${agencySlug}/immobili/${propertySlug}`;
+
+  return (
+    <div className="py-20 text-center space-y-6">
+      <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--fg-primary)] text-[var(--bg-canvas)] mb-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-7 w-7"
+          aria-hidden="true"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+
+      <h2 className="font-display text-4xl md:text-5xl text-[var(--fg-primary)]">
+        Pubblicato
+      </h2>
+      <p className="text-base text-[var(--fg-secondary)] max-w-md mx-auto">
+        Il tuo immobile è ora online e visibile a tutti i visitatori del
+        sito agenzia.
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
+        <Link
+          href={publicUrl}
+          className="px-8 py-3 bg-[var(--fg-primary)] text-[var(--bg-canvas)] rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          Vedi annuncio pubblico →
+        </Link>
+        <Link
+          href="/admin/properties"
+          className="px-8 py-3 border border-[var(--border-subtle)] text-[var(--fg-primary)] rounded-md text-sm font-medium hover:border-[var(--fg-primary)]/40 transition-colors"
+        >
+          Torna alla lista immobili
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Amenities tag editor
 // ──────────────────────────────────────────────────────────────────────
 
 function AmenitiesEditor({
@@ -751,19 +994,36 @@ function RoomCount({
   );
 }
 
-function Placeholder({
-  title,
-  subtitle,
+function Toggle({
+  label,
+  value,
+  onChange,
 }: {
-  title: string;
-  subtitle: string;
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="rounded-md border border-dashed border-[var(--border-subtle)] py-20 px-8 text-center">
-      <p className="font-display text-2xl text-[var(--fg-primary)] mb-3">
-        {title}
-      </p>
-      <p className="text-sm text-[var(--fg-secondary)]">{subtitle}</p>
-    </div>
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className={`flex w-full items-center justify-between px-4 py-3 border rounded-md text-sm transition-all ${
+        value
+          ? "border-[var(--fg-primary)] bg-[var(--fg-primary)]/5"
+          : "border-[var(--border-subtle)] hover:border-[var(--fg-primary)]/40"
+      }`}
+    >
+      <span className="text-[var(--fg-primary)]">{label}</span>
+      <span
+        className={`flex h-5 w-5 items-center justify-center rounded border text-xs ${
+          value
+            ? "border-[var(--fg-primary)] bg-[var(--fg-primary)] text-[var(--bg-canvas)]"
+            : "border-[var(--border-subtle)] text-transparent"
+        }`}
+        aria-hidden="true"
+      >
+        ✓
+      </span>
+    </button>
   );
 }
