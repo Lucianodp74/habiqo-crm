@@ -4,7 +4,7 @@ import type { PublicAgency } from "@/lib/habita/tenant";
 export function AgencyContact({ agency }: { agency: PublicAgency }) {
   return (
     <section className="border-t border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-20 max-w-4xl text-center">
+      <div className="container mx-auto px-6 py-14 max-w-4xl text-center">
         <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-4">
           Contatti
         </p>
@@ -12,8 +12,8 @@ export function AgencyContact({ agency }: { agency: PublicAgency }) {
           Parliamone.
         </h2>
         <p className="text-lg text-[var(--fg-secondary)] mb-10 max-w-xl mx-auto leading-relaxed">
-          Vuoi vendere, comprare o affittare? Contattaci e raccontaci la tua
-          esigenza.
+          Stai cercando casa, vuoi vendere o affittare un immobile?
+          Siamo un'agenzia indipendente: parli con noi, non con un call center.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {agency.phone ? (
