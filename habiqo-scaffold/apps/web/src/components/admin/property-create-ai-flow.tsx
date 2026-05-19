@@ -258,7 +258,7 @@ export function PropertyCreateAIFlow() {
           ← Torna alla lista
         </Link>
         <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-2">
-          Assistente AI
+        Habiquo Studio
         </p>
         <h1 className="font-display text-4xl md:text-5xl text-[var(--fg-primary)] leading-tight">
           Crea immobile
