@@ -8,16 +8,16 @@ type SidebarProps = {
 };
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard overview" },
-  { href: "/properties", label: "Properties" },
-  { href: "/crm/leads", label: "Leads" },
-  { href: "/deals", label: "Deals" },
-  { href: "/ai-assistant", label: "AI Assistant" },
+  { href: "/dashboard",       label: "Dashboard overview" },
+  { href: "/admin/properties", label: "Immobili" },
+  { href: "/crm/leads",       label: "Leads" },
+  { href: "/deals",           label: "Deals" },
+  { href: "/ai-assistant",    label: "AI Assistant" },
 ] as const;
 
 const ADMIN_NAV = [
-  { href: "/admin/agency", label: "Sito pubblico" },
-  { href: "/admin/properties", label: "Foto immobili" },
+  { href: "/admin/agency",     label: "Sito pubblico" },
+  { href: "/admin/properties", label: "Gestione immobili" },
 ] as const;
 
 export function Sidebar({ userName, avatarUrl }: SidebarProps) {
