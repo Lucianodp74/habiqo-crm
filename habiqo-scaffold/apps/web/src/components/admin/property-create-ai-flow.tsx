@@ -1,8 +1,6 @@
 "use client";
-
 import { useState, useTransition } from "react";
 import Link from "next/link";
-
 import { createDraftProperty } from "@/lib/actions/create-draft-property";
 import {
   generatePropertyContent,
@@ -12,12 +10,11 @@ import { updatePropertyContent } from "@/lib/actions/update-property-content";
 import { publishProperty } from "@/lib/actions/publish-property";
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
 
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Types & constants
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 type ContractType = "sale" | "rent";
-
 type FormData = {
   contractType: ContractType | null;
   propertyType: string;
@@ -27,17 +24,15 @@ type FormData = {
   bedrooms: number;
   bathrooms: number;
 };
-
 type AdvancedData = {
   address: string;
   postalCode: string;
   region: string;
-  floor: string; // string for controlled input
+  floor: string;
   hasElevator: boolean;
   hasGarage: boolean;
   energyClass: string;
 };
-
 type PublishedRefs = {
   propertyId: string;
   propertySlug: string;
@@ -53,7 +48,6 @@ const INITIAL_DATA: FormData = {
   bedrooms: 2,
   bathrooms: 1,
 };
-
 const INITIAL_ADVANCED: AdvancedData = {
   address: "",
   postalCode: "",
@@ -63,20 +57,17 @@ const INITIAL_ADVANCED: AdvancedData = {
   hasGarage: false,
   energyClass: "",
 };
-
 const STEPS = [
   { id: 1, label: "Dati" },
   { id: 2, label: "Foto" },
   { id: 3, label: "AI" },
   { id: 4, label: "Avanzati" },
 ] as const;
-
 const CONTRACT_OPTIONS: ReadonlyArray<{ value: ContractType; label: string }> =
   [
     { value: "sale", label: "Vendita" },
     { value: "rent", label: "Affitto" },
   ];
-
 const PROPERTY_TYPES = [
   "Appartamento",
   "Villa",
@@ -91,23 +82,11 @@ const PROPERTY_TYPES = [
   "Negozio",
   "Box / Garage",
 ];
+const ENERGY_CLASSES = ["A4", "A3", "A2", "A1", "B", "C", "D", "E", "F", "G"];
 
-const ENERGY_CLASSES = [
-  "A4",
-  "A3",
-  "A2",
-  "A1",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-];
-
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Main component
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 export function PropertyCreateAIFlow() {
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -133,7 +112,6 @@ export function PropertyCreateAIFlow() {
     if (error) setError(null);
   };
 
-  // If we've published, show success view immediately and skip the form
   if (published) {
     return (
       <SuccessView
@@ -155,10 +133,10 @@ export function PropertyCreateAIFlow() {
     (currentStep === 1
       ? isStep1Valid
       : currentStep === 2
-      ? true
-      : currentStep === 3
-      ? aiContent !== null
-      : true);
+        ? true
+        : currentStep === 3
+          ? aiContent !== null
+          : true);
 
   const canPublish = !isPending && propertyId !== null;
 
@@ -248,8 +226,10 @@ export function PropertyCreateAIFlow() {
   })();
 
   return (
-    <div className="space-y-12">
-      {/* ─── Header ─────────────────────────────────────────────────── */}
+    // ─── MOBILE: reduced vertical spacing + bottom padding for sticky nav ───
+    <div className="space-y-8 sm:space-y-12 pb-2">
+
+      {/* ─── Header ──────────────────────────────────────────────────────── */}
       <div>
         <Link
           href="/admin/properties"
@@ -258,14 +238,14 @@ export function PropertyCreateAIFlow() {
           ← Torna alla lista
         </Link>
         <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-2">
-        Habiquo Studio
+          Habiquo Studio
         </p>
         <h1 className="font-display text-4xl md:text-5xl text-[var(--fg-primary)] leading-tight">
           Crea immobile
         </h1>
       </div>
 
-      {/* ─── Progress indicator ─────────────────────────────────────── */}
+      {/* ─── Progress indicator ──────────────────────────────────────────── */}
       <ol className="flex items-center gap-2 sm:gap-3">
         {STEPS.map((step, idx) => {
           const isActive = step.id === currentStep;
@@ -281,8 +261,8 @@ export function PropertyCreateAIFlow() {
                     isActive
                       ? "bg-[var(--fg-primary)] border-[var(--fg-primary)] text-[var(--bg-canvas)]"
                       : isDone
-                      ? "bg-[var(--fg-primary)]/10 border-[var(--fg-primary)]/30 text-[var(--fg-primary)]"
-                      : "bg-transparent border-[var(--border-subtle)] text-[var(--fg-secondary)]"
+                        ? "bg-[var(--fg-primary)]/10 border-[var(--fg-primary)]/30 text-[var(--fg-primary)]"
+                        : "bg-transparent border-[var(--border-subtle)] text-[var(--fg-secondary)]"
                   }`}
                 >
                   {step.id}
@@ -311,15 +291,15 @@ export function PropertyCreateAIFlow() {
         })}
       </ol>
 
-      {/* ─── Error banner ──────────────────────────────────────────── */}
+      {/* ─── Error banner ────────────────────────────────────────────────── */}
       {error && (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
         </div>
       )}
 
-      {/* ─── Step content ───────────────────────────────────────────── */}
-      <div className="min-h-[400px]">
+      {/* ─── Step content ────────────────────────────────────────────────── */}
+      <div className="min-h-[320px] sm:min-h-[400px]">
         {currentStep === 1 && (
           <Step1Form formData={formData} update={update} />
         )}
@@ -335,15 +315,12 @@ export function PropertyCreateAIFlow() {
           />
         )}
         {currentStep === 4 && (
-          <Step4Advanced
-            data={advancedData}
-            update={updateAdvanced}
-          />
+          <Step4Advanced data={advancedData} update={updateAdvanced} />
         )}
       </div>
 
-      {/* ─── Navigation ─────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between border-t border-[var(--border-subtle)] pt-8">
+      {/* ─── Navigation — sticky on mobile so it stays above the keyboard ── */}
+      <div className="sticky bottom-0 -mx-6 px-6 py-4 bg-[var(--bg-canvas)] border-t border-[var(--border-subtle)] flex items-center justify-between md:relative md:bottom-auto md:mx-0 md:px-0 md:py-0 md:pt-8 md:border-t-0">
         {currentStep > 1 ? (
           <button
             type="button"
@@ -380,9 +357,9 @@ export function PropertyCreateAIFlow() {
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Step 1 — Basic property info
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 function Step1Form({
   formData,
@@ -395,7 +372,7 @@ function Step1Form({
     formData.contractType === "rent" ? "Prezzo (€/mese)" : "Prezzo (€)";
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <Field label="Tipo di contratto">
         <div className="grid grid-cols-2 gap-3">
           {CONTRACT_OPTIONS.map(({ value, label }) => {
@@ -484,9 +461,9 @@ function Step1Form({
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Step 2 — Photo upload
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 function Step2Photos({ propertyId }: { propertyId: string }) {
   return (
@@ -499,7 +476,7 @@ function Step2Photos({ propertyId }: { propertyId: string }) {
           Foto immobile
         </h2>
         <p className="text-sm text-[var(--fg-secondary)]">
-          Carica le foto dell'immobile. La prima foto caricata diventa
+          Carica le foto dell&apos;immobile. La prima foto caricata diventa
           automaticamente la cover; puoi cambiarla in qualsiasi momento.
         </p>
       </div>
@@ -508,9 +485,9 @@ function Step2Photos({ propertyId }: { propertyId: string }) {
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Step 3 — AI generation + editable review
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 function Step3AI({
   formData,
@@ -557,7 +534,7 @@ function Step3AI({
             Genera con AI
           </h2>
           <p className="text-sm text-[var(--fg-secondary)] mb-1">
-            L'assistente userà i dati del Step 1 per generare titolo,
+            L&apos;assistente userà i dati del Step 1 per generare titolo,
             descrizione, caratteristiche, SEO title e social caption.
           </p>
           <p className="text-xs text-[var(--fg-secondary)]/70">
@@ -565,7 +542,7 @@ function Step3AI({
           </p>
         </div>
 
-        <div className="rounded-md border border-dashed border-[var(--border-subtle)] py-16 px-8 text-center">
+        <div className="rounded-md border border-dashed border-[var(--border-subtle)] py-12 sm:py-16 px-8 text-center">
           <button
             type="button"
             onClick={handleGenerate}
@@ -580,9 +557,9 @@ function Step3AI({
 
   if (isGenerating) {
     return (
-      <div className="rounded-md border border-dashed border-[var(--border-subtle)] py-20 px-8 text-center animate-pulse">
+      <div className="rounded-md border border-dashed border-[var(--border-subtle)] py-12 sm:py-20 px-8 text-center animate-pulse">
         <p className="font-display text-2xl text-[var(--fg-primary)] mb-3">
-          L'assistente sta scrivendo…
+          L&apos;assistente sta scrivendo…
         </p>
         <p className="text-sm text-[var(--fg-secondary)]">
           GPT-4o sta generando i contenuti per il tuo annuncio
@@ -602,8 +579,8 @@ function Step3AI({
             Contenuto generato
           </h2>
           <p className="text-sm text-[var(--fg-secondary)]">
-            Modifica liberamente i testi. "Rigenera" produce una nuova
-            versione AI partendo dai dati del Step 1.
+            Modifica liberamente i testi. &ldquo;Rigenera&rdquo; produce una
+            nuova versione AI partendo dai dati del Step 1.
           </p>
         </div>
 
@@ -622,7 +599,7 @@ function Step3AI({
             onChange={(e) =>
               setContent({ ...content, description: e.target.value })
             }
-            rows={8}
+            rows={6}
             className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base leading-relaxed focus:outline-none focus:border-[var(--fg-primary)] transition-colors resize-y"
           />
         </Field>
@@ -673,9 +650,9 @@ function Step3AI({
   return null;
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// Step 4 — Advanced data (all optional, "Publish first, complete later")
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// Step 4 — Advanced data (all optional)
+// ──────────────────────────────────────────────────────────────────────────────
 
 function Step4Advanced({
   data,
@@ -685,7 +662,7 @@ function Step4Advanced({
   update: <K extends keyof AdvancedData>(key: K, value: AdvancedData[K]) => void;
 }) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <div>
         <p className="text-xs uppercase tracking-widest text-[var(--fg-secondary)] mb-2">
           Step 4
@@ -695,7 +672,7 @@ function Step4Advanced({
         </h2>
         <p className="text-sm text-[var(--fg-secondary)]">
           Tutti i campi sono opzionali. Puoi pubblicare ora e completare
-          questi dettagli in seguito dall'admin.
+          questi dettagli in seguito dall&apos;admin.
         </p>
       </div>
 
@@ -775,9 +752,9 @@ function Step4Advanced({
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// Success view — shown after publish
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// Success view
+// ──────────────────────────────────────────────────────────────────────────────
 
 function SuccessView({
   propertySlug,
@@ -789,7 +766,7 @@ function SuccessView({
   const publicUrl = `/${agencySlug}/immobili/${propertySlug}`;
 
   return (
-    <div className="py-20 text-center space-y-6">
+    <div className="py-16 sm:py-20 text-center space-y-6">
       <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--fg-primary)] text-[var(--bg-canvas)] mb-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -832,9 +809,9 @@ function SuccessView({
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Amenities tag editor
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 function AmenitiesEditor({
   value,
@@ -869,9 +846,7 @@ function AmenitiesEditor({
               key={`${amenity}-${idx}`}
               className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 border border-[var(--border-subtle)] rounded-full bg-[var(--bg-canvas)]"
             >
-              <span className="text-sm text-[var(--fg-primary)]">
-                {amenity}
-              </span>
+              <span className="text-sm text-[var(--fg-primary)]">{amenity}</span>
               <button
                 type="button"
                 onClick={() => handleRemove(idx)}
@@ -911,9 +886,9 @@ function AmenitiesEditor({
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Reusable sub-components
-// ──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 
 function Field({
   label,
@@ -980,7 +955,7 @@ function RoomCount({
             key={n}
             type="button"
             onClick={() => onChange(n)}
-            className={`flex-1 py-2.5 border rounded-md text-sm font-medium transition-all ${
+            className={`flex-1 py-3 border rounded-md text-sm font-medium transition-all ${
               isSelected
                 ? "border-[var(--fg-primary)] bg-[var(--fg-primary)] text-[var(--bg-canvas)]"
                 : "border-[var(--border-subtle)] text-[var(--fg-primary)] hover:border-[var(--fg-primary)]/40"
