@@ -49,7 +49,6 @@ function slugify(text: string): string {
 
 function generateUniqueSlug(title: string): string {
   const base = slugify(title) || "immobile";
-  // Random 5-char suffix to avoid per-agency collisions on similar titles
   const suffix = Math.random().toString(36).substring(2, 7);
   return `${base}-${suffix}`;
 }
@@ -60,7 +59,7 @@ function generateUniqueSlug(title: string): string {
 
 /**
  * Publishes a draft property:
- *   - sets status = 'published'
+ *   - sets status = 'active'    (property_status enum: draft|active|reserved|sold|archived)
  *   - sets is_public = true
  *   - sets published_at = now()
  *   - generates a unique slug from the title
@@ -127,7 +126,7 @@ export async function publishProperty(
   const propertySlug = property.slug || generateUniqueSlug(property.title);
 
   type UpdatePayload = {
-    status: "published";
+    status: "active";
     is_public: true;
     published_at: string;
     slug: string;
@@ -141,7 +140,7 @@ export async function publishProperty(
   };
 
   const payload: UpdatePayload = {
-    status: "published",
+    status: "active",
     is_public: true,
     published_at: new Date().toISOString(),
     slug: propertySlug,
