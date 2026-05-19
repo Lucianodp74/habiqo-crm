@@ -42,7 +42,8 @@ export default async function HabitaAgencyLayout({
   const location = [agency.city, agency.region].filter(Boolean).join(", ");
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-canvas)]">
+    // force-light: garantisce palette chiara anche con dark mode OS attivo
+    <div className="force-light min-h-screen flex flex-col">
       {/* ── Header ────────────────────────────────────────────────────── */}
       <header className="border-b border-[var(--border-subtle)] sticky top-0 z-40 bg-[var(--bg-canvas)]/80 backdrop-blur">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">

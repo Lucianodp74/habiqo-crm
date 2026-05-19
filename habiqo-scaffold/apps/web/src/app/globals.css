@@ -1,9 +1,8 @@
 @import "tailwindcss";
-@import "@habiqo/config/styles/tokens.css";
+@import "@habiquo/config/styles/tokens.css";
 
-/* ─── Tailwind v4 theme bridge ─────────────────────────────────
- * Map our semantic tokens to Tailwind utilities. Anything we don't
- * map here is still reachable via arbitrary values: bg-[var(--accent)]
+/* ─── Tailwind v4 theme bridge ──────────────────────────────────────
+ * Map our semantic tokens to Tailwind utilities.
  */
 @theme {
   --color-paper: #f6f2e9;
@@ -42,33 +41,19 @@
 }
 
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes drawer-in {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
-/* ─── Base ─────────────────────────────────────────────────────── */
+/* ─── Base ─────────────────────────────────────────────────────────── */
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -105,21 +90,10 @@
   }
 
   /* Fine scrollbars */
-  *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  *::-webkit-scrollbar-thumb {
-    background: var(--color-onyx-200);
-    border-radius: 8px;
-    border: 2px solid var(--bg-canvas);
-  }
-  *::-webkit-scrollbar-thumb:hover {
-    background: var(--color-onyx-300);
-  }
-  *::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  *::-webkit-scrollbar        { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb  { background: var(--color-onyx-200); border-radius: 8px; border: 2px solid var(--bg-canvas); }
+  *::-webkit-scrollbar-thumb:hover { background: var(--color-onyx-300); }
+  *::-webkit-scrollbar-track  { background: transparent; }
 
   .dark *::-webkit-scrollbar-thumb {
     border-color: var(--bg-canvas);
@@ -138,5 +112,32 @@
 
   .animate-in-card {
     animation: fade-up 480ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+   * .force-light — forza il tema chiaro su qualsiasi contenitore,
+   * anche se <html> ha la classe .dark (dark mode di sistema).
+   * Usato dalle pagine pubbliche Habita per garantire sempre
+   * la palette paper/onyx/brass indipendentemente dal tema OS.
+   * ───────────────────────────────────────────────────────────────── */
+  .force-light {
+    color-scheme: light;
+    --bg-canvas:      #f6f2e9;
+    --bg-elevated:    #fcfaf4;
+    --bg-sunken:      #efe9da;
+    --fg-primary:     #100d09;
+    --fg-secondary:   #5c5247;
+    --fg-muted:       #837a6e;
+    --fg-on-onyx:     #fcfaf4;
+    --accent:         #a77a45;
+    --accent-deep:    #7c5526;
+    --accent-soft:    #cba677;
+    --border-subtle:  #e5ddc9;
+    --border-strong:  #d6cdb6;
+    --glass-bg:       rgba(252, 250, 244, 0.72);
+    --glass-edge:     rgba(229, 221, 201, 0.55);
+    --shadow-card:    0 1px 2px rgba(16,13,9,0.04), 0 4px 12px -6px rgba(16,13,9,0.08);
+    background-color: #f6f2e9;
+    color: #100d09;
   }
 }
