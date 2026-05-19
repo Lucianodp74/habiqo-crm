@@ -21,7 +21,7 @@ export async function generateMetadata({
   return {
     title: agency.tagline ? `${agency.name} · ${agency.tagline}` : agency.name,
     description:
-      agency.description ?? `${agency.name} — agenzia immobiliare`,
+      agency.description ?? `${agency.name} – agenzia immobiliare`,
   };
 }
 
@@ -43,6 +43,7 @@ export default async function HabitaAgencyLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-canvas)]">
+      {/* ── Header ────────────────────────────────────────────────────── */}
       <header className="border-b border-[var(--border-subtle)] sticky top-0 z-40 bg-[var(--bg-canvas)]/80 backdrop-blur">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link
@@ -72,21 +73,66 @@ export default async function HabitaAgencyLayout({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-[var(--border-subtle)] mt-16">
-        <div className="container mx-auto px-6 py-10 text-sm text-[var(--fg-secondary)]">
-          <div className="flex flex-wrap justify-between gap-6">
+      {/* ── Footer ────────────────────────────────────────────────────── */}
+      <footer className="border-t border-[var(--border-subtle)] mt-12">
+        <div className="container mx-auto px-6 py-10 max-w-5xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-sm text-[var(--fg-secondary)]">
+
+            {/* Colonna 1 — Brand */}
             <div>
-              <p className="font-medium text-[var(--fg-primary)]">
+              <p className="font-medium text-[var(--fg-primary)] mb-3">
                 {agency.name}
               </p>
-              {location ? <p className="mt-1">{location}</p> : null}
-              {agency.phone ? <p className="mt-1">{agency.phone}</p> : null}
+              {location ? <p className="mb-1">{location}</p> : null}
+              {agency.phone ? (
+                <a
+                  href={`tel:${agency.phone}`}
+                  className="hover:text-[var(--fg-primary)] transition-colors"
+                >
+                  {agency.phone}
+                </a>
+              ) : null}
             </div>
-            <div className="text-right">
-              <p className="text-xs opacity-60">
+
+            {/* Colonna 2 — Link */}
+            <div>
+              <p className="font-medium text-[var(--fg-primary)] mb-3">
+                Esplora
+              </p>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href={`/${agency.slug}/immobili`}
+                    className="hover:text-[var(--fg-primary)] transition-colors"
+                  >
+                    Immobili
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={`/${agency.slug}#chi-siamo`}
+                    className="hover:text-[var(--fg-primary)] transition-colors"
+                  >
+                    Chi siamo
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={`/${agency.slug}#contatti`}
+                    className="hover:text-[var(--fg-primary)] transition-colors"
+                  >
+                    Contatti
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Colonna 3 — Powered by */}
+            <div className="sm:text-right">
+              <p className="text-xs opacity-50 mb-1">
                 Powered by <span className="font-medium">Habiquo</span>
               </p>
-              <p className="text-xs opacity-60 mt-1 italic">
+              <p className="text-xs opacity-50 italic">
                 Smart living. Smart real estate.
               </p>
             </div>
