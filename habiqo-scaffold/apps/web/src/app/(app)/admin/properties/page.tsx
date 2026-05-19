@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 
 export const metadata = {
-  title: "Foto immobili · Habiquo",
+  title: "Immobili · Habiquo",
 };
 
 type PropertyRow = {
@@ -30,7 +30,6 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Agencies where the user has write access (owner/admin/agent).
   const { data: memberships } = await supabase
     .from("agency_members")
     .select("agency_id, role")
@@ -41,8 +40,6 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
 
   const agencyIds = memberships.map((m) => m.agency_id);
 
-  // Two parallel queries instead of a nested join — cleaner typing
-  // under strict TS, and roughly the same latency.
   const [propertiesQuery, agenciesQuery] = await Promise.all([
     supabase
       .from("properties")
@@ -92,16 +89,38 @@ export default async function AdminPropertiesPage() {
   if (properties.length === 0) {
     return (
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
-        <header className="mb-8">
-          <div className="text-xs uppercase tracking-wider text-neutral-500 mb-1">
-            Impostazioni agenzia
+        <header className="mb-10">
+          <div className="text-xs uppercase tracking-widest text-neutral-400 mb-2">
+            Habiquo Studio
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Foto immobili
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 mb-6">
+            Immobili
           </h1>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/properties/new-ai"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-900 text-white rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              ✦ Crea con AI
+            </Link>
+            <Link
+              href="/admin/properties/new-ai"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-700 rounded-md text-sm font-medium hover:border-neutral-400 transition-colors"
+            >
+              Creazione classica
+            </Link>
+          </div>
         </header>
-        <div className="rounded-md border border-neutral-200 bg-neutral-50 px-4 py-6 text-sm text-neutral-700">
-          Nessun immobile trovato nelle agenzie di cui sei membro.
+        <div className="rounded-md border border-neutral-200 bg-neutral-50 px-6 py-10 text-center">
+          <p className="text-sm text-neutral-500 mb-4">
+            Nessun immobile ancora. Crea il tuo primo annuncio in pochi minuti.
+          </p>
+          <Link
+            href="/admin/properties/new-ai"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-900 text-white rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            ✦ Crea con AI
+          </Link>
         </div>
       </div>
     );
@@ -110,14 +129,34 @@ export default async function AdminPropertiesPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
       <header className="mb-8 sm:mb-10">
-        <div className="text-xs uppercase tracking-wider text-neutral-500 mb-1">
-          Impostazioni agenzia
+        <div className="text-xs uppercase tracking-widest text-neutral-400 mb-2">
+          Habiquo Studio
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">Foto immobili</h1>
-        <p className="mt-2 text-sm text-neutral-600 max-w-xl">
-          Gestisci le foto degli immobili. La prima foto è la cover usata nelle
-          card del sito pubblico.
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">
+              Immobili
+            </h1>
+            <p className="mt-1 text-sm text-neutral-500">
+              {properties.length}{" "}
+              {properties.length === 1 ? "immobile" : "immobili"}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/properties/new-ai"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-900 text-white rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              ✦ Crea con AI
+            </Link>
+            <Link
+              href="/admin/properties/new-ai"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-700 rounded-md text-sm font-medium hover:border-neutral-400 transition-colors"
+            >
+              Creazione classica
+            </Link>
+          </div>
+        </div>
       </header>
 
       <div className="space-y-3">
@@ -130,10 +169,6 @@ export default async function AdminPropertiesPage() {
               href={`/admin/properties/${p.id}/photos`}
               className="block rounded-md border border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm transition overflow-hidden"
             >
-              {/* Layout container:
-                   - Mobile (<md): vertical card (image on top, info + CTA below)
-                   - Desktop (md+): horizontal row (thumb left, info center, CTA right)
-                   No data or behavior changes — only Tailwind responsive classes. */}
               <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-4 p-4">
                 {/* Cover thumbnail */}
                 <div className="shrink-0 w-full aspect-[16/9] md:w-24 md:h-24 md:aspect-auto rounded overflow-hidden bg-neutral-100">
@@ -182,15 +217,12 @@ export default async function AdminPropertiesPage() {
                       </>
                     )}
                   </div>
-
-                  {/* Mobile-only CTA — appears inline at the bottom of the
-                       info column so it stays inside the card flow. */}
                   <div className="md:hidden mt-3 text-sm text-neutral-500">
                     Gestisci →
                   </div>
                 </div>
 
-                {/* Desktop-only CTA — right-aligned trailing column. */}
+                {/* Desktop CTA */}
                 <div className="hidden md:flex items-center text-sm text-neutral-500 pl-3">
                   Gestisci →
                 </div>
