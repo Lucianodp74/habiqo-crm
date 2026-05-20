@@ -2,12 +2,6 @@
  * GET /feed/[agency_slug]/immobiliare.xml
  *
  * Public XML feed for Immobiliare.it.
- * The agency configures this URL once in their Immobiliare.it account
- * settings. From that point on, every property published on Habiquo
- * is automatically synced to the portal.
- *
- * Security: only returns is_public=true, status=active properties.
- * No auth required — feed is intentionally public.
  */
 
 import { generateImmobiliareXml } from "@/lib/xml/immobiliare";
@@ -38,18 +32,19 @@ export async function GET(_req: Request, { params }: { params: Params }) {
     id: agencyData.id,
     slug: agencyData.slug,
     name: agencyData.name,
-    email: null, // agencies table may not have email yet
+    email: null,
     phone: agencyData.phone,
     city: agencyData.city,
     region: agencyData.region,
   };
 
   // 2. Fetch active public properties
+  // Note: column names match actual DB schema (sqm, rooms, not surface_sqm/bedrooms)
   const { data: propertiesData, error: propertiesError } = await supabase
     .from("properties")
     .select(
-      `id, title, description, listing_type, property_type,
-       price_eur, surface_sqm, bedrooms, bathrooms,
+      `id, title, description, listing_type,
+       price_eur, sqm, rooms, bathrooms,
        address, city, postal_code, region, floor,
        has_elevator, has_garage, energy_class,
        photos, slug, created_at, updated_at`
@@ -69,10 +64,10 @@ export async function GET(_req: Request, { params }: { params: Params }) {
     title: p.title,
     description: p.description,
     listingType: p.listing_type,
-    propertyType: p.property_type,
+    propertyType: "Appartamento", // default — property_type column not in schema yet
     price: p.price_eur,
-    surfaceSqm: p.surface_sqm,
-    bedrooms: p.bedrooms,
+    surfaceSqm: p.sqm,
+    bedrooms: p.rooms,
     bathrooms: p.bathrooms,
     address: p.address,
     city: p.city,
@@ -94,7 +89,7 @@ export async function GET(_req: Request, { params }: { params: Params }) {
     status: 200,
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600", // cache 1 ora
+      "Cache-Control": "public, max-age=3600",
     },
   });
 }
