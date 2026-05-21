@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getAnonClient } from "@/lib/habita/supabase-anon";
+import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 interface HeroProperty {
@@ -45,12 +46,16 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
     ? `Vendita e affitto di immobili residenziali e commerciali a ${agency.city} e provincia.`
     : "Vendita e affitto di immobili residenziali e commerciali.";
 
+  const featuredPhotoUrl = featured?.photos?.[0]
+    ? getPropertyPhotoUrl(featured.photos[0])
+    : null;
+
   return (
     <section className="border-b border-[var(--border-subtle)]">
       <div className="container mx-auto px-6 py-14 md:py-20 max-w-5xl">
         <div className={`grid gap-10 md:gap-16 ${featured ? "md:grid-cols-2 md:items-center" : ""}`}>
 
-          {/* ── Left: testo + CTA ─────────────────────────────────────── */}
+          {/* ── Left ────────────────────────────────────────────────── */}
           <div>
             <h1 className="font-display text-5xl md:text-6xl leading-tight text-[var(--fg-primary)] mb-4">
               {agency.name}
@@ -82,7 +87,7 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
             </p>
           </div>
 
-          {/* ── Right: featured property card ─────────────────────────── */}
+          {/* ── Right: featured property card ───────────────────────── */}
           {featured && (
             <Link href={`/${agency.slug}/immobili/${featured.slug}`} className="group block">
               <div className="overflow-hidden rounded-sm border border-[var(--border-subtle)]">
@@ -92,9 +97,9 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
                       {featured.listing_type === "rent" ? "Affitto" : "Vendita"}
                     </span>
                   </div>
-                  {featured.photos?.[0] ? (
+                  {featuredPhotoUrl ? (
                     <Image
-                      src={featured.photos[0]}
+                      src={featuredPhotoUrl}
                       alt={featured.title}
                       fill
                       priority

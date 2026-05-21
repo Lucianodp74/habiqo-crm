@@ -1,15 +1,16 @@
 /**
  * Habiquo XML Feed — Immobiliare.it formatter
- *
- * Generates a valid XML feed compatible with the Immobiliare.it
- * batch import specification (feed.immobiliare.it v2.0).
- *
- * Only properties with photos are included — portals reject
- * listings without images.
  */
 
 import { getImmobiliareBuildingType, getImmobiliareTransactionType } from "./mapping";
 import type { NormalizedAgency, NormalizedProperty } from "./types";
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const PHOTO_BUCKET = "property-photos";
+
+function getPhotoUrl(path: string): string {
+  return `${SUPABASE_URL}/storage/v1/object/public/${PHOTO_BUCKET}/${path}`;
+}
 
 function esc(value: string | null | undefined): string {
   if (!value) return "";
@@ -23,12 +24,10 @@ function esc(value: string | null | undefined): string {
 
 function cdata(value: string | null | undefined): string {
   if (!value) return "";
-  // Escape ]]> inside CDATA
   return `<![CDATA[${(value ?? "").replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
 }
 
 function formatDateTime(iso: string): string {
-  // Convert ISO string to Immobiliare.it datetime format (no timezone)
   return iso.replace(/\.\d+Z$/, "").replace("Z", "");
 }
 
@@ -37,19 +36,18 @@ function buildPropertyXml(p: NormalizedProperty, agency: NormalizedAgency): stri
   const buildingIDType = getImmobiliareBuildingType(p.propertyType);
   const dateUpdated = formatDateTime(p.updatedAt || p.createdAt);
   const publishedOn = formatDateTime(p.createdAt);
+  const agentEmail = agency.email ?? `info@${agency.slug}.it`;
 
   const pictures = p.photos
-    .slice(0, 20) // max 20 photos
+    .slice(0, 20)
     .map(
-      (url, idx) =>
+      (path, idx) =>
         `      <picture>
-        <uri>${esc(url)}</uri>
+        <uri>${esc(getPhotoUrl(path))}</uri>
         ${idx === 0 ? "<main>true</main>" : "<main>false</main>"}
       </picture>`
     )
     .join("\n");
-
-  const agentEmail = agency.email ?? `info@${agency.slug}.it`;
 
   return `    <property operation="write">
       <unique-id>${cdata(p.id)}</unique-id>
@@ -108,9 +106,7 @@ export function generateImmobiliareXml(
   properties: NormalizedProperty[],
   agency: NormalizedAgency
 ): string {
-  // Only include properties that have at least one photo
   const withPhotos = properties.filter((p) => p.photos.length > 0);
-
   const propertiesXml = withPhotos.map((p) => buildPropertyXml(p, agency)).join("\n\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getAnonClient } from "@/lib/habita/supabase-anon";
+import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 interface FeaturedProperty {
@@ -61,38 +62,43 @@ export async function AgencyFeaturedProperties({ agency }: { agency: PublicAgenc
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <Link
-              key={property.id}
-              href={`/${agency.slug}/immobili/${property.slug}`}
-              className="group block"
-            >
-              <div className="aspect-[4/3] relative overflow-hidden rounded-sm bg-[var(--bg-canvas)] mb-4 border border-[var(--border-subtle)]">
-                {property.photos?.[0] ? (
-                  <Image
-                    src={property.photos[0]}
-                    alt={property.title}
-                    fill
-                    className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-xs uppercase tracking-widest text-[var(--fg-secondary)] opacity-40">
-                      Foto in arrivo
-                    </span>
-                  </div>
-                )}
-              </div>
-              <p className="font-display text-xl text-[var(--fg-primary)] mb-1">
-                {formatPrice(property.price_eur, property.listing_type)}
-              </p>
-              <p className="text-sm text-[var(--fg-secondary)]">
-                {property.city}
-                {property.sqm ? ` · ${property.sqm} m²` : ""}
-              </p>
-            </Link>
-          ))}
+          {properties.map((property) => {
+            const photoUrl = property.photos?.[0]
+              ? getPropertyPhotoUrl(property.photos[0])
+              : null;
+            return (
+              <Link
+                key={property.id}
+                href={`/${agency.slug}/immobili/${property.slug}`}
+                className="group block"
+              >
+                <div className="aspect-[4/3] relative overflow-hidden rounded-sm bg-[var(--bg-canvas)] mb-4 border border-[var(--border-subtle)]">
+                  {photoUrl ? (
+                    <Image
+                      src={photoUrl}
+                      alt={property.title}
+                      fill
+                      className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-xs uppercase tracking-widest text-[var(--fg-secondary)] opacity-40">
+                        Foto in arrivo
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <p className="font-display text-xl text-[var(--fg-primary)] mb-1">
+                  {formatPrice(property.price_eur, property.listing_type)}
+                </p>
+                <p className="text-sm text-[var(--fg-secondary)]">
+                  {property.city}
+                  {property.sqm ? ` · ${property.sqm} m²` : ""}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
