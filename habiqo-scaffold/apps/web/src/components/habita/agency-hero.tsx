@@ -49,7 +49,7 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
 
   return (
     <section className="border-b border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-10 md:py-16 max-w-7xl">
+      <div className="w-full px-6 lg:px-16 py-10 md:py-16 max-w-7xl">
         <div className={`grid gap-8 md:gap-12 ${featured ? "md:grid-cols-2 md:items-center" : ""}`}>
 
           {/* ── Left ──────────────────────────────────────────── */}

@@ -4,7 +4,7 @@ import type { PublicAgency } from "@/lib/habita/tenant";
 export function AgencyContact({ agency }: { agency: PublicAgency }) {
   return (
     <section className="border-t border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-14 max-w-4xl text-center">
+      <div className="w-full px-6 lg:px-16 py-14 max-w-4xl text-center">
         <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-4">
           Contatti
         </p>

@@ -53,7 +53,7 @@ export default async function ImmobiliListPage({
     : list;
 
   return (
-    <div className="container mx-auto px-6 py-10 max-w-7xl">
+    <div className="w-full px-6 lg:px-16 py-10 max-w-7xl">
       <header className="mb-8">
         <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-2">
           Immobili
