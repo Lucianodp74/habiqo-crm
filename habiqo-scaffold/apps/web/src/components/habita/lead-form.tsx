@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { submitPublicLead } from "@/lib/actions/submit-public-lead";
 
 type Props = {
@@ -15,6 +16,9 @@ type FormState =
   | { status: "error"; error: string };
 
 export function LeadForm({ agencyId, propertyId, propertyTitle }: Props) {
+  const searchParams = useSearchParams();
+  const source = searchParams.get("source"); // es. "immobiliare", "idealista"
+
   const defaultMessage = propertyTitle
     ? `Buongiorno, sono interessato a: ${propertyTitle}.\n\n`
     : "";
@@ -29,19 +33,12 @@ export function LeadForm({ agencyId, propertyId, propertyTitle }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Client-side validation (the server action validates again)
     if (fullName.trim().length < 2) {
-      setState({
-        status: "error",
-        error: "Inserisci il tuo nome e cognome.",
-      });
+      setState({ status: "error", error: "Inserisci il tuo nome e cognome." });
       return;
     }
     if (!email.trim() && !phone.trim()) {
-      setState({
-        status: "error",
-        error: "Inserisci almeno una email o un telefono.",
-      });
+      setState({ status: "error", error: "Inserisci almeno una email o un telefono." });
       return;
     }
 
@@ -55,6 +52,7 @@ export function LeadForm({ agencyId, propertyId, propertyTitle }: Props) {
         email: email.trim() || null,
         phone: phone.trim() || null,
         message: message.trim() || null,
+        source, // 🎯 traccia la sorgente del portale
       });
 
       if (result.ok) {
@@ -88,7 +86,7 @@ export function LeadForm({ agencyId, propertyId, propertyTitle }: Props) {
           onClick={() => setState({ status: "idle" })}
           className="text-sm underline underline-offset-4 text-[var(--accent-deep)] hover:opacity-80"
         >
-          Invia un'altra richiesta
+          Invia un&apos;altra richiesta
         </button>
       </div>
     );
