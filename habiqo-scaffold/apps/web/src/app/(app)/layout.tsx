@@ -9,23 +9,29 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect("/login");
 
-  const [profileResult, membershipResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("full_name, avatar_url")
-      .eq("id", user.id)
-      .single(),
-    supabase
-      .from("agency_members")
-      .select("agencies(slug)")
-      .eq("user_id", user.id)
-      .limit(1)
-      .single(),
-  ]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, avatar_url")
+    .eq("id", user.id)
+    .single();
 
-  const profile = profileResult.data;
-  const agencySlug =
-    (membershipResult.data?.agencies as { slug: string } | null)?.slug ?? null;
+  // Fetch agency slug for the public site link in sidebar
+  const { data: membership } = await supabase
+    .from("agency_members")
+    .select("agency_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .single();
+
+  let agencySlug: string | null = null;
+  if (membership?.agency_id) {
+    const { data: agency } = await supabase
+      .from("agencies")
+      .select("slug")
+      .eq("id", membership.agency_id)
+      .single();
+    agencySlug = agency?.slug ?? null;
+  }
 
   return (
     <AppShell
