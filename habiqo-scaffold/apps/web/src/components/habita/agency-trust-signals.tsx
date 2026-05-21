@@ -20,7 +20,7 @@ const SIGNALS = [
 export function AgencyTrustSignals() {
   return (
     <section className="border-b border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-12 max-w-5xl">
+      <div className="container mx-auto px-6 py-12 max-w-6xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {SIGNALS.map((s) => (
             <div key={s.label}>

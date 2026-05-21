@@ -84,7 +84,7 @@ export default async function HabitaAgencyLayout({
 
       {/* ── Footer ────────────────────────────────────────────────────── */}
       <footer className="border-t border-[var(--border-subtle)] mt-12">
-        <div className="container mx-auto px-6 py-10 max-w-5xl">
+        <div className="container mx-auto px-6 py-10 max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-sm text-[var(--fg-secondary)]">
             <div>
               <p className="font-medium text-[var(--fg-primary)] mb-3">{agency.name}</p>
