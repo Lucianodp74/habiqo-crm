@@ -119,7 +119,7 @@ export default async function PropertyDetailPage({ params }: { params: Params })
           {/* Gallery secondaria */}
           {photos.length > 1 && (
             <div className="grid grid-cols-3 gap-2 mb-8">
-              {photos.slice(1, 4).map((url, i) => (
+              {photos.slice(1, 4).map((url: string, i: number) => (
                 <div key={i} className="aspect-[4/3] relative overflow-hidden rounded-sm">
                   <Image
                     src={url}
