@@ -8,19 +8,17 @@ interface FeaturedProperty {
   title: string;
   price_eur: number;
   city: string;
-  surface_sqm: number | null;
+  sqm: number | null;
   photos: string[];
   listing_type: "sale" | "rent";
   slug: string;
 }
 
-async function getAgencyFeaturedProperties(
-  agencyId: string
-): Promise<FeaturedProperty[]> {
+async function getAgencyFeaturedProperties(agencyId: string): Promise<FeaturedProperty[]> {
   const supabase = getAnonClient();
   const { data } = await supabase
     .from("properties")
-    .select("id, title, price_eur, city, surface_sqm, photos, listing_type, slug")
+    .select("id, title, price_eur, city, sqm, photos, listing_type, slug")
     .eq("agency_id", agencyId)
     .eq("status", "active")
     .eq("is_public", true)
@@ -38,11 +36,7 @@ function formatPrice(price: number, listingType: "sale" | "rent"): string {
   return listingType === "rent" ? `${formatted}/mese` : formatted;
 }
 
-export async function AgencyFeaturedProperties({
-  agency,
-}: {
-  agency: PublicAgency;
-}) {
+export async function AgencyFeaturedProperties({ agency }: { agency: PublicAgency }) {
   const properties = await getAgencyFeaturedProperties(agency.id);
   if (properties.length === 0) return null;
 
@@ -95,7 +89,7 @@ export async function AgencyFeaturedProperties({
               </p>
               <p className="text-sm text-[var(--fg-secondary)]">
                 {property.city}
-                {property.surface_sqm ? ` · ${property.surface_sqm} m²` : ""}
+                {property.sqm ? ` · ${property.sqm} m²` : ""}
               </p>
             </Link>
           ))}

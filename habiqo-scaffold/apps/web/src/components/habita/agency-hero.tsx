@@ -8,8 +8,8 @@ interface HeroProperty {
   title: string;
   price_eur: number;
   city: string;
-  surface_sqm: number | null;
-  bedrooms: number | null;
+  sqm: number | null;
+  rooms: number | null;
   photos: string[];
   listing_type: "sale" | "rent";
   slug: string;
@@ -19,7 +19,7 @@ async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
   const supabase = getAnonClient();
   const { data } = await supabase
     .from("properties")
-    .select("id, title, price_eur, city, surface_sqm, bedrooms, photos, listing_type, slug")
+    .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
     .eq("agency_id", agencyId)
     .eq("status", "active")
     .eq("is_public", true)
@@ -48,11 +48,8 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
   return (
     <section className="border-b border-[var(--border-subtle)]">
       <div className="container mx-auto px-6 py-14 md:py-20 max-w-5xl">
-        <div
-          className={`grid gap-10 md:gap-16 ${
-            featured ? "md:grid-cols-2 md:items-center" : ""
-          }`}
-        >
+        <div className={`grid gap-10 md:gap-16 ${featured ? "md:grid-cols-2 md:items-center" : ""}`}>
+
           {/* ── Left: testo + CTA ─────────────────────────────────────── */}
           <div>
             <h1 className="font-display text-5xl md:text-6xl leading-tight text-[var(--fg-primary)] mb-4">
@@ -87,10 +84,7 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
 
           {/* ── Right: featured property card ─────────────────────────── */}
           {featured && (
-            <Link
-              href={`/${agency.slug}/immobili/${featured.slug}`}
-              className="group block"
-            >
+            <Link href={`/${agency.slug}/immobili/${featured.slug}`} className="group block">
               <div className="overflow-hidden rounded-sm border border-[var(--border-subtle)]">
                 <div className="aspect-[4/3] relative bg-[var(--bg-canvas)]">
                   <div className="absolute top-3 left-3 z-10">
@@ -121,8 +115,8 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
                   </p>
                   <p className="text-sm text-[var(--fg-secondary)] mb-3">
                     {featured.city}
-                    {featured.surface_sqm ? ` · ${featured.surface_sqm} m²` : ""}
-                    {featured.bedrooms ? ` · ${featured.bedrooms} camere` : ""}
+                    {featured.sqm ? ` · ${featured.sqm} m²` : ""}
+                    {featured.rooms ? ` · ${featured.rooms} camere` : ""}
                   </p>
                   <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] group-hover:opacity-60 transition-opacity">
                     Scopri →
