@@ -5,7 +5,7 @@ import Link from "next/link";
 type SidebarProps = {
   userName: string;
   avatarUrl: string | null;
-  agencySlug: string | null;
+  agencySlug?: string | null;
 };
 
 const NAV = [
