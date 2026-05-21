@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getAnonClient } from "@/lib/habita/supabase-anon";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
+import { PropertySearchBar } from "@/components/habita/property-search-bar";
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 interface HeroProperty {
@@ -42,52 +43,49 @@ function formatPrice(price: number, listingType: "sale" | "rent"): string {
 export async function AgencyHero({ agency }: { agency: PublicAgency }) {
   const featured = await getHeroProperty(agency.id);
 
-  const subtitle = agency.city
-    ? `Vendita e affitto di immobili residenziali e commerciali a ${agency.city} e provincia.`
-    : "Vendita e affitto di immobili residenziali e commerciali.";
-
   const featuredPhotoUrl = featured?.photos?.[0]
     ? getPropertyPhotoUrl(featured.photos[0])
     : null;
 
   return (
     <section className="border-b border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-14 md:py-20 max-w-5xl">
-        <div className={`grid gap-10 md:gap-16 ${featured ? "md:grid-cols-2 md:items-center" : ""}`}>
+      <div className="container mx-auto px-6 py-10 md:py-16 max-w-5xl">
+        <div className={`grid gap-8 md:gap-12 ${featured ? "md:grid-cols-2 md:items-center" : ""}`}>
 
-          {/* ── Left ────────────────────────────────────────────────── */}
+          {/* ── Left ──────────────────────────────────────────── */}
           <div>
-            <h1 className="font-display text-5xl md:text-6xl leading-tight text-[var(--fg-primary)] mb-4">
+            <h1 className="font-display text-4xl md:text-5xl leading-tight text-[var(--fg-primary)] mb-2">
               {agency.name}
             </h1>
-            <p className="font-display italic text-xl md:text-2xl text-[var(--fg-secondary)] mb-3 leading-snug">
+            <p className="font-display italic text-lg text-[var(--fg-secondary)] mb-1 leading-snug">
               {agency.tagline ?? "Case selezionate con attenzione."}
             </p>
-            <p className="text-sm text-[var(--fg-secondary)] mb-8 leading-relaxed max-w-sm">
-              {subtitle}
+            <p className="text-sm text-[var(--fg-secondary)] leading-relaxed">
+              {agency.city
+                ? `Vendita e affitto a ${agency.city} e provincia.`
+                : "Vendita e affitto di immobili residenziali."}
             </p>
-            <div className="flex flex-wrap gap-3 mb-5">
-              <Link
-                href={`/${agency.slug}/immobili`}
-                className="px-6 py-3 bg-[var(--fg-primary)] text-[var(--bg-canvas)] rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Scopri gli immobili
-              </Link>
+
+            {/* Search bar */}
+            <PropertySearchBar agencySlug={agency.slug} />
+
+            {/* CTA secondaria */}
+            <div className="flex items-center gap-4 mt-4">
               {agency.phone ? (
                 <a
                   href={`tel:${agency.phone}`}
-                  className="px-6 py-3 border border-[var(--border-subtle)] rounded-md text-sm font-medium hover:opacity-80 transition-opacity"
+                  className="text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors"
                 >
-                  {agency.phone}
+                  ☎ {agency.phone}
                 </a>
               ) : null}
+              <span className="text-xs tracking-widest uppercase text-[var(--fg-secondary)] opacity-40">
+                Tecnologia Habiquo
+              </span>
             </div>
-            <p className="text-xs tracking-widest uppercase text-[var(--fg-secondary)] opacity-50">
-              Tecnologia Habiquo
-            </p>
           </div>
 
-          {/* ── Right: featured property card ───────────────────────── */}
+          {/* ── Right: featured card ───────────────────────────── */}
           {featured && (
             <Link href={`/${agency.slug}/immobili/${featured.slug}`} className="group block">
               <div className="overflow-hidden rounded-sm border border-[var(--border-subtle)]">
