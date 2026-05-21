@@ -44,7 +44,7 @@ export async function AgencyFeaturedProperties({ agency }: { agency: PublicAgenc
 
   return (
     <section className="border-b border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6 py-12 max-w-6xl">
+      <div className="container mx-auto px-6 py-12 max-w-7xl">
         <div className="flex items-baseline justify-between mb-8">
           <div>
             <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-1">

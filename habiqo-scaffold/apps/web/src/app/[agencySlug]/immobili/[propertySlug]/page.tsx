@@ -77,7 +77,7 @@ export default async function PropertyDetailPage({ params }: { params: Params })
     .join(", ");
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
 
       {/* ── Breadcrumb ─────────────────────────────────────────── */}
       <nav className="flex items-center gap-2 text-xs text-[var(--fg-muted)] mb-6">
