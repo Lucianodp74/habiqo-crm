@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { getAnonClient } from "@/lib/habita/supabase-anon";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 import { PropertySearchBar } from "@/components/habita/property-search-bar";
@@ -13,83 +13,104 @@ interface HeroProperty {
 
 async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
   const supabase = getAnonClient();
-  const { data } = await supabase.from("properties")
+  const { data } = await supabase
+    .from("properties")
     .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
-    .eq("agency_id", agencyId).eq("status", "active").eq("is_public", true)
-    .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    .eq("agency_id", agencyId)
+    .eq("status", "active")
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
   return data ?? null;
 }
 
 function formatPrice(price: number, listingType: "sale" | "rent"): string {
-  const f = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(price);
+  const f = new Intl.NumberFormat("it-IT", {
+    style: "currency", currency: "EUR", maximumFractionDigits: 0,
+  }).format(price);
   return listingType === "rent" ? `${f}/mese` : f;
 }
 
 export async function AgencyHero({ agency }: { agency: PublicAgency }) {
   const featured = await getHeroProperty(agency.id);
-  const featuredPhotoUrl = featured?.photos?.[0] ? getPropertyPhotoUrl(featured.photos[0]) : null;
+  const featuredPhotoUrl = featured?.photos?.[0]
+    ? getPropertyPhotoUrl(featured.photos[0])
+    : null;
 
   return (
-    <section className="border-b border-[var(--border-subtle)]">
-      <div className="px-8 md:px-16 py-10 md:py-16">
-        <div className={`grid gap-10 md:gap-16 ${featured ? "md:grid-cols-2 md:items-center" : ""}`}>
+    <section className="relative min-h-[85vh] flex flex-col justify-end overflow-hidden">
 
-          {/* Left */}
-          <div>
-            <h1 className="font-display text-5xl md:text-6xl leading-tight text-[var(--fg-primary)] mb-2">
-              {agency.name}
-            </h1>
-            <p className="font-display italic text-xl text-[var(--fg-secondary)] mb-1">
-              {agency.tagline ?? "Case selezionate con attenzione."}
-            </p>
-            <p className="text-sm text-[var(--fg-secondary)] leading-relaxed mb-1">
-              {agency.city ? `Vendita e affitto a ${agency.city} e provincia.` : "Vendita e affitto di immobili residenziali."}
-            </p>
-            <PropertySearchBar agencySlug={agency.slug} />
-            <div className="flex items-center gap-4 mt-4">
-              {agency.phone && (
-                <a href={`tel:${agency.phone}`} className="text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors">
-                  ☎ {agency.phone}
-                </a>
-              )}
-              <span className="text-xs tracking-widest uppercase text-[var(--fg-secondary)] opacity-40">Tecnologia Habiquo</span>
-            </div>
+      {/* ── Foto di sfondo full-screen ──────────────────────────── */}
+      {featuredPhotoUrl ? (
+        <Image
+          src={featuredPhotoUrl}
+          alt={agency.name}
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[var(--fg-primary)]" />
+      )}
+
+      {/* ── Gradiente overlay ───────────────────────────────────── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+
+      {/* ── Contenuto sovrapposto — posizionato in basso ────────── */}
+      <div className="relative px-8 md:px-16 pb-10 md:pb-14 pt-32">
+
+        {/* Badge immobile in evidenza */}
+        {featured && (
+          <div className="mb-4">
+            <span className="inline-block px-3 py-1 text-[10px] uppercase tracking-widest font-medium bg-white/20 text-white/90 backdrop-blur-sm rounded-full border border-white/20">
+              {featured.listing_type === "rent" ? "Affitto" : "Vendita"} · In evidenza
+            </span>
           </div>
+        )}
 
-          {/* Right */}
-          {featured && (
-            <Link href={`/${agency.slug}/immobili/${featured.slug}`} className="group block">
-              <div className="overflow-hidden rounded-sm border border-[var(--border-subtle)]">
-                <div className="aspect-[4/3] relative bg-[var(--bg-canvas)]">
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="px-2.5 py-1 text-xs font-medium bg-[var(--bg-canvas)]/90 text-[var(--fg-primary)] rounded-sm backdrop-blur-sm">
-                      {featured.listing_type === "rent" ? "Affitto" : "Vendita"}
-                    </span>
-                  </div>
-                  {featuredPhotoUrl ? (
-                    <Image src={featuredPhotoUrl} alt={featured.title} fill priority
-                      className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                      sizes="(max-width: 768px) 100vw, 50vw" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-xs uppercase tracking-widest text-[var(--fg-secondary)] opacity-40">Foto in arrivo</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-5 border-t border-[var(--border-subtle)]">
-                  <p className="font-display text-2xl text-[var(--fg-primary)] mb-1">
-                    {formatPrice(featured.price_eur, featured.listing_type)}
-                  </p>
-                  <p className="text-sm text-[var(--fg-secondary)] mb-3">
-                    {featured.city}{featured.sqm ? ` · ${featured.sqm} m²` : ""}{featured.rooms ? ` · ${featured.rooms} camere` : ""}
-                  </p>
-                  <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] group-hover:opacity-60 transition-opacity">Scopri →</p>
-                </div>
-              </div>
-            </Link>
-          )}
+        {/* Titolo agenzia */}
+        <h1 className="font-display text-5xl md:text-7xl lg:text-8xl leading-none text-white mb-2">
+          {agency.name}
+        </h1>
+        <p className="font-display italic text-lg md:text-2xl text-white/75 mb-6 md:mb-8">
+          {agency.tagline ?? "Immobili scelti uno a uno."}
+        </p>
+
+        {/* Search bar dark */}
+        <div className="max-w-lg">
+          <PropertySearchBar agencySlug={agency.slug} variant="dark" />
         </div>
+
+        {/* Info immobile in evidenza */}
+        {featured && (
+          <Link
+            href={`/${agency.slug}/immobili/${featured.slug}`}
+            className="inline-flex items-center gap-3 mt-5 text-white/70 text-sm hover:text-white transition-colors group"
+          >
+            <span>
+              {featured.city}
+              {featured.sqm ? ` · ${featured.sqm} m²` : ""}
+              {featured.rooms ? ` · ${featured.rooms} camere` : ""}
+            </span>
+            <span className="text-white font-semibold">
+              {formatPrice(featured.price_eur, featured.listing_type)}
+            </span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+          </Link>
+        )}
       </div>
+
+      {/* ── CTA telefono in alto a dx su mobile ─────────────────── */}
+      {agency.phone && (
+        <a
+          href={`tel:${agency.phone}`}
+          className="absolute top-6 right-6 md:hidden px-4 py-2 bg-white/15 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/20 hover:bg-white/25 transition-colors"
+        >
+          {agency.phone}
+        </a>
+      )}
     </section>
   );
 }
