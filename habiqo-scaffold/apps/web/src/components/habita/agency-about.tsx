@@ -6,7 +6,7 @@ export function AgencyAbout({ agency }: { agency: PublicAgency }) {
   const location = [agency.city, agency.region].filter(Boolean).join(", ");
 
   return (
-    <section className="mx-auto w-full max-w-screen-xl px-6 lg:px-12 py-14 max-w-4xl">
+    <section className="w-full px-8 md:px-16 py-14 max-w-4xl">
       <div className="grid md:grid-cols-3 gap-12">
         <div>
           <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-3">
