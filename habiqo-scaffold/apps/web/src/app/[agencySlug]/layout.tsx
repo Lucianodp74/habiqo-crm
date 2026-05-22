@@ -1,46 +1,22 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { HabitaLogo } from "@/components/habita/habita-logo";
 import { getAgencyBySlug } from "@/lib/habita/tenant";
+import { notFound } from "next/navigation";
+import { AgencyHeader } from "@/components/habita/agency-header";
+
+const LIGHT_TOKENS = {
+  "--bg-canvas":       "#FAF9F7",
+  "--bg-elevated":     "#F5F3EF",
+  "--bg-sunken":       "#EFECE6",
+  "--fg-primary":      "#1A1814",
+  "--fg-secondary":    "#6B6560",
+  "--fg-muted":        "#9C9490",
+  "--border-subtle":   "#E8E4DE",
+  "--accent-deep":     "#8B7355",
+  "--color-brass-glow":"#F5EDD8",
+} as const;
 
 type Params = Promise<{ agencySlug: string }>;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Promise<Metadata> {
-  const { agencySlug } = await params;
-  const agency = await getAgencyBySlug(agencySlug);
-  if (!agency) return { title: "Pagina non trovata" };
-  return {
-    title: agency.tagline ? `${agency.name} · ${agency.tagline}` : agency.name,
-    description: agency.description ?? `${agency.name} – agenzia immobiliare`,
-  };
-}
-
-// Token light hardcodati inline — garantisce palette paper/onyx/brass
-// anche su iPhone con dark mode attivo, senza toccare globals.css.
-const LIGHT_TOKENS: React.CSSProperties = {
-  colorScheme: "light",
-  // @ts-expect-error CSS custom properties
-  "--bg-canvas":     "#f6f2e9",
-  "--bg-elevated":   "#fcfaf4",
-  "--bg-sunken":     "#efe9da",
-  "--fg-primary":    "#100d09",
-  "--fg-secondary":  "#5c5247",
-  "--fg-muted":      "#837a6e",
-  "--accent":        "#a77a45",
-  "--accent-deep":   "#7c5526",
-  "--accent-soft":   "#cba677",
-  "--border-subtle": "#e5ddc9",
-  "--border-strong": "#d6cdb6",
-  backgroundColor:   "#f6f2e9",
-  color:             "#100d09",
-};
-
-export default async function HabitaAgencyLayout({
+export default async function AgencyLayout({
   children,
   params,
 }: {
@@ -49,63 +25,37 @@ export default async function HabitaAgencyLayout({
 }) {
   const { agencySlug } = await params;
   const agency = await getAgencyBySlug(agencySlug);
-  if (!agency) notFound();
-
-  const location = [agency.city, agency.region].filter(Boolean).join(", ");
+  if (!agency || !agency.is_public) notFound();
 
   return (
     <div style={LIGHT_TOKENS} className="flex flex-col">
-      {/* ── Header ────────────────────────────────────────────────────── */}
-      <header className="border-b border-[var(--border-subtle)] sticky top-0 z-40 bg-[var(--bg-canvas)]/80 backdrop-blur">
-        <div className="w-full px-8 md:px-16 py-4 flex items-center justify-between">
-          <Link href={`/${agency.slug}`} className="hover:opacity-80 transition-opacity">
-            <HabitaLogo agency={agency} className="text-xl" />
-          </Link>
-          <nav className="flex items-center gap-6 text-sm">
-            <Link
-              href={`/${agency.slug}/immobili`}
-              className="text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors"
-            >
-              Immobili
-            </Link>
-            {agency.phone ? (
-              <a
-                href={`tel:${agency.phone}`}
-                className="hidden sm:inline text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors"
-              >
-                {agency.phone}
-              </a>
-            ) : null}
-          </nav>
-        </div>
-      </header>
 
-      <main className="flex-1">{children}</main>
+      {/* ── Header trasparente con scroll ─────────────────────── */}
+      <AgencyHeader agency={agency} agencySlug={agencySlug} />
 
-      {/* ── Footer ────────────────────────────────────────────────────── */}
-      <footer className="border-t border-[var(--border-subtle)] mt-12">
-        <div className="w-full px-8 md:px-16 py-10 max-w-7xl">
+      {/* ── Contenuto ─────────────────────────────────────────── */}
+      <main>{children}</main>
+
+      {/* ── Footer ────────────────────────────────────────────── */}
+      <footer className="border-t border-[var(--border-subtle)]">
+        <div className="px-8 md:px-16 py-10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-sm text-[var(--fg-secondary)]">
             <div>
-              <p className="font-medium text-[var(--fg-primary)] mb-3">{agency.name}</p>
-              {location ? <p className="mb-1">{location}</p> : null}
-              {agency.phone ? (
-                <a href={`tel:${agency.phone}`} className="hover:text-[var(--fg-primary)] transition-colors">
-                  {agency.phone}
-                </a>
-              ) : null}
+              <p className="font-medium text-[var(--fg-primary)] mb-2">{agency.name}</p>
+              {agency.city && <p>{agency.city}{agency.region ? `, ${agency.region}` : ""}</p>}
+              {agency.phone && <p>{agency.phone}</p>}
             </div>
             <div>
-              <p className="font-medium text-[var(--fg-primary)] mb-3">Esplora</p>
-              <ul className="space-y-2">
-                <li><Link href={`/${agency.slug}/immobili`} className="hover:text-[var(--fg-primary)] transition-colors">Immobili</Link></li>
-                <li><Link href={`/${agency.slug}#chi-siamo`} className="hover:text-[var(--fg-primary)] transition-colors">Chi siamo</Link></li>
-                <li><Link href={`/${agency.slug}#contatti`} className="hover:text-[var(--fg-primary)] transition-colors">Contatti</Link></li>
+              <p className="font-medium text-[var(--fg-primary)] mb-2">Esplora</p>
+              <ul className="space-y-1">
+                <li><a href={`/${agencySlug}/immobili`} className="hover:text-[var(--fg-primary)] transition-colors">Immobili</a></li>
+                <li><a href={`/${agencySlug}#chi-siamo`} className="hover:text-[var(--fg-primary)] transition-colors">Chi siamo</a></li>
+                <li><a href={`/${agencySlug}#contatti`} className="hover:text-[var(--fg-primary)] transition-colors">Contatti</a></li>
               </ul>
             </div>
-            <div className="sm:text-right">
-              <p className="text-xs opacity-50 mb-1">Powered by <span className="font-medium">Habiquo</span></p>
-              <p className="text-xs opacity-50 italic">Smart living. Smart real estate.</p>
+            <div className="text-right text-xs text-[var(--fg-muted)]">
+              <p>Powered by <span className="text-[var(--accent-deep)]">Habiquo</span></p>
+              <p className="italic">Smart living. Smart real estate.</p>
             </div>
           </div>
         </div>

@@ -4,11 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 type ListingFilter = "all" | "sale" | "rent";
-
-type Props = {
-  agencySlug: string;
-  variant?: "light" | "dark";
-};
+type Props = { agencySlug: string; variant?: "light" | "dark" };
 
 export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
   const [listing, setListing] = useState<ListingFilter>("all");
@@ -26,32 +22,20 @@ export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
 
   const isDark = variant === "dark";
 
-  const pillBase = "px-4 py-1.5 rounded-full text-xs font-medium transition-all";
-  const pillActive = isDark
-    ? "bg-white text-[#1a1a1a]"
-    : "bg-[var(--fg-primary)] text-[var(--bg-canvas)]";
-  const pillInactive = isDark
-    ? "text-white/70 hover:text-white"
-    : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]";
-
-  const containerClass = isDark
-    ? "rounded-xl border border-white/20 bg-white/10 backdrop-blur-md overflow-hidden"
-    : "rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)] overflow-hidden";
-
-  const inputClass = isDark
-    ? "flex-1 py-2 text-sm bg-transparent text-white placeholder:text-white/50 focus:outline-none"
-    : "flex-1 py-2 text-sm bg-transparent text-[var(--fg-primary)] placeholder:text-[var(--fg-secondary)]/50 focus:outline-none";
-
-  const btnClass = isDark
-    ? "px-5 py-2 bg-white text-[#1a1a1a] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-    : "px-5 py-2 bg-[var(--fg-primary)] text-[var(--bg-canvas)] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity";
-
   return (
-    <form onSubmit={handleSearch} className={containerClass}>
-      <div className="flex gap-1 px-3 pt-3 pb-1">
+    <form
+      onSubmit={handleSearch}
+      className={`rounded-xl overflow-hidden transition-all ${
+        isDark
+          ? "bg-black/40 backdrop-blur-xl border border-white/20 shadow-2xl"
+          : "bg-[var(--bg-canvas)] border border-[var(--border-subtle)] shadow-sm"
+      }`}
+    >
+      {/* Tipo contratto */}
+      <div className="flex gap-1 px-4 pt-3 pb-1.5">
         {(
           [
-            { value: "all", label: "Tutti" },
+            { value: "all",  label: "Tutti" },
             { value: "sale", label: "Vendita" },
             { value: "rent", label: "Affitto" },
           ] as { value: ListingFilter; label: string }[]
@@ -60,21 +44,42 @@ export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
             key={value}
             type="button"
             onClick={() => setListing(value)}
-            className={`${pillBase} ${listing === value ? pillActive : pillInactive}`}
+            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+              listing === value
+                ? isDark
+                  ? "bg-white text-black"
+                  : "bg-[var(--fg-primary)] text-[var(--bg-canvas)]"
+                : isDark
+                  ? "text-white/60 hover:text-white"
+                  : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]"
+            }`}
           >
             {label}
           </button>
         ))}
       </div>
-      <div className="flex items-center gap-2 px-3 pb-3">
+
+      {/* Input + CTA */}
+      <div className="flex items-center gap-3 px-4 pb-3">
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="Città o zona…"
-          className={inputClass}
+          className={`flex-1 text-sm py-1.5 bg-transparent focus:outline-none ${
+            isDark
+              ? "text-white placeholder:text-white/40"
+              : "text-[var(--fg-primary)] placeholder:text-[var(--fg-muted)]"
+          }`}
         />
-        <button type="submit" className={btnClass}>
+        <button
+          type="submit"
+          className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            isDark
+              ? "bg-white text-black hover:bg-white/90 shadow-lg"
+              : "bg-[var(--fg-primary)] text-[var(--bg-canvas)] hover:opacity-90"
+          }`}
+        >
           Cerca
         </button>
       </div>
