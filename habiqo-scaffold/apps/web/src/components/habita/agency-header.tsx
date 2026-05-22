@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 type Props = { agency: PublicAgency; agencySlug: string };
@@ -31,23 +30,7 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
 
         {/* Logo */}
         <Link href={`/${agencySlug}`} className="flex items-center gap-3">
-          {agency.logo_url ? (
-            <Image
-              src={agency.logo_url}
-              alt={agency.name}
-              width={120}
-              height={40}
-              className="h-10 w-auto object-contain"
-            />
-          ) : (
-            <span
-              className={`font-display text-xl tracking-tight transition-colors ${
-                isTransparent ? "text-white" : "text-[var(--fg-primary)]"
-              }`}
-            >
-              {agency.name}
-            </span>
-          )}
+          <span className={`font-display text-xl tracking-tight transition-colors $\{isTransparent ? 'text-white' : 'text-[var(--fg-primary)]'\}`}>{agency.name}</span>
         </Link>
 
         {/* Nav */}
@@ -89,3 +72,4 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
     </header>
   );
 }
+
