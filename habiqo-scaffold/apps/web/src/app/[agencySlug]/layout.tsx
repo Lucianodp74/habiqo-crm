@@ -57,7 +57,7 @@ export default async function HabitaAgencyLayout({
     <div style={LIGHT_TOKENS} className="flex flex-col">
       {/* ── Header ────────────────────────────────────────────────────── */}
       <header className="border-b border-[var(--border-subtle)] sticky top-0 z-40 bg-[var(--bg-canvas)]/80 backdrop-blur">
-        <div className="w-full px-6 lg:px-16 py-4 flex items-center justify-between">
+        <div className="mx-auto w-full max-w-screen-xl px-6 lg:px-12 py-4 flex items-center justify-between">
           <Link href={`/${agency.slug}`} className="hover:opacity-80 transition-opacity">
             <HabitaLogo agency={agency} className="text-xl" />
           </Link>
@@ -84,7 +84,7 @@ export default async function HabitaAgencyLayout({
 
       {/* ── Footer ────────────────────────────────────────────────────── */}
       <footer className="border-t border-[var(--border-subtle)] mt-12">
-        <div className="w-full px-6 lg:px-16 py-10 max-w-7xl">
+        <div className="mx-auto w-full max-w-screen-xl px-6 lg:px-12 py-10 max-w-7xl">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-sm text-[var(--fg-secondary)]">
             <div>
               <p className="font-medium text-[var(--fg-primary)] mb-3">{agency.name}</p>

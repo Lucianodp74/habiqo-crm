@@ -122,7 +122,7 @@ export default async function PropertyDetailPage({ params }: { params: Params })
       <div className="pb-20 md:pb-0">
 
         {/* Breadcrumb */}
-        <div className="w-full px-6 lg:px-16 pt-6 pb-4">
+        <div className="mx-auto w-full max-w-screen-xl px-6 lg:px-12 pt-6 pb-4">
           <nav className="flex items-center gap-2 text-xs text-[var(--fg-muted)]">
             <Link href={`/${agencySlug}`} className="hover:text-[var(--fg-primary)] transition-colors">
               {agency.name}
@@ -138,7 +138,7 @@ export default async function PropertyDetailPage({ params }: { params: Params })
 
         {/* Foto principale */}
         {photos[0] && (
-          <div className="w-full px-6 lg:px-16 mb-2">
+          <div className="mx-auto w-full max-w-screen-xl px-6 lg:px-12 mb-2">
             <div className="aspect-[16/9] relative overflow-hidden rounded-sm">
               <div className="absolute top-3 left-3 z-10">
                 <span className="px-3 py-1 text-xs font-medium bg-[var(--bg-canvas)]/90 text-[var(--fg-primary)] rounded-sm backdrop-blur-sm">
@@ -159,7 +159,7 @@ export default async function PropertyDetailPage({ params }: { params: Params })
 
         {/* Gallery thumbnails */}
         {photos.length > 1 && (
-          <div className="w-full px-6 lg:px-16 mb-8">
+          <div className="mx-auto w-full max-w-screen-xl px-6 lg:px-12 mb-8">
             <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
               {photos.slice(1, 5).map((url: string, i: number) => (
                 <div key={i} className="aspect-[4/3] relative overflow-hidden rounded-sm">
@@ -182,7 +182,7 @@ export default async function PropertyDetailPage({ params }: { params: Params })
         )}
 
         {/* Layout 2 colonne */}
-        <div className="w-full px-6 lg:px-16">
+        <div className="mx-auto w-full max-w-screen-xl px-6 lg:px-12">
           <div className="grid md:grid-cols-[1fr_360px] gap-12">
 
             {/* ── Sinistra ─────────────────────────────────────── */}
