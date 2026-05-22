@@ -1,8 +1,9 @@
+import React from "react";
 import { getAgencyBySlug } from "@/lib/habita/tenant";
 import { notFound } from "next/navigation";
 import { AgencyHeader } from "@/components/habita/agency-header";
 
-const LIGHT_TOKENS = {
+const LIGHT_TOKENS: React.CSSProperties = {
   "--bg-canvas":       "#FAF9F7",
   "--bg-elevated":     "#F5F3EF",
   "--bg-sunken":       "#EFECE6",
