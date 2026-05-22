@@ -10,7 +10,7 @@ const PORTALS = [
   { id: "idealista",    label: "Idealista",       color: "bg-green-50 text-green-700 border-green-200" },
 ] as const;
 
-type PortalId = (typeof PORTALS)[number]["id"];
+
 
 type Props = {
   id: string;
