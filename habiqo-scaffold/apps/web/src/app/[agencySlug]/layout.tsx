@@ -25,7 +25,7 @@ export default async function AgencyLayout({
 }) {
   const { agencySlug } = await params;
   const agency = await getAgencyBySlug(agencySlug);
-  if (!agency || !agency.is_public) notFound();
+  if (!agency) notFound();
 
   return (
     <div style={LIGHT_TOKENS} className="flex flex-col">
