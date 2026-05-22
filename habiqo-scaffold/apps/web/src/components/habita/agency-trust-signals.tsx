@@ -1,4 +1,4 @@
-import type { PublicAgency } from "@/lib/habita/tenant";
+
 
 const SIGNALS = [
   { label: "Immobili selezionati", text: "Solo proprietà valutate e curate personalmente." },
@@ -7,7 +7,7 @@ const SIGNALS = [
   { label: "Territorio", text: "Conoscenza diretta e quotidiana della zona." },
 ];
 
-export function AgencyTrustSignals({ agency }: { agency: PublicAgency }) {
+export function AgencyTrustSignals() {
   return (
     <section className="border-b border-[var(--border-subtle)]">
       <div className="px-8 md:px-16 py-10">
