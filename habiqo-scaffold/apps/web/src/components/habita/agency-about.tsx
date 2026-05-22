@@ -1,7 +1,7 @@
 import type { PublicAgency } from "@/lib/habita/tenant";
 
 export function AgencyAbout({ agency }: { agency: PublicAgency }) {
-  if (!agency.about) return null;
+
   return (
     <section className="border-b border-[var(--border-subtle)]">
       <div className="px-8 md:px-16 py-14">
@@ -13,7 +13,7 @@ export function AgencyAbout({ agency }: { agency: PublicAgency }) {
             </h2>
           </div>
           <div>
-            <p className="text-sm leading-relaxed text-[var(--fg-secondary)] mb-4">{agency.about}</p>
+            <p className="text-sm leading-relaxed text-[var(--fg-secondary)] mb-4">Siamo un'agenzia immobiliare indipendente. Lavoriamo su un numero limitato di immobili residenziali e commerciali per garantire attenzione, riservatezza e relazione diretta tra venditore, acquirente e agenzia. Non siamo parte di un network nazionale: niente franchising, niente quote, solo conoscenza diretta del territorio.</p>
             {agency.city && (
               <p className="text-sm text-[var(--fg-secondary)]">
                 <strong className="text-[var(--fg-primary)] font-medium">Operiamo a:</strong>{" "}
