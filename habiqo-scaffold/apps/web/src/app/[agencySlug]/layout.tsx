@@ -1,9 +1,10 @@
 import React from "react";
+import React from "react";
 import { getAgencyBySlug } from "@/lib/habita/tenant";
 import { notFound } from "next/navigation";
 import { AgencyHeader } from "@/components/habita/agency-header";
 
-const LIGHT_TOKENS: React.CSSProperties = {
+const LIGHT_TOKENS = {
   "--bg-canvas":       "#FAF9F7",
   "--bg-elevated":     "#F5F3EF",
   "--bg-sunken":       "#EFECE6",
@@ -29,7 +30,7 @@ export default async function AgencyLayout({
   if (!agency) notFound();
 
   return (
-    <div style={LIGHT_TOKENS} className="flex flex-col">
+    <div style={LIGHT_TOKENS as React.CSSProperties} className="flex flex-col">
 
       {/* ── Header trasparente con scroll ─────────────────────── */}
       <AgencyHeader agency={agency} agencySlug={agencySlug} />
