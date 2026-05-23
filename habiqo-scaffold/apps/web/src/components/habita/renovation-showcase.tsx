@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, useTransition } from "react";
 import { submitRenovation } from "@/lib/actions/submit-renovation";
 
-/* ─── Types ──────────────────────────────────────────────────────────────── */
 type Props = { agencyId: string; agencyName: string };
 
 type Room = {
@@ -12,8 +11,6 @@ type Room = {
   tag: string;
   beforeUrl: string;
   afterUrl: string;
-  beforeLabel: string;
-  afterLabel: string;
   gain: string;
 };
 
@@ -24,47 +21,45 @@ type Interest = {
   body: string;
 };
 
-/* ─── Data ───────────────────────────────────────────────────────────────── */
+// Foto reali — Unsplash free license
+// AFTER: foto caricate in sessione (pool Sicilia, masseria Toscana, villa pietra, villa pini)
+// BEFORE: foto stesso stile ma più datate/da valorizzare
 const ROOMS: Room[] = [
   {
-    id:           "soggiorno",
-    label:        "Soggiorno",
-    tag:          "Home staging",
-    beforeUrl:    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=60",
-    afterUrl:     "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=60",
-    beforeLabel:  "Prima",
-    afterLabel:   "Dopo",
-    gain:         "+18% valore",
+    id:        "soggiorno",
+    label:     "Soggiorno",
+    tag:       "Home staging",
+    beforeUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=70",
+    afterUrl:  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=900&q=80",
+    gain:      "+18% valore",
   },
   {
-    id:           "cucina",
-    label:        "Cucina",
-    tag:          "Ristrutturazione",
-    beforeUrl:    "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=60",
-    afterUrl:     "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=60",
-    beforeLabel:  "Prima",
-    afterLabel:   "Dopo",
-    gain:         "+24% valore",
+    id:        "cucina",
+    label:     "Cucina",
+    tag:       "Ristrutturazione",
+    beforeUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&q=70",
+    afterUrl:  "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=900&q=80",
+    gain:      "+24% valore",
   },
   {
-    id:           "camera",
-    label:        "Camera",
-    tag:          "Redesign",
-    beforeUrl:    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=60",
-    afterUrl:     "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=60",
-    beforeLabel:  "Prima",
-    afterLabel:   "Dopo",
-    gain:         "+15% valore",
+    id:        "esterno",
+    label:     "Esterno",
+    tag:       "Render AI",
+    // before: villa con pini (meno premium)
+    beforeUrl: "https://images.unsplash.com/photo-GAUinEwfk6g?w=900&q=70",
+    // after: masseria toscana (foto caricata oggi)
+    afterUrl:  "https://images.unsplash.com/photo-bg9cf3RMqG4?w=900&q=80",
+    gain:      "+30% valore",
   },
   {
-    id:           "esterno",
-    label:        "Esterno",
-    tag:          "Render AI",
-    beforeUrl:    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=60",
-    afterUrl:     "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=60",
-    beforeLabel:  "Prima",
-    afterLabel:   "Dopo",
-    gain:         "+30% valore",
+    id:        "giardino",
+    label:     "Giardino",
+    tag:       "Valorizzazione",
+    // before: villa pietra con giardino base
+    beforeUrl: "https://images.unsplash.com/photo-HCuwXCJqWVc?w=900&q=70",
+    // after: villa con piscina e montagne (foto caricata oggi)
+    afterUrl:  "https://images.unsplash.com/photo-f13vM9-CGtM?w=900&q=80",
+    gain:      "+35% valore",
   },
 ];
 
@@ -95,12 +90,11 @@ const INTERESTS: Interest[] = [
   },
 ];
 
-/* ─── Before/After Slider ────────────────────────────────────────────────── */
 function BeforeAfterSlider({ room }: { room: Room }) {
-  const [pos, setPos]         = useState(50);
+  const [pos, setPos]           = useState(50);
   const [dragging, setDragging] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef            = useRef<HTMLDivElement>(null);
 
   const updatePos = useCallback((clientX: number) => {
     const el = containerRef.current;
@@ -111,10 +105,10 @@ function BeforeAfterSlider({ room }: { room: Room }) {
     setRevealed(true);
   }, []);
 
-  const onMouseMove  = (e: React.MouseEvent)  => { if (dragging) updatePos(e.clientX); };
-  const onTouchMove  = (e: React.TouchEvent)  => { if (e.touches[0]) updatePos(e.touches[0].clientX); };
-  const onMouseDown  = ()                      => setDragging(true);
-  const onMouseUp    = ()                      => setDragging(false);
+  const onMouseMove = (e: React.MouseEvent) => { if (dragging) updatePos(e.clientX); };
+  const onTouchMove = (e: React.TouchEvent)  => { if (e.touches[0]) updatePos(e.touches[0].clientX); };
+  const onMouseDown = () => setDragging(true);
+  const onMouseUp   = () => setDragging(false);
 
   return (
     <div
@@ -127,7 +121,7 @@ function BeforeAfterSlider({ room }: { room: Room }) {
       onTouchMove={onTouchMove}
       onTouchEnd={onMouseUp}
     >
-      {/* AFTER — base layer */}
+      {/* AFTER */}
       <img
         src={room.afterUrl}
         alt={`Dopo — ${room.label}`}
@@ -136,7 +130,7 @@ function BeforeAfterSlider({ room }: { room: Room }) {
         loading="lazy"
       />
 
-      {/* BEFORE — clipped layer */}
+      {/* BEFORE — clipped */}
       <div
         className="absolute inset-0 overflow-hidden"
         style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
@@ -145,19 +139,19 @@ function BeforeAfterSlider({ room }: { room: Room }) {
           src={room.beforeUrl}
           alt={`Prima — ${room.label}`}
           className="w-full h-full object-cover"
-          style={{ filter: "saturate(0.6) brightness(0.88)" }}
+          style={{ filter: "saturate(0.5) brightness(0.82)" }}
           draggable={false}
           loading="lazy"
         />
       </div>
 
-      {/* Divider handle */}
+      {/* Handle */}
       <div
         className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-lg z-20 pointer-events-none"
         style={{ left: `${pos}%` }}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-          w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center gap-1">
+          w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center">
           <span className="text-[10px] text-gray-600 font-bold select-none">◀▶</span>
         </div>
       </div>
@@ -166,13 +160,13 @@ function BeforeAfterSlider({ room }: { room: Room }) {
       <div className="absolute top-3 left-3 z-10">
         <span className="text-[10px] font-bold tracking-widest uppercase
           bg-black/50 text-white/80 px-2 py-1 rounded-full backdrop-blur-sm">
-          {room.beforeLabel}
+          Prima
         </span>
       </div>
       <div className="absolute top-3 right-3 z-10">
         <span className="text-[10px] font-bold tracking-widest uppercase
           bg-[var(--accent-deep)]/90 text-white px-2 py-1 rounded-full">
-          {room.afterLabel}
+          Dopo
         </span>
       </div>
 
@@ -184,10 +178,18 @@ function BeforeAfterSlider({ room }: { room: Room }) {
         </span>
       </div>
 
-      {/* Hint on first view */}
+      {/* Room tag */}
+      <div className="absolute bottom-3 left-3 z-10">
+        <span className="text-[10px] uppercase tracking-widest
+          bg-black/40 text-white/80 px-2 py-1 rounded-full backdrop-blur-sm">
+          {room.tag}
+        </span>
+      </div>
+
+      {/* Hint */}
       {!revealed && (
         <div className="absolute inset-0 flex items-center justify-center z-30
-          bg-black/10 backdrop-blur-[1px] pointer-events-none">
+          bg-black/10 pointer-events-none">
           <div className="text-white text-sm font-medium bg-black/40 px-4 py-2 rounded-full
             backdrop-blur-sm animate-pulse">
             ← Trascina per confrontare →
@@ -198,7 +200,6 @@ function BeforeAfterSlider({ room }: { room: Room }) {
   );
 }
 
-/* ─── Lead Form ──────────────────────────────────────────────────────────── */
 function RenovationForm({
   agencyId,
   agencyName,
@@ -208,10 +209,10 @@ function RenovationForm({
   agencyName: string;
   selectedInterest: string;
 }) {
-  const [form, setForm]     = useState({ name: "", phone: "", email: "" });
-  const [done, setDone]     = useState(false);
-  const [error, setError]   = useState("");
-  const [isPending, start]  = useTransition();
+  const [form, setForm]    = useState({ name: "", phone: "", email: "" });
+  const [done, setDone]    = useState(false);
+  const [error, setError]  = useState("");
+  const [isPending, start] = useTransition();
 
   function set(k: keyof typeof form, v: string) {
     setForm(f => ({ ...f, [k]: v }));
@@ -235,8 +236,9 @@ function RenovationForm({
   if (done) return (
     <div className="text-center py-8">
       <div className="w-14 h-14 rounded-full bg-[var(--color-brass-glow)] border
-        border-[var(--accent-deep)]/30 flex items-center justify-center text-xl
-        mx-auto mb-4">✓</div>
+        border-[var(--accent-deep)]/30 flex items-center justify-center text-xl mx-auto mb-4">
+        ✓
+      </div>
       <p className="font-medium text-[var(--fg-primary)] text-lg mb-1">Richiesta inviata!</p>
       <p className="text-sm text-[var(--fg-secondary)]">
         Un consulente di <strong>{agencyName}</strong> ti contatterà presto.
@@ -251,24 +253,18 @@ function RenovationForm({
   return (
     <div className="space-y-3">
       <input
-        type="text"
-        placeholder="Nome e cognome *"
-        value={form.name}
-        onChange={e => set("name", e.target.value)}
+        type="text" placeholder="Nome e cognome *"
+        value={form.name} onChange={e => set("name", e.target.value)}
         className={inputClass}
       />
       <input
-        type="tel"
-        placeholder="Telefono *"
-        value={form.phone}
-        onChange={e => set("phone", e.target.value)}
+        type="tel" placeholder="Telefono *"
+        value={form.phone} onChange={e => set("phone", e.target.value)}
         className={inputClass}
       />
       <input
-        type="email"
-        placeholder="Email (opzionale)"
-        value={form.email}
-        onChange={e => set("email", e.target.value)}
+        type="email" placeholder="Email (opzionale)"
+        value={form.email} onChange={e => set("email", e.target.value)}
         className={inputClass}
       />
       {error && (
@@ -277,9 +273,7 @@ function RenovationForm({
         </p>
       )}
       <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isPending}
+        type="button" onClick={handleSubmit} disabled={isPending}
         className="w-full py-3.5 bg-[var(--fg-primary)] text-[var(--bg-canvas)]
           rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity
           disabled:opacity-50 disabled:cursor-not-allowed"
@@ -293,18 +287,17 @@ function RenovationForm({
   );
 }
 
-/* ─── Main Component ─────────────────────────────────────────────────────── */
 export function RenovationShowcase({ agencyId, agencyName }: Props) {
-  const [activeRoom, setActiveRoom] = useState<number>(0);
-  const currentRoom = ROOMS[activeRoom] ?? ROOMS[0]!;
-  const [selectedInterest, setInterest]   = useState("ristrutturazione");
-  const [formOpen, setFormOpen]           = useState(false);
+  const [activeRoom, setActiveRoom]   = useState<number>(0);
+  const currentRoom                   = ROOMS[activeRoom] ?? ROOMS[0]!;
+  const [selectedInterest, setInterest] = useState("ristrutturazione");
+  const [formOpen, setFormOpen]       = useState(false);
 
   return (
     <section className="py-20 md:py-28 bg-[var(--bg-canvas)]">
       <div className="px-6 md:px-16 max-w-6xl mx-auto">
 
-        {/* ── Header ─────────────────────────────────────────── */}
+        {/* Header */}
         <div className="text-center mb-14">
           <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-4">
             Valorizzazione immobiliare
@@ -317,11 +310,11 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
           <p className="text-base md:text-lg text-[var(--fg-secondary)] max-w-xl
             mx-auto leading-relaxed">
             Prima di vendere, scopri come una ristrutturazione o uno home staging
-            possono aumentare il valore del tuo immobile fino al 30%.
+            possono aumentare il valore del tuo immobile fino al 35%.
           </p>
         </div>
 
-        {/* ── Room Tabs ──────────────────────────────────────── */}
+        {/* Room tabs */}
         <div className="flex gap-2 justify-center flex-wrap mb-8">
           {ROOMS.map((room, i) => (
             <button
@@ -334,16 +327,11 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
               }`}
             >
               {room.label}
-              {activeRoom === i && (
-                <span className="ml-2 text-[10px] text-[var(--accent-deep)]">
-                  {room.tag}
-                </span>
-              )}
             </button>
           ))}
         </div>
 
-        {/* ── Before/After Slider ─────────────────────────────── */}
+        {/* Slider + stats */}
         <div className="grid md:grid-cols-2 gap-8 items-center mb-16">
           <div>
             <BeforeAfterSlider room={currentRoom} />
@@ -357,7 +345,6 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
             </div>
           </div>
 
-          {/* Side content */}
           <div className="space-y-6">
             <div>
               <h3 className="font-display text-2xl md:text-3xl text-[var(--fg-primary)] mb-3">
@@ -373,8 +360,8 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: "Vendita più rapida", value: "−40 giorni" },
-                { label: "Valore percepito", value: "+22%" },
-                { label: "Offerte ricevute", value: "×3 visite" },
+                { label: "Valore percepito",   value: "+22%" },
+                { label: "Visite ricevute",    value: "×3" },
                 { label: "Trattative al ribasso", value: "−60%" },
               ].map(stat => (
                 <div key={stat.label} className="p-4 rounded-xl bg-[var(--bg-elevated)]
@@ -397,7 +384,7 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
           </div>
         </div>
 
-        {/* ── Interest Selector + Form ────────────────────────── */}
+        {/* Interest selector */}
         <div className="border-t border-[var(--border-subtle)] pt-16">
           <div className="text-center mb-10">
             <h3 className="font-display text-2xl md:text-3xl text-[var(--fg-primary)] mb-2">
@@ -426,9 +413,7 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
                   {item.title}
                 </p>
                 <p className={`text-[11px] leading-relaxed ${
-                  selectedInterest === item.id
-                    ? "text-white/60"
-                    : "text-[var(--fg-muted)]"
+                  selectedInterest === item.id ? "text-white/60" : "text-[var(--fg-muted)]"
                 }`}>
                   {item.body}
                 </p>
@@ -460,7 +445,7 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
           )}
         </div>
 
-        {/* ── Future AI teaser ────────────────────────────────── */}
+        {/* AI teaser */}
         <div className="mt-16 p-8 rounded-2xl bg-[var(--fg-primary)] text-center">
           <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-3">
             Prossimamente
@@ -470,8 +455,8 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
           </h3>
           <p className="text-white/60 text-sm max-w-lg mx-auto mb-6 leading-relaxed">
             Presto potrai caricare le foto del tuo immobile e vedere in pochi secondi
-            come apparirebbe dopo una ristrutturazione, uno home staging virtuale,
-            o un redesign degli ambienti. Powered by AI.
+            come apparirebbe dopo una ristrutturazione o un home staging virtuale.
+            Powered by AI.
           </p>
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
             border border-white/20 text-white/70 text-sm">
