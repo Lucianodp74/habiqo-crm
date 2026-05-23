@@ -30,7 +30,13 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
 
         {/* Logo */}
         <Link href={`/${agencySlug}`} className="flex items-center gap-3">
-          <span className={`font-display text-xl tracking-tight transition-colors $\{isTransparent ? 'text-white' : 'text-[var(--fg-primary)]'\}`}>{agency.name}</span>
+          <span
+            className={`font-display text-xl tracking-tight transition-colors ${
+              isTransparent ? "text-white" : "text-[var(--fg-primary)]"
+            }`}
+          >
+            {agency.name}
+          </span>
         </Link>
 
         {/* Nav */}
@@ -44,6 +50,16 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
             }`}
           >
             Immobili
+          </Link>
+          <Link
+            href={`/${agencySlug}/valuta-casa`}
+            className={`text-sm transition-colors hidden sm:block ${
+              isTransparent
+                ? "text-white/80 hover:text-white"
+                : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]"
+            }`}
+          >
+            Valuta casa
           </Link>
           <Link
             href={`/${agencySlug}#chi-siamo`}
@@ -72,4 +88,3 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
     </header>
   );
 }
-
