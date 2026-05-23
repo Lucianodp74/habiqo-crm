@@ -39,7 +39,7 @@ export default function HomePage() {
               Prova HABIQUO gratis
             </Button>
           </Link>
-          <Link href="/valutazione">
+          <Link href="/habitami/valuta-casa">
             <Button intent="secondary" size="lg">
               Valuta il tuo immobile
             </Button>
