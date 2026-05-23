@@ -112,7 +112,7 @@ function BeforeAfterSlider({ room }: { room: Room }) {
   }, []);
 
   const onMouseMove  = (e: React.MouseEvent)  => { if (dragging) updatePos(e.clientX); };
-  const onTouchMove  = (e: React.TouchEvent)  => { updatePos(e.touches[0].clientX); };
+  const onTouchMove  = (e: React.TouchEvent)  => { if (e.touches[0]) updatePos(e.touches[0].clientX); };
   const onMouseDown  = ()                      => setDragging(true);
   const onMouseUp    = ()                      => setDragging(false);
 
