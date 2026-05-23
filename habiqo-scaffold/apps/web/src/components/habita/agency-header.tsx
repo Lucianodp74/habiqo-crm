@@ -53,13 +53,13 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
           </Link>
           <Link
             href={`/${agencySlug}/valuta-casa`}
-            className={`text-sm font-bold px-4 py-2 rounded-full transition-all ${
+            className={`text-sm transition-colors hidden sm:block ${
               isTransparent
-                ? "bg-white text-black hover:bg-white/90"
-                : "bg-[var(--accent-deep)] text-white hover:opacity-90"
+                ? "text-white/80 hover:text-white"
+                : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]"
             }`}
           >
-            Valuta casa ?
+            Valuta casa
           </Link>
           <Link
             href={`/${agencySlug}#chi-siamo`}
@@ -88,4 +88,3 @@ export function AgencyHeader({ agency, agencySlug }: Props) {
     </header>
   );
 }
-
