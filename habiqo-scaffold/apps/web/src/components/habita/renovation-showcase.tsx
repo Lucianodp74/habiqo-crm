@@ -46,9 +46,9 @@ const ROOMS: Room[] = [
     label:     "Esterno",
     tag:       "Render AI",
     // before: villa con pini (meno premium)
-    beforeUrl: "https://images.unsplash.com/photo-GAUinEwfk6g?w=900&q=70",
+    beforeUrl: "https://jwivrcofmxnpgkdolnuo.supabase.co/storage/v1/object/public/property-photos/gabriele-romano-GAUinEwfk6g-unsplash.jpg",
     // after: masseria toscana (foto caricata oggi)
-    afterUrl:  "https://images.unsplash.com/photo-bg9cf3RMqG4?w=900&q=80",
+    afterUrl:  "https://jwivrcofmxnpgkdolnuo.supabase.co/storage/v1/object/public/property-photos/vitaliy-burlaka-bg9cf3RMqG4-unsplash.jpg",
     gain:      "+30% valore",
   },
   {
@@ -56,9 +56,9 @@ const ROOMS: Room[] = [
     label:     "Giardino",
     tag:       "Valorizzazione",
     // before: villa pietra con giardino base
-    beforeUrl: "https://images.unsplash.com/photo-HCuwXCJqWVc?w=900&q=70",
+    beforeUrl: "https://jwivrcofmxnpgkdolnuo.supabase.co/storage/v1/object/public/property-photos/nikola-perekovic-HCuwXCJqWVc-unsplash.jpg",
     // after: villa con piscina e montagne (foto caricata oggi)
-    afterUrl:  "https://images.unsplash.com/photo-f13vM9-CGtM?w=900&q=80",
+    afterUrl:  "https://jwivrcofmxnpgkdolnuo.supabase.co/storage/v1/object/public/property-photos/sara-abilova-f13vM9-CGtM-unsplash.jpg",
     gain:      "+35% valore",
   },
 ];
@@ -468,3 +468,4 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
     </section>
   );
 }
+
