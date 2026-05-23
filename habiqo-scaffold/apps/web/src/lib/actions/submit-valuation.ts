@@ -33,7 +33,7 @@ export async function submitValuation(
 
   const supabase = getAnonClient();
 
-  const { data, error } = await supabase.rpc("submit_valuation_request", {
+  const { error } = await supabase.rpc("submit_valuation_request", {
     p_agency_id:     input.agencyId,
     p_property_type: input.propertyType,
     p_city:          input.city.trim(),
