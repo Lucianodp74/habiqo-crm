@@ -7,7 +7,7 @@ export type RenovationInput = {
   fullName: string;
   phone: string;
   email?: string;
-  interest: string;   // "ristrutturazione" | "home-staging" | "render" | "valutazione"
+  interest: string;
   notes?: string;
 };
 
@@ -25,19 +25,13 @@ export async function submitRenovation(
 
   const supabase = getAnonClient();
 
-  const { error } = await supabase.from("leads").insert({
-    agency_id:    input.agencyId,
-    full_name:    input.fullName.trim(),
-    phone:        input.phone.trim() || null,
-    email:        input.email?.trim() || null,
-    status:       "new",
-    temperature:  "warm",
-    source:       "renovation",
-    source_detail: input.interest,
-    notes: [
-      `Richiesta: ${input.interest}`,
-      input.notes ? `Note: ${input.notes}` : null,
-    ].filter(Boolean).join("\n"),
+  const { error } = await supabase.rpc("submit_renovation_lead", {
+    p_agency_id: input.agencyId,
+    p_full_name: input.fullName.trim(),
+    p_phone:     input.phone.trim(),
+    p_email:     input.email?.trim() || null,
+    p_interest:  input.interest,
+    p_notes:     input.notes || null,
   });
 
   if (error) {
