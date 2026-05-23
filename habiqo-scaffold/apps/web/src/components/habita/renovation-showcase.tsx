@@ -295,7 +295,8 @@ function RenovationForm({
 
 /* ─── Main Component ─────────────────────────────────────────────────────── */
 export function RenovationShowcase({ agencyId, agencyName }: Props) {
-  const [activeRoom, setActiveRoom]       = useState(0);
+  const [activeRoom, setActiveRoom] = useState<number>(0);
+  const currentRoom = ROOMS[activeRoom] ?? ROOMS[0]!;
   const [selectedInterest, setInterest]   = useState("ristrutturazione");
   const [formOpen, setFormOpen]           = useState(false);
 
@@ -345,13 +346,13 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
         {/* ── Before/After Slider ─────────────────────────────── */}
         <div className="grid md:grid-cols-2 gap-8 items-center mb-16">
           <div>
-            <BeforeAfterSlider room={ROOMS[activeRoom]} />
+            <BeforeAfterSlider room={currentRoom} />
             <div className="flex items-center justify-between mt-3">
               <span className="text-xs text-[var(--fg-muted)]">
-                {ROOMS[activeRoom].tag} · {ROOMS[activeRoom].label}
+                {currentRoom.tag} · {currentRoom.label}
               </span>
               <span className="text-sm font-semibold text-[var(--accent-deep)]">
-                {ROOMS[activeRoom].gain}
+                {currentRoom.gain}
               </span>
             </div>
           </div>
