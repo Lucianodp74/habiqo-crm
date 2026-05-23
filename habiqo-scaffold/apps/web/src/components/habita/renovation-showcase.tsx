@@ -335,7 +335,7 @@ export function RenovationShowcase({ agencyId, agencyName }: Props) {
               {room.label}
               {activeRoom === i && (
                 <span className="ml-2 text-[10px] text-[var(--accent-deep)]">
-                  {ROOMS[i].tag}
+                  {room.tag}
                 </span>
               )}
             </button>
