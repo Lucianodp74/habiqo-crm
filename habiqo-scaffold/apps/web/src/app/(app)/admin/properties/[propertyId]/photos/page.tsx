@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
+import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -25,7 +26,6 @@ export default async function PropertyPhotosPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  // Fetch property
   const { data: property } = await supabase
     .from("properties")
     .select(
@@ -36,7 +36,6 @@ export default async function PropertyPhotosPage({
 
   if (!property) notFound();
 
-  // Verify membership
   const { data: membership } = await supabase
     .from("agency_members")
     .select("role")
@@ -53,7 +52,6 @@ export default async function PropertyPhotosPage({
     notFound();
   }
 
-  // Get agency slug to build a "view public page" link, if applicable
   const { data: agency } = await supabase
     .from("agencies")
     .select("slug, is_public")
@@ -99,6 +97,19 @@ export default async function PropertyPhotosPage({
         propertyId={property.id}
         initialPhotos={property.photos ?? []}
       />
+
+      {/* ── Valorizza Casa AI ──────────────────────────────────── */}
+      <section className="mt-16">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-900">
+            Valorizza Casa AI
+          </h2>
+          <p className="mt-1 text-sm text-neutral-500">
+            Carica una foto di una stanza e genera una versione valorizzata con intelligenza artificiale.
+          </p>
+        </div>
+        <RenovationWizard propertyId={property.id} />
+      </section>
     </div>
   );
 }
