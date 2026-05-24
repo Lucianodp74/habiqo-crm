@@ -4,6 +4,7 @@ import { AgencyFeaturedProperties } from "@/components/habita/agency-featured-pr
 import { AgencyTrustSignals } from "@/components/habita/agency-trust-signals";
 import { AgencyAbout } from "@/components/habita/agency-about";
 import { RenovationShowcase } from "@/components/habita/renovation-showcase";
+import { RenovationRealPreviews } from "@/components/habita/renovation-real-previews";
 import { AgencyContact } from "@/components/habita/agency-contact";
 
 type Params = Promise<{ agencySlug: string }>;
@@ -23,8 +24,10 @@ export default async function HabitaAgencyHomePage({
       <AgencyFeaturedProperties agency={agency} />
       <AgencyTrustSignals />
       <RenovationShowcase agencyId={agency.id} agencyName={agency.name} />
+      <RenovationRealPreviews agencyId={agency.id} />
       <AgencyAbout agency={agency} />
       <AgencyContact agency={agency} />
     </>
   );
 }
+

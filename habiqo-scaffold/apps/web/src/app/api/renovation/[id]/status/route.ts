@@ -1,14 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 const BUCKET = 'property-renovations'
-
-const supabaseAdmin = createAdminClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-)
 
 export async function GET(
   request: NextRequest,
@@ -22,21 +15,14 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('renovation_previews')
-      .select('status, after_image_url, error_message, replicate_prediction_id')
+      .select('status, after_image_url, error_message, replicate_prediction_id, agency_id')
       .eq('id', id)
       .single()
 
-    if (error || !data) {
-      return NextResponse.json({ error: 'Preview non trovata' }, { status: 404 })
-    }
+    if (error || !data) return NextResponse.json({ error: 'Preview non trovata' }, { status: 404 })
 
-    if (data.status === 'completed') {
-      return NextResponse.json({ status: 'completed', afterImageUrl: data.after_image_url })
-    }
-
-    if (data.status === 'failed') {
-      return NextResponse.json({ status: 'failed', error: data.error_message })
-    }
+    if (data.status === 'completed') return NextResponse.json({ status: 'completed', afterImageUrl: data.after_image_url })
+    if (data.status === 'failed') return NextResponse.json({ status: 'failed', error: data.error_message })
 
     if (data.status === 'processing' && data.replicate_prediction_id) {
       const replicateRes = await fetch(
@@ -48,28 +34,27 @@ export async function GET(
         const prediction = await replicateRes.json()
         console.log('[status] Replicate status:', prediction.status, 'id:', data.replicate_prediction_id)
 
-        if (prediction.status === 'succeeded' && (Array.isArray(prediction.output) ? (Array.isArray(prediction.output) ? prediction.output[0] : prediction.output) : prediction.output)) {
-          const imageRes = await fetch((Array.isArray(prediction.output) ? prediction.output[0] : prediction.output))
+        if (prediction.status === 'succeeded' && prediction.output) {
+          const outputUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
+
+          const imageRes = await fetch(outputUrl)
           const imageBuffer = await imageRes.arrayBuffer()
-          const { data: { user: currentUser } } = await supabase.auth.getUser()
-          const { data: member } = await supabase
-            .from('agency_members')
-            .select('agency_id')
-            .eq('user_id', currentUser!.id)
-            .limit(1)
-            .maybeSingle()
+          const afterPath = `${data.agency_id}/${Date.now()}-after.webp`
 
-          const afterPath = `${member?.agency_id ?? 'unknown'}/${Date.now()}-after.webp`
-
-          await supabaseAdmin.storage
+          const { error: storageError } = await supabase.storage
             .from(BUCKET)
             .upload(afterPath, imageBuffer, { contentType: 'image/webp', upsert: false })
 
-          const { data: { publicUrl: afterImageUrl } } = supabaseAdmin.storage
+          if (storageError) {
+            console.error('[status] Storage error:', storageError.message)
+            return NextResponse.json({ status: 'processing', afterImageUrl: null })
+          }
+
+          const { data: { publicUrl: afterImageUrl } } = supabase.storage
             .from(BUCKET)
             .getPublicUrl(afterPath)
 
-          await supabaseAdmin
+          await supabase
             .from('renovation_previews')
             .update({ after_image_url: afterImageUrl, status: 'completed' })
             .eq('id', id)
@@ -79,7 +64,7 @@ export async function GET(
         }
 
         if (prediction.status === 'failed') {
-          await supabaseAdmin
+          await supabase
             .from('renovation_previews')
             .update({ status: 'failed', error_message: prediction.error ?? 'Generazione fallita' })
             .eq('id', id)
@@ -95,5 +80,3 @@ export async function GET(
     return NextResponse.json({ error: 'Errore interno' }, { status: 500 })
   }
 }
-
-
