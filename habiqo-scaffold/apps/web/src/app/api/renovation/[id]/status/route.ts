@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 const BUCKET = 'property-renovations'
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -80,3 +80,4 @@ export async function GET(
     return NextResponse.json({ error: 'Errore interno' }, { status: 500 })
   }
 }
+
