@@ -40,7 +40,7 @@ export async function updateLead(input: unknown): Promise<ActionResult<{ id: str
     return { ok: false, error: { code: "unauthenticated", message: "Sessione scaduta" } };
   }
 
-  const { id, assignedTo, ...rest } = parsed.data;
+  const { id, assignedTo, preferredCity, preferredListingType, preferredRoomsMin, preferredSqmMin, ...rest } = parsed.data;
   const updates: Record<string, unknown> = { ...rest };
   if (assignedTo !== undefined) updates.assigned_to = assignedTo;
   if (parsed.data.preferredCity !== undefined) updates.preferred_city = parsed.data.preferredCity;
@@ -121,4 +121,5 @@ export async function createLead(input: unknown): Promise<ActionResult<{ id: str
   revalidatePath("/crm");
   return { ok: true, data: { id: data.id } };
 }
+
 
