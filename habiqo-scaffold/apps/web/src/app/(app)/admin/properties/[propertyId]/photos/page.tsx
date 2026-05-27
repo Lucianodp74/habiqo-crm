@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
+import { PropertyMatchingLeads } from "@/components/crm/property-matching-leads";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { createClient } from "@/lib/supabase/server";
 
@@ -109,7 +110,9 @@ export default async function PropertyPhotosPage({
           </p>
         </div>
         <RenovationWizard propertyId={property.id} />
+      <PropertyMatchingLeads propertyId={property.id} />
       </section>
     </div>
   );
 }
+

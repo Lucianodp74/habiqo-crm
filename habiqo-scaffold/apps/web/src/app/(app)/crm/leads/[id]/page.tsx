@@ -1,3 +1,4 @@
+import { LeadMatchingProperties } from "@/components/crm/lead-matching-properties";
 import { LeadPreferencesForm } from "@/components/crm/lead-preferences-form";
 import { LeadActivityTimeline } from "@/components/crm/lead-activity-timeline";
 import { LeadInsightPanel } from "@/components/crm/lead-insight-panel";
@@ -178,6 +179,7 @@ export default async function LeadDetailPage({ params }: Props) {
         <LeadTasksFollowUp leadId={lead.id} />
 
           <LeadNotesForm leadId={lead.id} />
+        <LeadMatchingProperties leadId={lead.id} />
 
           <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)] animate-in-card [animation-delay:120ms]">
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-6">
@@ -194,4 +196,5 @@ export default async function LeadDetailPage({ params }: Props) {
     </div>
   );
 }
+
 
