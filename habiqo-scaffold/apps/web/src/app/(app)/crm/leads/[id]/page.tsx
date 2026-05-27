@@ -1,3 +1,4 @@
+import { LeadPreferencesForm } from "@/components/crm/lead-preferences-form";
 import { LeadActivityTimeline } from "@/components/crm/lead-activity-timeline";
 import { LeadInsightPanel } from "@/components/crm/lead-insight-panel";
 import { LeadNotesForm } from "@/components/crm/lead-notes-form";
@@ -165,7 +166,16 @@ export default async function LeadDetailPage({ params }: Props) {
             </dl>
           </section>
 
-          <LeadTasksFollowUp leadId={lead.id} />
+          <LeadPreferencesForm
+          leadId={lead.id}
+          initial={{
+            preferredCity:        lead.preferredCity,
+            preferredListingType: lead.preferredListingType,
+            preferredRoomsMin:    lead.preferredRoomsMin,
+            preferredSqmMin:      lead.preferredSqmMin,
+          }}
+        />
+        <LeadTasksFollowUp leadId={lead.id} />
 
           <LeadNotesForm leadId={lead.id} />
 
@@ -184,3 +194,4 @@ export default async function LeadDetailPage({ params }: Props) {
     </div>
   );
 }
+
