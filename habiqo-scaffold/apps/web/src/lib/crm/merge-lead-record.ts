@@ -74,5 +74,11 @@ export function mergeLeadRecordIntoPipelineLead(
     status: readString(raw, "status") ?? prev?.status ?? "new",
     temperature: readString(raw, "temperature") ?? prev?.temperature ?? "cold",
     aiScore: readNumber(raw, "ai_score") ?? prev?.aiScore ?? null,
+    preferredCity: null,
+    preferredListingType: null,
+    preferredRoomsMin: null,
+    preferredSqmMin: null,
   };
 }
+
+

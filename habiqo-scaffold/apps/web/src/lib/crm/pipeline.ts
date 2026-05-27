@@ -52,6 +52,10 @@ export type PipelineLead = {
   status: string;
   temperature: string;
   aiScore: number | null;
+  preferredCity: string | null;
+  preferredListingType: string | null;
+  preferredRoomsMin: number | null;
+  preferredSqmMin: number | null;
 };
 
 const COLUMN_SET = new Set<string>(PIPELINE_COLUMN_IDS);
@@ -109,3 +113,4 @@ export function findContainerForDnd(
   if (isPipelineColumnId(id)) return id;
   return findLeadColumn(items, id);
 }
+

@@ -13,6 +13,10 @@ const updateLeadSchema = z.object({
   notes: z.string().max(5000).optional(),
   tags: z.array(z.string().max(40)).max(20).optional(),
   assignedTo: z.string().uuid().nullable().optional(),
+  preferredCity: z.string().max(100).nullable().optional(),
+  preferredListingType: z.enum(["sale", "rent"]).nullable().optional(),
+  preferredRoomsMin: z.number().int().min(1).max(20).nullable().optional(),
+  preferredSqmMin: z.number().int().min(1).max(1000).nullable().optional(),
 });
 
 export async function updateLead(input: unknown): Promise<ActionResult<{ id: string }>> {
@@ -39,6 +43,10 @@ export async function updateLead(input: unknown): Promise<ActionResult<{ id: str
   const { id, assignedTo, ...rest } = parsed.data;
   const updates: Record<string, unknown> = { ...rest };
   if (assignedTo !== undefined) updates.assigned_to = assignedTo;
+  if (parsed.data.preferredCity !== undefined) updates.preferred_city = parsed.data.preferredCity;
+  if (parsed.data.preferredListingType !== undefined) updates.preferred_listing_type = parsed.data.preferredListingType;
+  if (parsed.data.preferredRoomsMin !== undefined) updates.preferred_rooms_min = parsed.data.preferredRoomsMin;
+  if (parsed.data.preferredSqmMin !== undefined) updates.preferred_sqm_min = parsed.data.preferredSqmMin;
 
   // RLS enforces agency scope. We never set agency_id from the client.
   const { error } = await supabase.from("leads").update(updates).eq("id", id);
@@ -113,3 +121,4 @@ export async function createLead(input: unknown): Promise<ActionResult<{ id: str
   revalidatePath("/crm");
   return { ok: true, data: { id: data.id } };
 }
+

@@ -22,6 +22,10 @@ type DbLead = Record<string, unknown> & {
   status: string | null;
   temperature: string | null;
   ai_score: number | null;
+  preferred_city?: string | null;
+  preferred_listing_type?: string | null;
+  preferred_rooms_min?: number | null;
+  preferred_sqm_min?: number | null;
 };
 
 function parsePriority(raw: string | null | undefined): LeadPriority {
@@ -55,6 +59,10 @@ function mapDbLead(
     status: row.status ?? "new",
     temperature: row.temperature ?? "cold",
     aiScore: row.ai_score ?? null,
+    preferredCity: row.preferred_city ?? null,
+    preferredListingType: row.preferred_listing_type ?? null,
+    preferredRoomsMin: row.preferred_rooms_min ?? null,
+    preferredSqmMin: row.preferred_sqm_min ?? null,
   };
 }
 
@@ -156,3 +164,4 @@ export async function listEventsForLead(leadId: string) {
     occurredAt: new Date(e.occurredAt),
   }));
 }
+
