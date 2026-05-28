@@ -42,7 +42,7 @@ export function LeadsChart({ data }: Props) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={160}>
+    <ResponsiveContainer width="100%" height={180}>
       <AreaChart data={data} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
         <defs>
           <linearGradient id="leadGradient" x1="0" y1="0" x2="0" y2="1">
@@ -60,7 +60,7 @@ export function LeadsChart({ data }: Props) {
           tick={{ fontSize: 10, fill: 'var(--fg-muted)' }}
           tickLine={false}
           axisLine={false}
-          interval="preserveStartEnd"
+          interval={6}
         />
         <YAxis
           tick={{ fontSize: 10, fill: 'var(--fg-muted)' }}
@@ -82,4 +82,5 @@ export function LeadsChart({ data }: Props) {
     </ResponsiveContainer>
   )
 }
+
 
