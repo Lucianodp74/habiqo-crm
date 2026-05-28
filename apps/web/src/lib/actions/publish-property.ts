@@ -1,4 +1,5 @@
 "use server";
+import { sendMatchNotificationForProperty } from "@/lib/email/send-match-notification";
 
 import { revalidatePath } from "next/cache";
 
@@ -172,6 +173,13 @@ export async function publishProperty(
     };
   }
 
+  // 4b) Notify matching leads (fire and forget)
+  void sendMatchNotificationForProperty(
+    property.id,
+    property.agency_id,
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://habiquo.it",
+  )
+
   // 5) Fetch agency slug for return value + revalidation
   const { data: agency } = await supabase
     .from("agencies")
@@ -199,3 +207,4 @@ export async function publishProperty(
     },
   };
 }
+
