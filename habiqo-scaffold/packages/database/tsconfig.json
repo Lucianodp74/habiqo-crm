@@ -1,0 +1,4 @@
+{
+  "extends": "@habiqo/config/tsconfig/library.json",
+  "include": ["src"]
+}
