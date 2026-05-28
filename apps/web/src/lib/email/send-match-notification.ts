@@ -133,7 +133,7 @@ export async function sendMatchNotificationForProperty(
     )
 
     // 1. Dati immobile
-    const { data: property, error: propErr } = await admin.from('properties')
+    const { data: property, error: _propErr } = await admin.from('properties')
       .select('id, title, city, price_eur, rooms, sqm, listing_type')
       .eq('id', propertyId)
       .single()
@@ -216,5 +216,6 @@ export async function sendMatchNotificationForProperty(
     console.error('[match] Error:', err)
   }
 }
+
 
 

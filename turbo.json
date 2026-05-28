@@ -11,7 +11,8 @@
     "ANTHROPIC_API_KEY",
     "OPENAI_API_KEY",
     "SENTRY_DSN",
-    "NEXT_PUBLIC_SENTRY_DSN"
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "RESEND_API_KEY"
   ],
   "tasks": {
     "build": {
@@ -39,3 +40,4 @@
     }
   }
 }
+
