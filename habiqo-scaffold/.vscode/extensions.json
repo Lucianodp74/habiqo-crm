@@ -1,9 +1,0 @@
-{
-  "recommendations": [
-    "biomejs.biome",
-    "bradlc.vscode-tailwindcss",
-    "denoland.vscode-deno",
-    "supabase.vscode-supabase-extension",
-    "yoavbls.pretty-ts-errors"
-  ]
-}

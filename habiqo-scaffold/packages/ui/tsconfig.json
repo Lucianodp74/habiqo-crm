@@ -1,4 +1,0 @@
-{
-  "extends": "@habiqo/config/tsconfig/react-library.json",
-  "include": ["src"]
-}
