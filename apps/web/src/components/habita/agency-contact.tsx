@@ -3,7 +3,7 @@ import type { PublicAgency } from "@/lib/habita/tenant";
 
 export function AgencyContact({ agency }: { agency: PublicAgency }) {
   return (
-    <section>
+    <section id="contatti">
       <div className="px-8 md:px-16 py-16 text-center">
         <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-4">Contatti</p>
         <h2 className="font-display text-5xl md:text-6xl text-[var(--fg-primary)] mb-6">
@@ -33,3 +33,4 @@ export function AgencyContact({ agency }: { agency: PublicAgency }) {
     </section>
   );
 }
+
