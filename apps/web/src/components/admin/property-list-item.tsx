@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { updatePropertyPortals } from "@/lib/actions/update-portals";
 
 const PORTALS = [
@@ -201,10 +202,14 @@ export function PropertyListItem({
                 : "bg-neutral-900 text-white hover:opacity-90"
             } disabled:opacity-50`}
           >
-            {isPending ? "Salvataggio…" : saved ? "✓ Salvato" : "Salva distribuzione"}
+            <div className="mt-2 flex justify-end">
+        <DeletePropertyButton propertyId={id} propertyTitle={title} />
+      </div>
+      {isPending ? "Salvataggio…" : saved ? "✓ Salvato" : "Salva distribuzione"}
           </button>
         </div>
       )}
     </div>
   );
 }
+
