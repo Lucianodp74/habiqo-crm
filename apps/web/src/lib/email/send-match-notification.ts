@@ -39,91 +39,73 @@ function buildEmailHtml(opts: {
     </tr>
   `).join('')
 
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-</head>
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /></head>
 <body style="margin:0;padding:0;background:#f5f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;padding:32px 16px;">
-    <tr>
-      <td align="center">
-        <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
-
-          <tr>
-            <td style="background:#1a1a18;padding:24px 32px;">
-              <p style="margin:0;color:#a67c52;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;">HABIQUO CRM · MATCHING</p>
-              <h1 style="margin:8px 0 0;color:#ffffff;font-size:20px;font-weight:700;">
-                🏠 ${opts.matchCount} lead compatibil${opts.matchCount === 1 ? 'e' : 'i'} trovat${opts.matchCount === 1 ? 'o' : 'i'}
-              </h1>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:28px 32px;">
-              <p style="margin:0 0 20px;color:#44403c;font-size:15px;line-height:1.6;">
-                Ciao <strong>${opts.ownerName}</strong>,<br/>
-                il nuovo immobile <strong>${opts.propertyTitle}</strong> è compatibile con ${opts.matchCount} lead nel tuo CRM.
+    <tr><td align="center">
+      <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
+        <tr><td style="background:#1a1a18;padding:24px 32px;">
+          <p style="margin:0;color:#a67c52;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;">HABIQUO CRM &middot; MATCHING</p>
+          <h1 style="margin:8px 0 0;color:#ffffff;font-size:20px;font-weight:700;">
+            ${opts.matchCount} lead compatibil${opts.matchCount === 1 ? 'e' : 'i'} trovati
+          </h1>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">
+          <p style="margin:0 0 20px;color:#44403c;font-size:15px;line-height:1.6;">
+            Ciao <strong>${opts.ownerName}</strong>,<br/>
+            il nuovo immobile <strong>${opts.propertyTitle}</strong> e compatibile con ${opts.matchCount} lead nel tuo CRM.
+          </p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f8f6;border-radius:10px;border:1px solid #e8e5df;margin-bottom:24px;">
+            <tr><td style="padding:16px 20px;">
+              <p style="margin:0 0 2px;color:#a67c52;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">Immobile pubblicato</p>
+              <p style="margin:0;color:#1a1a18;font-size:16px;font-weight:700;">${opts.propertyTitle}</p>
+              <p style="margin:4px 0 0;color:#78716c;font-size:13px;">
+                ${opts.propertyCity ?? 'N/D'} &middot; ${formatPrice(opts.priceEur, opts.listingType)} &middot; ${LISTING_LABEL[opts.listingType] ?? opts.listingType}
+                ${opts.rooms ? ` &middot; ${opts.rooms} cam &middot; ${opts.sqm ?? '?'} mq` : ''}
               </p>
-
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f8f6;border-radius:10px;border:1px solid #e8e5df;margin-bottom:24px;">
-                <tr>
-                  <td style="padding:16px 20px;">
-                    <p style="margin:0 0 2px;color:#a67c52;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">Immobile pubblicato</p>
-                    <p style="margin:0;color:#1a1a18;font-size:16px;font-weight:700;">${opts.propertyTitle}</p>
-                    <p style="margin:4px 0 0;color:#78716c;font-size:13px;">
-                      ${opts.propertyCity ?? 'N/D'} · ${formatPrice(opts.priceEur, opts.listingType)} · ${LISTING_LABEL[opts.listingType] ?? opts.listingType}
-                      ${opts.rooms ? ` · ${opts.rooms} cam · ${opts.sqm ?? '?'} mq` : ''}
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin:0 0 12px;color:#44403c;font-size:14px;font-weight:600;">Lead compatibili:</p>
-
-              <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e5df;border-radius:10px;overflow:hidden;margin-bottom:24px;">
-                <tr style="background:#f9f8f6;">
-                  <th style="padding:8px 12px;text-align:left;color:#78716c;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Lead</th>
-                  <th style="padding:8px 12px;text-align:left;color:#78716c;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Città</th>
-                  <th style="padding:8px 12px;text-align:left;color:#78716c;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Budget</th>
-                </tr>
-                ${leadsHtml}
-              </table>
-
-              <table cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="border-radius:10px;background:#1a1a18;">
-                    <a href="${opts.appUrl}/crm/leads" style="display:inline-block;padding:12px 24px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;">
-                      Vai ai lead nel CRM →
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:16px 32px 24px;border-top:1px solid #f0ede8;">
-              <p style="margin:0;color:#a8a29e;font-size:11px;">
-                Notifica automatica di <strong>Habiquo CRM</strong> · Smart living. Smart real estate.
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
+            </td></tr>
+          </table>
+          <p style="margin:0 0 12px;color:#44403c;font-size:14px;font-weight:600;">Lead compatibili:</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e5df;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+            <tr style="background:#f9f8f6;">
+              <th style="padding:8px 12px;text-align:left;color:#78716c;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Lead</th>
+              <th style="padding:8px 12px;text-align:left;color:#78716c;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Citta</th>
+              <th style="padding:8px 12px;text-align:left;color:#78716c;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Budget</th>
+            </tr>
+            ${leadsHtml}
+          </table>
+          <table cellpadding="0" cellspacing="0"><tr><td style="border-radius:10px;background:#1a1a18;">
+            <a href="${opts.appUrl}/crm/leads" style="display:inline-block;padding:12px 24px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;">
+              Vai ai lead nel CRM
+            </a>
+          </td></tr></table>
+        </td></tr>
+        <tr><td style="padding:16px 32px 24px;border-top:1px solid #f0ede8;">
+          <p style="margin:0;color:#a8a29e;font-size:11px;">Notifica automatica di <strong>Habiquo CRM</strong> &middot; Smart living. Smart real estate.</p>
+        </td></tr>
+      </table>
+    </td></tr>
   </table>
 </body>
 </html>`
 }
 
+export type PropertyForMatch = {
+  id:           string
+  title:        string
+  city:         string | null
+  price_eur:    number | null
+  rooms:        number | null
+  sqm:          number | null
+  listing_type: string
+}
+
 export async function sendMatchNotificationForProperty(
-  propertyId: string,
-  agencyId:   string,
-  appUrl:     string,
+  property: PropertyForMatch,
+  agencyId: string,
+  appUrl:   string,
 ): Promise<void> {
   try {
     const admin = createAdminClient(
@@ -132,15 +114,7 @@ export async function sendMatchNotificationForProperty(
       { auth: { persistSession: false } }
     )
 
-    // 1. Dati immobile
-    const { data: property, error: _propErr } = await admin.from('properties')
-      .select('id, title, city, price_eur, rooms, sqm, listing_type')
-      .eq('id', propertyId)
-      .single()
-
-    if (!property) { console.log('[match] property not found, id:', propertyId, 'error?'); return }
-
-    // 2. Lead compatibili
+    // 1. Lead compatibili
     let query = admin
       .from('leads')
       .select('id, full_name, preferred_city, budget_min_eur, budget_max_eur')
@@ -156,12 +130,12 @@ export async function sendMatchNotificationForProperty(
         .or(`budget_min_eur.is.null,budget_min_eur.lte.${p}`)
     }
 
-    const { data: leads } = await query
-    console.log('[match] matching leads:', leads?.length ?? 0)
+    const { data: leads, error: leadsErr } = await query
+    console.log('[match] leads found:', leads?.length ?? 0, 'error:', leadsErr?.message)
 
     if (!leads || leads.length === 0) return
 
-    // 3. Email owner agenzia
+    // 2. Email owner
     const { data: ownerMember } = await admin
       .from('agency_members')
       .select('user_id')
@@ -170,10 +144,12 @@ export async function sendMatchNotificationForProperty(
       .limit(1)
       .maybeSingle()
 
-    if (!ownerMember) { console.log('[match] no owner found'); return }
+    if (!ownerMember) { console.log('[match] no owner'); return }
 
-    const { data: { user: ownerUser } } = await admin.auth.admin.getUserById(ownerMember.user_id)
-    if (!ownerUser?.email) { console.log('[match] no owner email'); return }
+    const { data: { user: ownerUser }, error: authErr } = await admin.auth.admin.getUserById(ownerMember.user_id)
+    console.log('[match] owner email:', ownerUser?.email, 'authErr:', authErr?.message)
+
+    if (!ownerUser?.email) return
 
     const { data: ownerProfile } = await admin
       .from('profiles')
@@ -183,7 +159,7 @@ export async function sendMatchNotificationForProperty(
 
     const ownerName = ownerProfile?.full_name?.trim() || ownerUser.email
 
-    // 4. Invia email
+    // 3. Invia email
     const leadsForEmail = leads.map(l => ({
       id:     l.id,
       name:   l.full_name?.trim() || 'Senza nome',
@@ -196,12 +172,12 @@ export async function sendMatchNotificationForProperty(
     const result = await resend.emails.send({
       from:    EMAIL_FROM,
       to:      ownerUser.email,
-      subject: `🏠 ${leads.length} lead compatibil${leads.length === 1 ? 'e' : 'i'} con "${property.title}" - Habiquo`,
+      subject: `${leads.length} lead compatibili con "${property.title}" - Habiquo`,
       html:    buildEmailHtml({
         ownerName,
         propertyTitle: property.title,
         propertyCity:  property.city,
-        priceEur:      property.price_eur ? Number(property.price_eur) : null,
+        priceEur:      property.price_eur,
         listingType:   property.listing_type,
         rooms:         property.rooms,
         sqm:           property.sqm,
@@ -211,11 +187,8 @@ export async function sendMatchNotificationForProperty(
       }),
     })
 
-    console.log('[match] email sent:', result)
+    console.log('[match] email result:', JSON.stringify(result))
   } catch (err) {
     console.error('[match] Error:', err)
   }
 }
-
-
-

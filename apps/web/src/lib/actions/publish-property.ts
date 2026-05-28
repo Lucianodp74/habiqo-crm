@@ -95,7 +95,7 @@ export async function publishProperty(
   // 2) Fetch property + verify write membership
   const { data: property } = await supabase
     .from("properties")
-    .select("id, agency_id, title, slug")
+    .select("id, agency_id, title, slug, city, price_eur, rooms, sqm, listing_type")
     .eq("id", input.propertyId)
     .maybeSingle();
 
@@ -175,7 +175,15 @@ export async function publishProperty(
 
   // 4b) Notify matching leads (fire and forget)
   void sendMatchNotificationForProperty(
-    property.id,
+    {
+      id:           property.id,
+      title:        property.title,
+      city:         (property as Record<string,unknown>).city as string | null ?? null,
+      price_eur:    (property as Record<string,unknown>).price_eur as number | null ?? null,
+      rooms:        (property as Record<string,unknown>).rooms as number | null ?? null,
+      sqm:          (property as Record<string,unknown>).sqm as number | null ?? null,
+      listing_type: (property as Record<string,unknown>).listing_type as string ?? "sale",
+    },
     property.agency_id,
     process.env.NEXT_PUBLIC_APP_URL ?? "https://habiquo.it",
   )
@@ -207,4 +215,6 @@ export async function publishProperty(
     },
   };
 }
+
+
 
