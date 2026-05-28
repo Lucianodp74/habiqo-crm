@@ -13,6 +13,7 @@ const signInSchema = z.object({
 
 const signUpSchema = z.object({
   fullName: z.string().min(2, { message: "Inserisci nome e cognome" }).max(200).optional(),
+  agencyName: z.string().min(2, { message: "Inserisci il nome dell'agenzia" }).max(200).optional(),
   email: z.string().email({ message: "Inserisci un'email valida" }),
   password: z.string().min(8, { message: "Minimo 8 caratteri" }),
 });
@@ -180,6 +181,7 @@ export async function signUpAndRedirect(
 ): Promise<ActionResult<null>> {
   const parsed = signUpSchema.safeParse({
     fullName: formData.get("fullName") || undefined,
+    agencyName: formData.get("agencyName") || undefined,
     email: formData.get("email"),
     password: formData.get("password"),
   });
@@ -199,7 +201,12 @@ export async function signUpAndRedirect(
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
-      options: parsed.data.fullName ? { data: { full_name: parsed.data.fullName } } : undefined,
+      options: {
+        data: {
+          ...(parsed.data.fullName    ? { full_name:    parsed.data.fullName }    : {}),
+          ...(parsed.data.agencyName  ? { agency_name:  parsed.data.agencyName }  : {}),
+        }
+      },
     });
 
     if (error || !data.user) {
@@ -213,7 +220,7 @@ export async function signUpAndRedirect(
     }
 
     revalidatePath("/", "layout");
-    redirect("/dashboard");
+    redirect("/onboarding");
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return {
@@ -234,3 +241,4 @@ export async function signOut() {
   revalidatePath("/", "layout");
   redirect("/login");
 }
+
