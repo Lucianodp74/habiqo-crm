@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getDashboardData } from '@/lib/queries/dashboard'
 import { KpiCard } from '@/components/dashboard/kpi-card'
+import { LeadsChart } from '@/components/dashboard/leads-chart'
 
 export const metadata = { title: 'Dashboard · Habiquo' }
 
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
   const data = await getDashboardData()
   if (!data) redirect('/login')
 
-  const { kpis, recentLeads, recentProps, appointments, agencyName } = data
+  const { kpis, recentLeads, recentProps, appointments, agencyName, chartData } = data
 
   const today = new Intl.DateTimeFormat('it-IT', {
     weekday: 'long', day: '2-digit', month: 'long',
@@ -132,6 +133,17 @@ export default async function DashboardPage() {
           icon="🎯"
           sublabel="lead con preferenze"
         />
+      </section>
+
+      {/* Grafico lead */}
+      <section className="mb-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-display text-[18px] text-[var(--fg-primary)]">Lead ultimi 30 giorni</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mt-0.5">{kpis.newLeads30d} lead ricevuti</p>
+          </div>
+        </div>
+        <LeadsChart data={chartData} />
       </section>
 
       {/* Main grid */}
@@ -290,3 +302,6 @@ export default async function DashboardPage() {
     </div>
   )
 }
+
+
+

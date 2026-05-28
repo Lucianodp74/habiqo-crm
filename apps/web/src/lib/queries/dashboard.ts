@@ -45,6 +45,7 @@ export type DashboardLeadChartPoint = {
 }
 
 export type DashboardData = {
+  chartData:     DashboardLeadChartPoint[]
   kpis:          DashboardKpis
   recentLeads:   DashboardRecentLead[]
   recentProps:   DashboardRecentProperty[]
@@ -82,6 +83,7 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     rendersRes,
     appointmentsTodayRes,
     leadsWithPrefsRes,
+    chartLeadsRes,
     recentLeadsRes,
     recentPropsRes,
     appointmentsRes,
@@ -129,6 +131,14 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       .eq('agency_id', agencyId)
       .not('preferred_city', 'is', null),
 
+    // Lead per grafico (ultimi 30gg)
+    supabase
+      .from('leads')
+      .select('created_at')
+      .eq('agency_id', agencyId)
+      .gte('created_at', ago30d)
+      .order('created_at', { ascending: true }),
+
     // Ultimi 5 lead
     supabase
       .from('leads')
@@ -156,6 +166,20 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       .limit(5),
   ])
 
+  // Genera chart data: conta lead per giorno
+  const chartMap: Record<string, number> = {}
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000)
+    const key = d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })
+    chartMap[key] = 0
+  }
+  for (const lead of (chartLeadsRes.data ?? [])) {
+    const d = new Date(lead.created_at ?? '')
+    const key = d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })
+    if (key in chartMap) if (typeof chartMap[key] === "number") chartMap[key]++
+  }
+  const chartData = Object.entries(chartMap).map(([date, count]) => ({ date, count }))
+
   return {
     kpis: {
       activeLeads:       activeLeadsRes.count      ?? 0,
@@ -165,6 +189,7 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       appointmentsToday: appointmentsTodayRes.count ?? 0,
       leadsWithPrefs:    leadsWithPrefsRes.count    ?? 0,
     },
+    chartData,
     recentLeads:  (recentLeadsRes.data ?? []).map(l => ({
       id:         l.id,
       full_name:  l.full_name,
@@ -186,4 +211,10 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     agencyName,
   }
 }
+
+
+
+
+
+
 
