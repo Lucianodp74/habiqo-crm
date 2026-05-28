@@ -1,5 +1,4 @@
 "use client";
-
 import { signUpAndRedirect } from "@/lib/actions/auth";
 import { Button } from "@habiquo/ui";
 import { useActionState } from "react";
@@ -9,15 +8,6 @@ export function RegisterForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <Field
-        name="agencyName"
-        type="text"
-        label="Nome agenzia"
-        placeholder="Immobiliare Rossi"
-        autoComplete="organization"
-        errors={state?.ok === false ? state.error.fields?.agencyName : undefined}
-        required
-      />
       <Field
         name="agencyName"
         type="text"
@@ -100,5 +90,3 @@ function Field({
     </div>
   );
 }
-
-
