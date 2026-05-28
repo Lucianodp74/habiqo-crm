@@ -133,13 +133,12 @@ export async function sendMatchNotificationForProperty(
     )
 
     // 1. Dati immobile
-    const { data: property } = await admin
-      .from('properties')
+    const { data: property, error: propErr } = await admin.from('properties')
       .select('id, title, city, price_eur, rooms, sqm, listing_type')
       .eq('id', propertyId)
       .single()
 
-    if (!property) { console.log('[match] property not found'); return }
+    if (!property) { console.log('[match] property not found, id:', propertyId, 'error?'); return }
 
     // 2. Lead compatibili
     let query = admin
@@ -217,3 +216,5 @@ export async function sendMatchNotificationForProperty(
     console.error('[match] Error:', err)
   }
 }
+
+
