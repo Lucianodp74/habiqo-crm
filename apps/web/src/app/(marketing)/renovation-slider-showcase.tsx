@@ -4,8 +4,8 @@ import { useState, useRef, useCallback } from 'react'
 
 interface Render {
   id:           string
-  original_url: string
-  result_url:   string
+  before_image_url: string
+  after_image_url:   string
   style:        string | null
 }
 
@@ -68,7 +68,7 @@ export function RenovationSliderShowcase({ renders }: Props) {
 
   return (
     <div>
-      <Slider before={render.original_url} after={render.result_url} />
+      <Slider before={render.before_image_url} after={render.after_image_url} />
       {renders.length > 1 && (
         <div className="flex gap-3 mt-4 justify-center">
           {renders.map((r, i) => (
@@ -77,7 +77,7 @@ export function RenovationSliderShowcase({ renders }: Props) {
               onClick={() => setActive(i)}
               className={`w-16 h-10 rounded-lg overflow-hidden border-2 transition-all ${i === active ? 'border-[#a67c52]' : 'border-transparent opacity-50 hover:opacity-75'}`}
             >
-              <img src={r.result_url} alt="" className="w-full h-full object-cover" />
+              <img src={r.after_image_url} alt="" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
@@ -85,3 +85,4 @@ export function RenovationSliderShowcase({ renders }: Props) {
     </div>
   )
 }
+

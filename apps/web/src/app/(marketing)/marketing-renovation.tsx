@@ -13,10 +13,10 @@ async function getShowcaseRenders() {
     )
     const { data } = await admin
       .from('renovation_previews')
-      .select('id, original_url, result_url, style')
+      .select('id, before_image_url, after_image_url, style')
       .eq('status', 'completed')
-      .not('original_url', 'is', null)
-      .not('result_url', 'is', null)
+      .not('before_image_url', 'is', null)
+      .not('after_image_url', 'is', null)
       .order('created_at', { ascending: false })
       .limit(3)
     return data ?? []
@@ -89,3 +89,4 @@ export async function MarketingRenovation() {
     </section>
   )
 }
+
