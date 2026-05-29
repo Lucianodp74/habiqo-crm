@@ -108,21 +108,7 @@ export default function HomePage() {
                 className="w-full bg-[#f5f4f0] flex items-center justify-center"
                 style={{ aspectRatio: '16/10', minHeight: '320px' }}
               >
-                {/* Replace this div with <img src="YOUR_SCREENSHOT_URL" alt="Dashboard Habiquo" className="w-full h-full object-cover object-top" /> */}
-                <div className="text-center">
-                  <div className="w-12 h-12 rounded-xl bg-[#e8e5df] flex items-center justify-center mx-auto mb-3">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a67c52" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="2"/>
-                      <path d="M3 9h18M9 21V9"/>
-                    </svg>
-                  </div>
-                  <p className="text-[12px] text-[#9a9490] font-mono uppercase tracking-wider" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                    Screenshot dashboard
-                  </p>
-                  <p className="text-[11px] text-[#c0bbb6] mt-1" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                    Carica l'immagine reale
-                  </p>
-                </div>
+                <img src="https://jwivrcofmxnpgkdolnuo.supabase.co/storage/v1/object/public/landing/dashboard%20per%20landing.png" alt="Dashboard Habiquo" className="w-full h-full object-cover object-top" />
               </div>
             </div>
 
@@ -150,3 +136,4 @@ export default function HomePage() {
     </div>
   )
 }
+
