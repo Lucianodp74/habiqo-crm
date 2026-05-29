@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { MarketingNav } from './marketing-nav'
 import { MarketingFeatures } from './marketing-features'
 import { MarketingRenovation } from './marketing-renovation'
+import { MarketingFounder } from './marketing-founder'
+import { MarketingFooter } from './marketing-footer'
 
 export const metadata = {
   title: 'HABIQUO · Il CRM AI per agenzie immobiliari italiane',
@@ -132,13 +134,13 @@ export default function HomePage() {
       <MarketingRenovation />
 
       {/* ── PLACEHOLDER sezioni future ───────────────────────── */}
-      <div id="ai-renovation" className="h-1" />
-      <div id="dashboard" className="h-1" />
-      <div id="founder-access" className="h-1" />
+      <MarketingFounder />
+      <MarketingFooter />
 
     </div>
   )
 }
+
 
 
 
