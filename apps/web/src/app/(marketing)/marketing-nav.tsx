@@ -10,7 +10,6 @@ function scrollTo(id: string) {
 const NAV_LINKS = [
   { label: 'Funzionalità',   href: '#funzionalita'   },
   { label: 'AI Renovation',  href: '#ai-renovation'  },
-  { label: 'Dashboard',      href: '#dashboard'       },
   { label: 'Founder Access', href: '#founder-access'  },
 ]
 
@@ -120,3 +119,4 @@ export function MarketingNav() {
     </header>
   )
 }
+
