@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#FAF9F6]" style={{ fontFamily: 'var(--font-display, serif)' }}>
+    <div className="min-h-screen bg-[#FAF9F6] scroll-smooth" style={{ fontFamily: 'var(--font-display, serif)' }}>
 
       <MarketingNav />
 
@@ -136,4 +136,6 @@ export default function HomePage() {
     </div>
   )
 }
+
+
 
