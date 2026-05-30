@@ -4,6 +4,8 @@ import { MarketingProblem } from './marketing-problem'
 import { MarketingScreenshots } from './marketing-screenshots'
 import { MarketingFeatures } from './marketing-features'
 import { MarketingRenovation } from './marketing-renovation'
+import { MarketingBuiltWith } from './marketing-built-with'
+import { MarketingWhoUses } from './marketing-who-uses'
 import { MarketingFounder } from './marketing-founder'
 import { MarketingFooter } from './marketing-footer'
 
@@ -142,12 +144,17 @@ export default function HomePage() {
       <MarketingRenovation />
 
       {/* ── PLACEHOLDER sezioni future ───────────────────────── */}
+      <MarketingBuiltWith />
+
+      <MarketingWhoUses />
+
       <MarketingFounder />
       <MarketingFooter />
 
     </div>
   )
 }
+
 
 
 
