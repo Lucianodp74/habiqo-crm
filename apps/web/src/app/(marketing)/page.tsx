@@ -24,21 +24,16 @@ export default function HomePage() {
 
       <MarketingNav />
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
+      {/* HERO */}
       <section className="pt-32 pb-12 px-6 lg:px-16 max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-          {/* Left: Copy */}
           <div>
-            {/* Badge */}
             <div className="inline-flex items-center gap-2 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-[#a67c52]" />
               <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#a67c52]">
                 Founder Access · Accesso limitato
               </span>
             </div>
-
-            {/* Headline */}
             <h1
               className="text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.06] tracking-[-0.02em] text-[#1a1a18] mb-6"
               style={{ fontWeight: 700 }}
@@ -46,17 +41,13 @@ export default function HomePage() {
               Il sistema operativo delle agenzie immobiliari{' '}
               <em style={{ fontStyle: 'italic', color: '#a67c52' }}>italiane.</em>
             </h1>
-
-            {/* Subheadline */}
             <p
               className="text-[18px] leading-[1.6] text-[#6b6660] max-w-[480px] mb-10"
               style={{ fontFamily: 'system-ui, sans-serif', fontWeight: 400 }}
             >
-              CRM, matching automatico lead-immobili, AI renovation e agenda team.
-              Tutto in un unica piattaforma. Senza Excel, senza frammentazione.
+              Gestisci lead, immobili e team da un unica piattaforma.
+              Progettata per il mercato italiano.
             </p>
-
-            {/* CTAs */}
             <div className="flex flex-wrap items-center gap-4 mb-14">
               <Link
                 href="/richiedi-demo"
@@ -73,11 +64,9 @@ export default function HomePage() {
                 className="text-[14px] text-[#6b6660] hover:text-[#1a1a18] transition-colors underline underline-offset-4"
                 style={{ fontFamily: 'system-ui, sans-serif' }}
               >
-                Vedi come funziona
+                Scopri le funzionalità
               </Link>
             </div>
-
-            {/* Social proof mini */}
             <div className="flex items-center gap-6 pt-8 border-t border-[#e8e5df]">
               {[
                 { value: '2',    label: 'agenzie in beta privata' },
@@ -92,7 +81,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right: Dashboard Screenshot */}
           <div className="relative">
             <div
               className="absolute inset-0 rounded-2xl"
@@ -103,7 +91,6 @@ export default function HomePage() {
               }}
             />
             <div className="relative rounded-2xl overflow-hidden shadow-[0_32px_80px_-20px_rgba(0,0,0,0.22)] border border-[rgba(0,0,0,0.08)]">
-              {/* Browser bar */}
               <div className="flex items-center gap-1.5 px-4 py-3 bg-[#f0ede8] border-b border-[rgba(0,0,0,0.06)]">
                 <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
                 <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
@@ -114,13 +101,8 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <img
-                src={SCREENSHOT_URL}
-                alt="Dashboard Habiquo"
-                className="w-full h-auto object-cover object-top"
-              />
+              <img src={SCREENSHOT_URL} alt="Dashboard Habiquo" className="w-full h-auto object-cover object-top" />
             </div>
-            {/* Floating badges */}
             <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[rgba(0,0,0,0.06)] px-4 py-3">
               <p className="text-[10px] font-mono uppercase tracking-wider text-[#9a9490] mb-1" style={{ fontFamily: 'system-ui, sans-serif' }}>Lead attivi</p>
               <p className="text-[22px] font-bold text-[#1a1a18] leading-none">847</p>
@@ -130,50 +112,62 @@ export default function HomePage() {
               <p className="text-[22px] font-bold text-[#a67c52] leading-none">12</p>
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* ── FUNZIONALITA ─────────────────────────────────────── */}
+      {/* PROBLEMA → SOLUZIONE */}
       <MarketingProblem />
 
-      <div className="py-14 px-6 lg:px-16 bg-[#f5f4f0]"><div className="max-w-[1200px] mx-auto"><div className="rounded-2xl border border-[rgba(166,124,82,0.2)] bg-white p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"><div><h3 className="text-[20px] font-bold text-[#1a1a18] mb-2">Hai riconosciuto la tua agenzia in questa situazione?</h3><p className="text-[14px] text-[#6b6660] max-w-[480px]" style={{fontFamily:'system-ui,sans-serif'}}>Scopri come Habiquo centralizza lead, immobili, documenti e appuntamenti in un unica piattaforma.</p></div><a href="/richiedi-demo" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1a1a18] text-white text-[14px] font-semibold hover:bg-[#2d2d2a] transition-colors whitespace-nowrap flex-shrink-0" style={{fontFamily:'system-ui,sans-serif'}}>Richiedi una demo privata</a></div></div></div>
+      {/* CTA INTERMEDIA */}
+      <div className="py-14 px-6 lg:px-16 bg-[#f5f4f0]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="rounded-2xl border border-[rgba(166,124,82,0.2)] bg-white p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h3 className="text-[20px] font-bold text-[#1a1a18] mb-2" style={{ fontWeight: 700 }}>
+                Hai riconosciuto la tua agenzia in questa situazione?
+              </h3>
+              <p className="text-[14px] text-[#6b6660] max-w-[480px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
+                Scopri come Habiquo centralizza lead, immobili, documenti e appuntamenti in un unica piattaforma.
+              </p>
+            </div>
+            <a
+              href="/richiedi-demo"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1a1a18] text-white text-[14px] font-semibold hover:bg-[#2d2d2a] transition-colors whitespace-nowrap flex-shrink-0"
+              style={{ fontFamily: 'system-ui, sans-serif' }}
+            >
+              Richiedi una demo privata
+            </a>
+          </div>
+        </div>
+      </div>
 
+      {/* DENTRO HABIQUO */}
       <MarketingScreenshots />
 
-      <div className="py-14 px-6 lg:px-16 bg-[#f5f4f0]"><div className="max-w-[1200px] mx-auto"><div className="rounded-2xl border border-[rgba(166,124,82,0.2)] bg-white p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"><div><h3 className="text-[20px] font-bold text-[#1a1a18] mb-2">Hai riconosciuto la tua agenzia in questa situazione?</h3><p className="text-[14px] text-[#6b6660] max-w-[480px]" style={{fontFamily:'system-ui,sans-serif'}}>Scopri come Habiquo centralizza lead, immobili, documenti e appuntamenti in un unica piattaforma.</p></div><a href="/richiedi-demo" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1a1a18] text-white text-[14px] font-semibold hover:bg-[#2d2d2a] transition-colors whitespace-nowrap flex-shrink-0" style={{fontFamily:'system-ui,sans-serif'}}>Richiedi una demo privata</a></div></div></div>
-
-      <MarketingScreenshots />
-
+      {/* FEATURE GRID */}
       <MarketingFeatures />
 
+      {/* AI RENOVATION */}
       <MarketingRenovation />
 
-      {/* ── PLACEHOLDER sezioni future ───────────────────────── */}
+      {/* COSTRUITO CON LE AGENZIE */}
       <MarketingBuiltWith />
 
+      {/* CHI USA HABIQUO */}
       <MarketingWhoUses />
 
+      {/* NUMERI REALI */}
       <MarketingStats />
 
+      {/* FOUNDER ACCESS */}
       <MarketingFounder />
+
+      {/* MESSAGGIO FONDATORE */}
       <MarketingFounderStory />
 
+      {/* FOOTER */}
       <MarketingFooter />
 
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
