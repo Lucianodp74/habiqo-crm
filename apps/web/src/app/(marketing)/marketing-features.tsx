@@ -1,6 +1,6 @@
 export function MarketingFeatures() {
   return (
-    <section id="funzionalita" className="py-28 px-6 lg:px-16 max-w-[1200px] mx-auto">
+    <section id="funzionalita" className="py-16 px-6 lg:px-16 max-w-[1200px] mx-auto">
 
       <div className="text-center mb-16">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#a67c52] mb-4">
@@ -132,4 +132,5 @@ export function MarketingFeatures() {
     </section>
   )
 }
+
 
