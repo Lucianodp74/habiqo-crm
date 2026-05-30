@@ -3,7 +3,7 @@
 
 export function MarketingFounder() {
   return (
-    <section id="founder-access" className="py-28 px-6 lg:px-16">
+    <section id="founder-access" className="py-16 px-6 lg:px-16">
       <div className="max-w-[1200px] mx-auto">
 
         {/* Main card */}
@@ -127,3 +127,4 @@ export function MarketingFounder() {
     </section>
   )
 }
+
