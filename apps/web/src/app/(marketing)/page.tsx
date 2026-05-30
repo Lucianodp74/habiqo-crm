@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MarketingNav } from './marketing-nav'
+import { MarketingProblem } from './marketing-problem'
 import { MarketingFeatures } from './marketing-features'
 import { MarketingRenovation } from './marketing-renovation'
 import { MarketingFounder } from './marketing-founder'
@@ -129,6 +130,8 @@ export default function HomePage() {
       </section>
 
       {/* ── FUNZIONALITA ─────────────────────────────────────── */}
+      <MarketingProblem />
+
       <MarketingFeatures />
 
       <MarketingRenovation />
@@ -140,6 +143,7 @@ export default function HomePage() {
     </div>
   )
 }
+
 
 
 
