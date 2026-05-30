@@ -61,7 +61,7 @@ export function MarketingNav() {
             style={{ fontFamily: 'system-ui, sans-serif' }}>
             Accedi
           </Link>
-          <Link href="/register"
+          <Link href="/richiedi-demo"
             className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#1a1a18] text-white text-[13px] font-medium hover:bg-[#2d2d2a] transition-colors"
             style={{ fontFamily: 'system-ui, sans-serif' }}>
             Richiedi demo
@@ -108,7 +108,7 @@ export function MarketingNav() {
               style={{ fontFamily: 'system-ui, sans-serif' }}>
               Accedi
             </Link>
-            <Link href="/register" onClick={() => setOpen(false)}
+            <Link href="/richiedi-demo" onClick={() => setOpen(false)}
               className="text-center py-3 rounded-full bg-[#1a1a18] text-white text-[14px] font-medium"
               style={{ fontFamily: 'system-ui, sans-serif' }}>
               Richiedi demo privata
@@ -119,4 +119,5 @@ export function MarketingNav() {
     </header>
   )
 }
+
 

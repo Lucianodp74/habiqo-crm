@@ -57,7 +57,7 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-4 mb-14">
               <Link
-                href="/register"
+                href="/richiedi-demo"
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1a1a18] text-white text-[14px] font-semibold hover:bg-[#2d2d2a] transition-colors"
                 style={{ fontFamily: 'system-ui, sans-serif' }}
               >
@@ -135,7 +135,11 @@ export default function HomePage() {
       {/* ── FUNZIONALITA ─────────────────────────────────────── */}
       <MarketingProblem />
 
+      <div className="py-14 px-6 lg:px-16 bg-[#f5f4f0]"><div className="max-w-[1200px] mx-auto"><div className="rounded-2xl border border-[rgba(166,124,82,0.2)] bg-white p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"><div><h3 className="text-[20px] font-bold text-[#1a1a18] mb-2">Hai riconosciuto la tua agenzia in questa situazione?</h3><p className="text-[14px] text-[#6b6660] max-w-[480px]" style={{fontFamily:'system-ui,sans-serif'}}>Scopri come Habiquo centralizza lead, immobili, documenti e appuntamenti in un unica piattaforma.</p></div><a href="/richiedi-demo" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1a1a18] text-white text-[14px] font-semibold hover:bg-[#2d2d2a] transition-colors whitespace-nowrap flex-shrink-0" style={{fontFamily:'system-ui,sans-serif'}}>Richiedi una demo privata</a></div></div></div>
+
       <MarketingScreenshots />
+
+      <div className="py-14 px-6 lg:px-16 bg-[#f5f4f0]"><div className="max-w-[1200px] mx-auto"><div className="rounded-2xl border border-[rgba(166,124,82,0.2)] bg-white p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"><div><h3 className="text-[20px] font-bold text-[#1a1a18] mb-2">Hai riconosciuto la tua agenzia in questa situazione?</h3><p className="text-[14px] text-[#6b6660] max-w-[480px]" style={{fontFamily:'system-ui,sans-serif'}}>Scopri come Habiquo centralizza lead, immobili, documenti e appuntamenti in un unica piattaforma.</p></div><a href="/richiedi-demo" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1a1a18] text-white text-[14px] font-semibold hover:bg-[#2d2d2a] transition-colors whitespace-nowrap flex-shrink-0" style={{fontFamily:'system-ui,sans-serif'}}>Richiedi una demo privata</a></div></div></div>
 
       <MarketingScreenshots />
 
@@ -154,6 +158,8 @@ export default function HomePage() {
     </div>
   )
 }
+
+
 
 
 
