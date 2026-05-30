@@ -20,7 +20,7 @@ const AFTER = [
 
 export function MarketingProblem() {
   return (
-    <section className="py-24 px-6 lg:px-16 bg-[#FAF9F6]">
+    <section className="py-16 px-6 lg:px-16 bg-[#FAF9F6]">
       <div className="max-w-[1200px] mx-auto">
 
         {/* Header */}
@@ -124,3 +124,4 @@ export function MarketingProblem() {
     </section>
   )
 }
+

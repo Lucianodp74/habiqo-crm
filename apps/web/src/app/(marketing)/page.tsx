@@ -20,7 +20,7 @@ export default function HomePage() {
       <MarketingNav />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="pt-32 pb-20 px-6 lg:px-16 max-w-[1200px] mx-auto">
+      <section className="pt-32 pb-12 px-6 lg:px-16 max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* Left: Copy */}
@@ -143,6 +143,7 @@ export default function HomePage() {
     </div>
   )
 }
+
 
 
 
