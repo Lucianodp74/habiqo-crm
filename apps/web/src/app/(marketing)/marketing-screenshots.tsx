@@ -22,33 +22,7 @@ const SCREENS = [
     src:     `${BASE}/leads.png`,
     side:    'right',
   },
-  {
-    id:      'documenti',
-    label:   'Documenti & AI Insight',
-    title:   'Documenti del lead + insight AI in tempo reale.',
-    desc:    'Carica planimetrie, visure e contratti direttamente nel profilo lead. Il motore AI analizza la timeline e suggerisce la prossima azione più efficace.',
-    benefit: 'Meno dimenticanze, più conversioni.',
-    src:     `${BASE}/documenti.png`,
-    side:    'left',
-  },
-  {
-    id:      'immobili',
-    label:   'Gestione Immobili',
-    title:   'Tutti gli immobili. Pubblicati ovunque in un click.',
-    desc:    'Crea immobili con AI, gestisci le foto e pubblica su Immobiliare.it, Idealista e il tuo sito Habita con un solo click.',
-    benefit: 'Da bozza a pubblicato in meno di 2 minuti.',
-    src:     `${BASE}/immobili.png`,
-    side:    'right',
-  },
-  {
-    id:      'agenda',
-    label:   'Agenda Team',
-    title:   'Un\'agenda condivisa per tutto il team.',
-    desc:    'Visite, chiamate, firme e incontri in un\'unica agenda. Collega ogni appuntamento al lead e all\'immobile. Il team lavora sincronizzato.',
-    benefit: 'Nessun appuntamento perso, nessuna sovrapposizione.',
-    src:     `${BASE}/agenda.png`,
-    side:    'left',
-  },
+
 ]
 
 function Screenshot({ src, alt }: { src: string; alt: string }) {
@@ -152,4 +126,5 @@ export function MarketingScreenshots() {
     </section>
   )
 }
+
 
