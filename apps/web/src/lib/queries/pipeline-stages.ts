@@ -10,9 +10,7 @@ export type PipelineStage = {
   color: string;
   sortOrder: number;
   isSystem: boolean;
-  /** Maps to lead_status enum value for system stages. null for custom. */
   statusKey: string | null;
-  /** Sprint 2: automation hooks — read-only for now. */
   automationEnabled: boolean;
   automationConfig: Record<string, unknown> | null;
   createdAt: string;
@@ -51,16 +49,6 @@ function mapRow(row: DbRow): PipelineStage {
   };
 }
 
-// ─── Queries ──────────────────────────────────────────────────────
-
-/**
- * Returns pipeline stages for the current user's PRIMARY agency only.
- * Filters by agency_id explicitly to avoid returning stages for all
- * agencies when a user has multiple memberships.
- *
- * Returns null on auth failure (caller should redirect).
- * Returns [] when the agency has no stages yet.
- */
 export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   const supabase = await createClient();
 
@@ -69,24 +57,23 @@ export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Resolve primary agency explicitly — prevents multi-agency users
-  // from receiving stages for all their agencies at once.
-  const { data: membership } = await supabase
+  // Use limit(1) array form — avoids .single() crash with multiple memberships.
+  const { data: memberships } = await supabase
     .from("agency_members")
     .select("agency_id")
     .eq("user_id", user.id)
     .order("created_at", { ascending: true })
-    .limit(1)
-    .single();
+    .limit(1);
 
-  if (!membership) return null;
+  const agencyId = memberships?.[0]?.agency_id;
+  if (!agencyId) return null;
 
   const { data, error } = await supabase
     .from("pipeline_stages")
     .select(
       "id, agency_id, name, short_label, color, sort_order, is_system, status_key, automation_enabled, automation_config, created_at, updated_at",
     )
-    .eq("agency_id", membership.agency_id)
+    .eq("agency_id", agencyId)
     .order("sort_order", { ascending: true });
 
   if (error) {
@@ -97,10 +84,6 @@ export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   return (data ?? []).map(mapRow);
 }
 
-/**
- * Fetches stages for a specific agency (used in admin pages where
- * agency_id is known explicitly).
- */
 export async function getPipelineStagesForAgency(
   agencyId: string,
 ): Promise<PipelineStage[] | null> {
