@@ -1,17 +1,19 @@
 "use client";
 
-import type { PipelineColumnId } from "@/lib/crm/pipeline";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { ReactNode } from "react";
 
 type PipelineColumnProps = {
-  id: PipelineColumnId;
+  /** Column identifier — PipelineColumnId (static) or UUID (dynamic). */
+  id: string;
   label: string;
   shortLabel: string;
   count: number;
   leadIds: string[];
   children: ReactNode;
+  /** Optional hex color for the column accent dot. Defaults to muted. */
+  color?: string;
 };
 
 export function PipelineColumn({
@@ -21,6 +23,7 @@ export function PipelineColumn({
   count,
   leadIds,
   children,
+  color,
 }: PipelineColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -34,13 +37,23 @@ export function PipelineColumn({
       }`}
     >
       <header className="flex items-center justify-between gap-2 px-3 pt-3 pb-2 border-b border-[var(--border-subtle)]/80">
-        <div className="min-w-0">
-          <h2 className="text-[11px] font-medium tracking-wide text-[var(--fg-primary)] truncate">
-            {label}
-          </h2>
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--fg-muted)] truncate sm:hidden">
-            {shortLabel}
-          </p>
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Color accent dot — only shown when a custom color is provided */}
+          {color && (
+            <span
+              className="shrink-0 w-2 h-2 rounded-full"
+              style={{ backgroundColor: color }}
+              aria-hidden
+            />
+          )}
+          <div className="min-w-0">
+            <h2 className="text-[11px] font-medium tracking-wide text-[var(--fg-primary)] truncate">
+              {label}
+            </h2>
+            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--fg-muted)] truncate sm:hidden">
+              {shortLabel}
+            </p>
+          </div>
         </div>
         <span
           className="font-mono text-[10px] tabular-nums text-[var(--fg-muted)] shrink-0 px-2 py-0.5 rounded-md bg-[var(--bg-sunken)]"

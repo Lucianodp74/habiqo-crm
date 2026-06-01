@@ -1,8 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
 import { AddNewLeadFlow } from "@/components/crm/add-new-lead-flow";
 import { PipelineShell } from "@/components/crm/pipeline-shell";
+import { mapStagesToDynamicColumns } from "@/lib/crm/pipeline";
 import { listAgentsForAgency } from "@/lib/queries/agency-members";
 import { listLeadsForAgency } from "@/lib/queries/leads";
+import { getPipelineStages } from "@/lib/queries/pipeline-stages";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
 export const metadata = { title: "Pipeline · CRM" };
@@ -20,10 +22,16 @@ export default async function CrmLeadsPipelinePage({ searchParams }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [initialLeads, agents] = await Promise.all([
+  const [initialLeads, agents, stages] = await Promise.all([
     listLeadsForAgency(isMineFilter && user ? { assignedTo: user.id } : undefined),
     listAgentsForAgency(),
+    getPipelineStages(),
   ]);
+
+  // Map DB stages to dynamic columns for the board.
+  // If stages is null (auth error) or empty, board falls back to static columns.
+  const dynamicColumns =
+    stages && stages.length > 0 ? mapStagesToDynamicColumns(stages) : undefined;
 
   return (
     <div className="px-4 sm:px-8 py-8 max-w-[1920px] mx-auto">
@@ -61,21 +69,14 @@ export default async function CrmLeadsPipelinePage({ searchParams }: Props) {
                   : "text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]"
               }`}
             >
-              I miei
+              Miei
             </Link>
           </div>
-
-          <Link
-            href="/crm"
-            className="text-[12px] font-medium text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 bg-[var(--bg-elevated)] transition-colors"
-          >
-            Vista elenco
-          </Link>
+          <AddNewLeadFlow />
         </div>
       </header>
 
-      <PipelineShell initialLeads={initialLeads} agents={agents} />
-      <AddNewLeadFlow />
+      <PipelineShell initialLeads={initialLeads} agents={agents} columns={dynamicColumns} />
     </div>
   );
 }

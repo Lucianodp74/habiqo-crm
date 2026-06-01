@@ -1,7 +1,13 @@
 /**
  * CRM pipeline domain: column definitions and DB status mapping.
  * DB enum uses `in_negotiation`; the board uses column id `negotiation`.
+ *
+ * Sprint 1 addition: PipelineColumnDynamic + helpers to build column
+ * lists from DB pipeline_stages rows. All existing exports are
+ * unchanged — zero regresssions.
  */
+
+// ─── Static types (unchanged) ─────────────────────────────────────
 
 export const PIPELINE_COLUMN_IDS = [
   "new",
@@ -114,3 +120,131 @@ export function findContainerForDnd(
   return findLeadColumn(items, id);
 }
 
+// ─── Sprint 1 addition: Dynamic column support ────────────────────
+//
+// PipelineColumnDynamic is the runtime representation of a DB stage.
+// It coexists with the static PipelineColumnMeta above.
+// The board accepts either; it falls back to PIPELINE_COLUMNS when
+// no dynamic columns are supplied.
+
+export type PipelineColumnDynamic = {
+  /** UUID from pipeline_stages.id */
+  id: string;
+  /** Display label (agency-customised or default) */
+  label: string;
+  shortLabel: string;
+  color: string;
+  isSystem: boolean;
+  /**
+   * For system stages: the PipelineColumnId this maps to.
+   * Used to route leads from leads.status → correct column.
+   * null for custom stages.
+   */
+  statusKey: PipelineColumnId | null;
+  sortOrder: number;
+};
+
+/**
+ * Convert DB pipeline_stages rows (from getPipelineStages()) into
+ * PipelineColumnDynamic[] for use by the board.
+ *
+ * import type { PipelineStage } from "@/lib/queries/pipeline-stages";
+ * (kept as unknown here to avoid circular deps at the lib layer)
+ */
+export function mapStagesToDynamicColumns(
+  stages: Array<{
+    id: string;
+    name: string;
+    shortLabel: string | null;
+    color: string;
+    isSystem: boolean;
+    statusKey: string | null;
+    sortOrder: number;
+  }>,
+): PipelineColumnDynamic[] {
+  return stages.map((s) => ({
+    id: s.id,
+    label: s.name,
+    shortLabel: s.shortLabel ?? s.name.slice(0, 6),
+    color: s.color,
+    isSystem: s.isSystem,
+    statusKey:
+      s.statusKey && isPipelineColumnId(s.statusKey)
+        ? s.statusKey
+        : s.statusKey === "in_negotiation"
+          ? "negotiation"
+          : null,
+    sortOrder: s.sortOrder,
+  }));
+}
+
+/**
+ * Build column items map for dynamic columns.
+ * Falls back to statusToColumnId() for system stages;
+ * custom stages start empty (leads aren't assigned to custom stages yet).
+ */
+export function buildColumnItemsFromLeadsDynamic(
+  leads: PipelineLead[],
+  columns: PipelineColumnDynamic[],
+): Record<string, string[]> {
+  const empty = columns.reduce(
+    (acc, col) => {
+      acc[col.id] = [];
+      return acc;
+    },
+    {} as Record<string, string[]>,
+  );
+
+  // Build a lookup: statusKey → column uuid
+  const statusToColId = new Map<string, string>();
+  for (const col of columns) {
+    if (col.statusKey) {
+      statusToColId.set(col.statusKey, col.id);
+      // Also map the DB enum value for in_negotiation
+      if (col.statusKey === "negotiation") {
+        statusToColId.set("in_negotiation", col.id);
+      }
+    }
+  }
+
+  for (const lead of leads) {
+    const canonicalColId = statusToColumnId(lead.status); // PipelineColumnId
+    const dynamicId = statusToColId.get(canonicalColId) ?? statusToColId.get(lead.status);
+    if (dynamicId && dynamicId in empty) {
+      (empty[dynamicId] as string[]).push(lead.id);
+    } else {
+      // Fallback: put in first system column (new)
+      const fallback = statusToColId.get("new");
+      if (fallback && fallback in empty) (empty[fallback] as string[]).push(lead.id);
+    }
+  }
+
+  return empty;
+}
+
+/**
+ * Find which dynamic column contains a lead.
+ */
+export function findLeadColumnDynamic(
+  items: Record<string, string[]>,
+  leadId: string,
+): string | undefined {
+  for (const [colId, leadIds] of Object.entries(items)) {
+    if (leadIds.includes(leadId)) return colId;
+  }
+  return undefined;
+}
+
+/**
+ * Given a dynamic column id (UUID), return the DB status value
+ * to persist in leads.status. Returns null for custom stages
+ * (custom stages don't map to a lead_status enum value yet).
+ */
+export function dynamicColumnIdToDbStatus(
+  colId: string,
+  columns: PipelineColumnDynamic[],
+): string | null {
+  const col = columns.find((c) => c.id === colId);
+  if (!col?.statusKey) return null;
+  return columnIdToDbStatus(col.statusKey);
+}

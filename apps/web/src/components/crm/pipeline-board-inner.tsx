@@ -3,13 +3,13 @@
 import { mergeLeadRecordIntoPipelineLead } from "@/lib/crm/merge-lead-record";
 import {
   PIPELINE_COLUMNS,
-  PIPELINE_COLUMN_IDS,
-  type PipelineColumnId,
+  type PipelineColumnDynamic,
   type PipelineLead,
   buildColumnItemsFromLeads,
+  buildColumnItemsFromLeadsDynamic,
   columnIdToDbStatus,
-  findContainerForDnd,
-  findLeadColumn,
+  dynamicColumnIdToDbStatus,
+  findLeadColumnDynamic,
   isPipelineColumnId,
   statusToColumnId,
 } from "@/lib/crm/pipeline";
@@ -32,37 +32,47 @@ import { toast } from "sonner";
 import { LeadCard, LeadCardDragPreview } from "./lead-card";
 import { PipelineColumn } from "./pipeline-column";
 
+// ─── Types ────────────────────────────────────────────────────────
+
 type DragSnapshot = {
-  items: Record<PipelineColumnId, string[]>;
-  sourceColumn: PipelineColumnId;
+  items: Record<string, string[]>;
+  sourceColumn: string;
 };
 
 export type PipelineBoardProps = {
   initialLeads: PipelineLead[];
+  /**
+   * Dynamic columns from DB pipeline_stages.
+   * When provided, the board uses these for labels/colors.
+   * When absent, falls back to static PIPELINE_COLUMNS.
+   */
+  columns?: PipelineColumnDynamic[];
   /** Realtime INSERT + post-UPDATE visibility: keep in sync with pipeline filters. */
   includeLeadInBoard?: (lead: PipelineLead) => boolean;
 };
 
-function removeLeadFromAllColumns(
-  items: Record<PipelineColumnId, string[]>,
+// ─── Helpers ─────────────────────────────────────────────────────
+
+function removeLeadFromAllColumnsDynamic(
+  items: Record<string, string[]>,
   leadId: string,
-): Record<PipelineColumnId, string[]> {
+): Record<string, string[]> {
   const next = { ...items };
-  for (const col of PIPELINE_COLUMN_IDS) {
-    next[col] = items[col].filter((id) => id !== leadId);
+  for (const col of Object.keys(items)) {
+    next[col] = (items[col] ?? []).filter((id) => id !== leadId);
   }
   return next;
 }
 
-function placeLeadInColumn(
-  items: Record<PipelineColumnId, string[]>,
-  column: PipelineColumnId,
+function placeLeadInColumnDynamic(
+  items: Record<string, string[]>,
+  column: string,
   leadId: string,
-): Record<PipelineColumnId, string[]> {
-  const stripped = removeLeadFromAllColumns(items, leadId);
+): Record<string, string[]> {
+  const stripped = removeLeadFromAllColumnsDynamic(items, leadId);
   return {
     ...stripped,
-    [column]: [...stripped[column], leadId],
+    [column]: [...(stripped[column] ?? []), leadId],
   };
 }
 
@@ -74,15 +84,23 @@ function realtimeFingerprint(lead: PipelineLead): string {
   return `${lead.status}\0${lead.updatedAt ?? ""}\0${lead.assignedToId ?? ""}\0${lead.fullName}`;
 }
 
-export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoardProps) {
-  const itemsRef = useRef<Record<PipelineColumnId, string[]>>(
-    buildColumnItemsFromLeads(initialLeads),
-  );
-  const [items, setItemsState] = useState<Record<PipelineColumnId, string[]>>(() => {
-    const initial = buildColumnItemsFromLeads(initialLeads);
-    itemsRef.current = initial;
-    return initial;
-  });
+// ─── Component ───────────────────────────────────────────────────
+
+export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: PipelineBoardProps) {
+  const isDynamic = columns !== undefined && columns.length > 0;
+
+  // Unified items: Record<colId, leadId[]>
+  // colId is PipelineColumnId (static) or UUID string (dynamic)
+  const buildInitialItems = useCallback(() => {
+    if (isDynamic) {
+      return buildColumnItemsFromLeadsDynamic(initialLeads, columns);
+    }
+    return buildColumnItemsFromLeads(initialLeads) as Record<string, string[]>;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const itemsRef = useRef<Record<string, string[]>>(buildInitialItems());
+  const [items, setItemsState] = useState<Record<string, string[]>>(buildInitialItems);
   const [leadsById, setLeadsById] = useState<Record<string, PipelineLead>>(() =>
     Object.fromEntries(initialLeads.map((l) => [l.id, l])),
   );
@@ -94,22 +112,27 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
   const includeLeadInBoardRef = useRef(includeLeadInBoard);
   const lastRealtimeFingerprintRef = useRef<Map<string, string>>(new Map());
   const leadsByIdRef = useRef(leadsById);
+  const columnsRef = useRef(columns);
   const pulseTimeoutsRef = useRef<number[]>([]);
 
   includeLeadInBoardRef.current = includeLeadInBoard;
+  columnsRef.current = columns;
   useLayoutEffect(() => {
     leadsByIdRef.current = leadsById;
   }, [leadsById]);
 
-  const setItems = useCallback((next: Record<PipelineColumnId, string[]>) => {
+  const setItems = useCallback((next: Record<string, string[]>) => {
     itemsRef.current = next;
     setItemsState(next);
   }, []);
 
   useEffect(() => {
-    const next = buildColumnItemsFromLeads(initialLeads);
+    const next = isDynamic
+      ? buildColumnItemsFromLeadsDynamic(initialLeads, columns)
+      : (buildColumnItemsFromLeads(initialLeads) as Record<string, string[]>);
     setItems(next);
     setLeadsById(Object.fromEntries(initialLeads.map((l) => [l.id, l])));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLeads, setItems]);
 
   useEffect(() => {
@@ -138,6 +161,18 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
     pulseTimeoutsRef.current.push(tid);
   }, []);
 
+  // ─── Realtime ──────────────────────────────────────────────────
+
+  const resolveColumnForLead = useCallback((lead: PipelineLead): string => {
+    const cols = columnsRef.current;
+    if (cols && cols.length > 0) {
+      const temp = buildColumnItemsFromLeadsDynamic([lead], cols);
+      const found = findLeadColumnDynamic(temp, lead.id);
+      if (found) return found;
+    }
+    return statusToColumnId(lead.status);
+  }, []);
+
   const applyRealtimePayload = useCallback(
     (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
       const shouldInclude = (lead: PipelineLead) =>
@@ -155,7 +190,7 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
           return rest;
         });
         setItemsState((prev) => {
-          const next = removeLeadFromAllColumns(prev, id);
+          const next = removeLeadFromAllColumnsDynamic(prev, id);
           itemsRef.current = next;
           return next;
         });
@@ -165,11 +200,8 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
 
       const rawNew = payload.new;
       if (!isRecord(rawNew)) return;
-
       const id = rawNew.id;
       if (typeof id !== "string") return;
-
-      // During drag, avoid reordering / merging the card being dragged (optimistic column vs DB echo).
       if (dragLockLeadIdRef.current === id) return;
 
       const prevLead = leadsByIdRef.current[id] ?? null;
@@ -182,9 +214,9 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
 
       if (payload.eventType === "INSERT") {
         if (!shouldInclude(merged)) return;
-        const col = statusToColumnId(merged.status);
+        const col = resolveColumnForLead(merged);
         const prevItems = itemsRef.current;
-        const nextItems = placeLeadInColumn(prevItems, col, id);
+        const nextItems = placeLeadInColumnDynamic(prevItems, col, id);
         itemsRef.current = nextItems;
         setLeadsById((prev) => ({ ...prev, [id]: merged }));
         setItemsState(nextItems);
@@ -201,8 +233,8 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
             return rest;
           });
           setItemsState((prev) => {
-            if (!PIPELINE_COLUMN_IDS.some((c) => prev[c].includes(id))) return prev;
-            const next = removeLeadFromAllColumns(prev, id);
+            if (!Object.values(prev).some((ids) => ids.includes(id))) return prev;
+            const next = removeLeadFromAllColumnsDynamic(prev, id);
             itemsRef.current = next;
             return next;
           });
@@ -210,16 +242,16 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
           return;
         }
 
-        const prevCol = prevLead ? statusToColumnId(prevLead.status) : undefined;
-        const nextCol = statusToColumnId(merged.status);
+        const prevCol = prevLead ? resolveColumnForLead(prevLead) : undefined;
+        const nextCol = resolveColumnForLead(merged);
         const prevItems = itemsRef.current;
-        const currentCol = findLeadColumn(prevItems, id);
+        const currentCol = findLeadColumnDynamic(prevItems, id);
         const needsMove = currentCol !== nextCol;
 
         setLeadsById((prev) => ({ ...prev, [id]: merged }));
 
         if (needsMove) {
-          const nextItems = placeLeadInColumn(prevItems, nextCol, id);
+          const nextItems = placeLeadInColumnDynamic(prevItems, nextCol, id);
           itemsRef.current = nextItems;
           setItemsState(nextItems);
         }
@@ -229,7 +261,7 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
         }
       }
     },
-    [triggerEnterPulse],
+    [triggerEnterPulse, resolveColumnForLead],
   );
 
   useEffect(() => {
@@ -258,79 +290,94 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
     };
   }, [applyRealtimePayload]);
 
+  // ─── DnD ────────────────────────────────────────────────────────
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
     }),
   );
 
-  const onDragStart = useCallback((event: DragStartEvent) => {
-    const activeIdStr = event.active.id as string;
-    const sourceColumn = findContainerForDnd(itemsRef.current, activeIdStr);
-    if (!sourceColumn) return;
-    dragLockLeadIdRef.current = activeIdStr;
-    snapshotRef.current = {
-      items: structuredClone(itemsRef.current),
-      sourceColumn,
-    };
-    setActiveId(activeIdStr);
+  const resolveContainer = useCallback((id: string): string | undefined => {
+    // Check if id is a column id
+    if (id in itemsRef.current) return id;
+    return findLeadColumnDynamic(itemsRef.current, id);
   }, []);
 
-  const onDragOver = useCallback((event: DragOverEvent) => {
-    const { active, over } = event;
-    const overId = over?.id;
-    if (overId == null || active.id === overId) return;
-
-    setItemsState((prev) => {
-      const activeContainer = findContainerForDnd(prev, active.id as string);
-      const overContainer = findContainerForDnd(prev, overId as string);
-      if (!activeContainer || !overContainer || activeContainer === overContainer) {
-        return prev;
-      }
-
-      const activeItems = prev[activeContainer];
-      const overItems = prev[overContainer];
-      const activeIndex = activeItems.indexOf(active.id as string);
-      if (activeIndex === -1) return prev;
-
-      const activeIdStr = active.id as string;
-      const overIdStr = overId as string;
-
-      let newIndex: number;
-      if (isPipelineColumnId(overIdStr)) {
-        newIndex = overItems.length;
-      } else {
-        const overIndex = overItems.indexOf(overIdStr);
-        if (overIndex === -1) return prev;
-        const isBelowOverItem =
-          over &&
-          active.rect.current.translated &&
-          active.rect.current.translated.top > over.rect.top + over.rect.height;
-        const modifier = isBelowOverItem ? 1 : 0;
-        newIndex = overIndex + modifier;
-      }
-
-      const next = {
-        ...prev,
-        [activeContainer]: activeItems.filter((id) => id !== activeIdStr),
-        [overContainer]: [
-          ...overItems.slice(0, newIndex),
-          activeIdStr,
-          ...overItems.slice(newIndex),
-        ],
+  const onDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const activeIdStr = event.active.id as string;
+      const sourceColumn = resolveContainer(activeIdStr);
+      if (!sourceColumn) return;
+      dragLockLeadIdRef.current = activeIdStr;
+      snapshotRef.current = {
+        items: structuredClone(itemsRef.current),
+        sourceColumn,
       };
-      itemsRef.current = next;
-      return next;
-    });
-  }, []);
+      setActiveId(activeIdStr);
+    },
+    [resolveContainer],
+  );
+
+  const onDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+      const overId = over?.id;
+      if (overId == null || active.id === overId) return;
+
+      setItemsState((prev) => {
+        const activeContainer =
+          resolveContainer(active.id as string) ?? findLeadColumnDynamic(prev, active.id as string);
+        const overContainer =
+          resolveContainer(overId as string) ?? findLeadColumnDynamic(prev, overId as string);
+        if (!activeContainer || !overContainer || activeContainer === overContainer) {
+          return prev;
+        }
+
+        const activeItems = prev[activeContainer] ?? [];
+        const overItems = prev[overContainer] ?? [];
+        const activeIndex = activeItems.indexOf(active.id as string);
+        if (activeIndex === -1) return prev;
+
+        const activeIdStr = active.id as string;
+        const overIdStr = overId as string;
+
+        let newIndex: number;
+        if (overIdStr in prev) {
+          // Dropped onto a column header
+          newIndex = overItems.length;
+        } else {
+          const overIndex = overItems.indexOf(overIdStr);
+          if (overIndex === -1) return prev;
+          const isBelowOverItem =
+            over &&
+            active.rect.current.translated &&
+            active.rect.current.translated.top > over.rect.top + over.rect.height;
+          const modifier = isBelowOverItem ? 1 : 0;
+          newIndex = overIndex + modifier;
+        }
+
+        const next = {
+          ...prev,
+          [activeContainer]: activeItems.filter((id) => id !== activeIdStr),
+          [overContainer]: [
+            ...overItems.slice(0, newIndex),
+            activeIdStr,
+            ...overItems.slice(newIndex),
+          ],
+        };
+        itemsRef.current = next;
+        return next;
+      });
+    },
+    [resolveContainer],
+  );
 
   const onDragCancel = useCallback(() => {
     dragLockLeadIdRef.current = null;
     setActiveId(null);
     const snap = snapshotRef.current;
-    if (snap) {
-      setItems(snap.items);
-    }
+    if (snap) setItems(snap.items);
   }, [setItems]);
 
   const onDragEnd = useCallback(
@@ -341,15 +388,17 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
       try {
         const snap = snapshotRef.current;
         let working = itemsRef.current;
-
         const { over } = event;
+
         if (!over) {
           if (snap) setItems(snap.items);
           return;
         }
 
-        const activeContainer = findContainerForDnd(working, activeIdStr);
-        const overContainer = findContainerForDnd(working, over.id as string);
+        const activeContainer =
+          resolveContainer(activeIdStr) ?? findLeadColumnDynamic(working, activeIdStr);
+        const overContainer =
+          resolveContainer(over.id as string) ?? findLeadColumnDynamic(working, over.id as string);
 
         if (!activeContainer || !overContainer) {
           if (snap) setItems(snap.items);
@@ -357,12 +406,13 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
         }
 
         if (activeContainer === overContainer) {
-          const oldIndex = working[activeContainer].indexOf(activeIdStr);
-          const newIndex = working[activeContainer].indexOf(over.id as string);
+          const colItems = working[activeContainer] ?? [];
+          const oldIndex = colItems.indexOf(activeIdStr);
+          const newIndex = colItems.indexOf(over.id as string);
           if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
             working = {
               ...working,
-              [activeContainer]: arrayMove(working[activeContainer], oldIndex, newIndex),
+              [activeContainer]: arrayMove(colItems, oldIndex, newIndex),
             };
             setItems(working);
           }
@@ -370,10 +420,22 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
 
         if (!snap) return;
 
-        const destNow = findContainerForDnd(working, activeIdStr);
+        const destNow = findLeadColumnDynamic(working, activeIdStr);
         if (!destNow || snap.sourceColumn === destNow) return;
 
-        const status = columnIdToDbStatus(destNow);
+        // Resolve DB status from destination column
+        const cols = columnsRef.current;
+        let status: string | null = null;
+        if (cols && cols.length > 0) {
+          status = dynamicColumnIdToDbStatus(destNow, cols);
+        } else if (isPipelineColumnId(destNow)) {
+          status = columnIdToDbStatus(destNow);
+        }
+
+        if (!status) {
+          // Custom stage with no status_key → no DB update yet (Sprint 2)
+          return;
+        }
 
         try {
           const res = await fetch("/api/leads/update-status", {
@@ -392,20 +454,28 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
           setLeadsById((prev) => {
             const row = prev[activeIdStr];
             if (!row) return prev;
-            const nextRow = { ...row, status };
+            const nextRow = { ...row, status: status! };
             lastRealtimeFingerprintRef.current.set(activeIdStr, realtimeFingerprint(nextRow));
             return { ...prev, [activeIdStr]: nextRow };
           });
         } catch (e) {
           setItems(snap.items);
-          const col = findLeadColumn(snap.items, activeIdStr);
+          const col = findLeadColumnDynamic(snap.items, activeIdStr);
           if (col) {
-            const reverted = columnIdToDbStatus(col);
-            setLeadsById((prev) => {
-              const row = prev[activeIdStr];
-              if (!row) return prev;
-              return { ...prev, [activeIdStr]: { ...row, status: reverted } };
-            });
+            const cols2 = columnsRef.current;
+            const revertedStatus =
+              cols2 && cols2.length > 0
+                ? dynamicColumnIdToDbStatus(col, cols2)
+                : isPipelineColumnId(col)
+                  ? columnIdToDbStatus(col)
+                  : null;
+            if (revertedStatus) {
+              setLeadsById((prev) => {
+                const row = prev[activeIdStr];
+                if (!row) return prev;
+                return { ...prev, [activeIdStr]: { ...row, status: revertedStatus } };
+              });
+            }
           }
           toast.error(e instanceof Error ? e.message : "Impossibile aggiornare lo stato");
         }
@@ -413,10 +483,27 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
         dragLockLeadIdRef.current = null;
       }
     },
-    [setItems],
+    [setItems, resolveContainer],
   );
 
+  // ─── Render ─────────────────────────────────────────────────────
+
   const activeLead = activeId ? leadsById[activeId] : null;
+
+  // Resolve columns to render — dynamic from DB or static fallback
+  const columnsToRender = isDynamic
+    ? columns.map((col) => ({
+        id: col.id,
+        label: col.label,
+        shortLabel: col.shortLabel,
+        color: col.color,
+      }))
+    : PIPELINE_COLUMNS.map((col) => ({
+        id: col.id,
+        label: col.label,
+        shortLabel: col.shortLabel,
+        color: "#6B7280",
+      }));
 
   return (
     <DndContext
@@ -428,14 +515,15 @@ export function PipelineBoard({ initialLeads, includeLeadInBoard }: PipelineBoar
       onDragCancel={onDragCancel}
     >
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1 snap-x snap-mandatory">
-        {PIPELINE_COLUMNS.map((col) => {
-          const leadIds = items[col.id];
+        {columnsToRender.map((col) => {
+          const leadIds = items[col.id] ?? [];
           return (
             <PipelineColumn
               key={col.id}
               id={col.id}
               label={col.label}
               shortLabel={col.shortLabel}
+              color={col.color}
               count={leadIds.length}
               leadIds={leadIds}
             >

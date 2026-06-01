@@ -1,6 +1,6 @@
 "use client";
 
-import type { PipelineLead } from "@/lib/crm/pipeline";
+import type { PipelineColumnDynamic, PipelineLead } from "@/lib/crm/pipeline";
 import { computePipelineStats } from "@/lib/crm/pipeline-analytics";
 import { leadMatchesPipelineFilters } from "@/lib/crm/pipeline-filter-match";
 import type { AgencyAgentOption } from "@/lib/queries/agency-members";
@@ -13,9 +13,14 @@ import { type PipelineFilterValues, PipelineFilters } from "./pipeline-filters";
 type Props = {
   initialLeads: PipelineLead[];
   agents: AgencyAgentOption[];
+  /**
+   * Dynamic columns from DB pipeline_stages.
+   * Optional — when absent the board uses static PIPELINE_COLUMNS.
+   */
+  columns?: PipelineColumnDynamic[];
 };
 
-export function PipelineShell({ initialLeads, agents }: Props) {
+export function PipelineShell({ initialLeads, agents, columns }: Props) {
   const [query, setQuery] = useQueryStates(
     {
       q: parseAsString.withDefault(""),
@@ -70,6 +75,7 @@ export function PipelineShell({ initialLeads, agents }: Props) {
       <PipelineFilters agents={agents} values={filterValues} onChange={onFilterChange} />
       <PipelineBoard
         initialLeads={filteredLeads}
+        columns={columns}
         includeLeadInBoard={(lead) => leadMatchesPipelineFilters(lead, filterValues)}
       />
     </>

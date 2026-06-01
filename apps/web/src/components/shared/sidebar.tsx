@@ -21,6 +21,7 @@ const NAV = [
 const ADMIN_NAV = [
   { href: "/admin/agency",     label: "Impostazioni agenzia" },
   { href: "/admin/properties", label: "Gestione immobili" },
+  { href: "/admin/pipeline",   label: "Configura Pipeline" },
 ] as const;
 
 export function Sidebar({ userName, avatarUrl, agencySlug }: SidebarProps) {
