@@ -54,12 +54,12 @@ function mapRow(row: DbRow): PipelineStage {
 // ─── Queries ──────────────────────────────────────────────────────
 
 /**
- * Returns all pipeline stages for the current user's agency,
- * ordered by sort_order.
+ * Returns pipeline stages for the current user's PRIMARY agency only.
+ * Filters by agency_id explicitly to avoid returning stages for all
+ * agencies when a user has multiple memberships.
  *
  * Returns null on auth failure (caller should redirect).
- * Returns [] when the agency has no stages yet (edge case — seed trigger
- * should prevent this, but callers should handle it gracefully).
+ * Returns [] when the agency has no stages yet.
  */
 export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   const supabase = await createClient();
@@ -69,11 +69,24 @@ export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // Resolve primary agency explicitly — prevents multi-agency users
+  // from receiving stages for all their agencies at once.
+  const { data: membership } = await supabase
+    .from("agency_members")
+    .select("agency_id")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (!membership) return null;
+
   const { data, error } = await supabase
     .from("pipeline_stages")
     .select(
       "id, agency_id, name, short_label, color, sort_order, is_system, status_key, automation_enabled, automation_config, created_at, updated_at",
     )
+    .eq("agency_id", membership.agency_id)
     .order("sort_order", { ascending: true });
 
   if (error) {
