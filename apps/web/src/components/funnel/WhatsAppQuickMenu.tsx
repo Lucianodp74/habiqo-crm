@@ -148,7 +148,7 @@ export function WhatsAppQuickMenu({
 
       {/* Dropdown menu */}
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 z-50 w-72 rounded-2xl border border-[var(--border-subtle)] bg-white shadow-[0_16px_48px_-12px_rgba(24,20,16,0.22)] overflow-hidden">
+        <div className="absolute left-0 top-full mt-1.5 z-[200] w-72 rounded-2xl border border-[var(--border-subtle)] bg-white shadow-[0_16px_48px_-12px_rgba(24,20,16,0.35)] overflow-hidden" style={{ isolation: 'isolate' }}>
           <div className="px-3 py-2 border-b border-[var(--border-subtle)]">
             <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--fg-muted)]">
               Scegli il messaggio per {first}
