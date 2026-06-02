@@ -305,51 +305,58 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
       const overId = over?.id;
       if (overId == null || active.id === overId) return;
 
-      setItemsState((prev) => {
-        const activeContainer =
-          resolveContainer(active.id as string) ?? findLeadColumnDynamic(prev, active.id as string);
-        const overContainer =
-          resolveContainer(overId as string) ?? findLeadColumnDynamic(prev, overId as string);
-        if (!activeContainer || !overContainer || activeContainer === overContainer) {
-          return prev;
-        }
+      const activeIdStr = active.id as string;
+      const overIdStr = overId as string;
 
-        const activeItems = prev[activeContainer] ?? [];
-        const overItems = prev[overContainer] ?? [];
-        const activeIndex = activeItems.indexOf(active.id as string);
-        if (activeIndex === -1) return prev;
+      // Resolve containers directly from itemsRef (always current)
+      const current = itemsRef.current;
+      const activeContainer = current[activeIdStr] !== undefined
+        ? activeIdStr
+        : findLeadColumnDynamic(current, activeIdStr);
+      const overContainer = current[overIdStr] !== undefined
+        ? overIdStr
+        : findLeadColumnDynamic(current, overIdStr);
 
-        const activeIdStr = active.id as string;
-        const overIdStr = overId as string;
+      console.log("[DnD over]", { activeContainer, overContainer, activeIdStr, overIdStr });
 
-        let newIndex: number;
-        if (overIdStr in prev) {
+      if (!activeContainer || !overContainer || activeContainer === overContainer) return;
+
+      const activeItems = current[activeContainer] ?? [];
+      const overItems = current[overContainer] ?? [];
+      const activeIndex = activeItems.indexOf(activeIdStr);
+      if (activeIndex === -1) return;
+
+      let newIndex: number;
+      if (overIdStr in current) {
+        newIndex = overItems.length;
+      } else {
+        const overIndex = overItems.indexOf(overIdStr);
+        if (overIndex === -1) {
           newIndex = overItems.length;
         } else {
-          const overIndex = overItems.indexOf(overIdStr);
-          if (overIndex === -1) return prev;
           const isBelowOverItem =
             over &&
             active.rect.current.translated &&
             active.rect.current.translated.top > over.rect.top + over.rect.height;
-          const modifier = isBelowOverItem ? 1 : 0;
-          newIndex = overIndex + modifier;
+          newIndex = overIndex + (isBelowOverItem ? 1 : 0);
         }
+      }
 
-        const next = {
-          ...prev,
-          [activeContainer]: activeItems.filter((id) => id !== activeIdStr),
-          [overContainer]: [
-            ...overItems.slice(0, newIndex),
-            activeIdStr,
-            ...overItems.slice(newIndex),
-          ],
-        };
-        itemsRef.current = next;
-        return next;
-      });
+      const next = {
+        ...current,
+        [activeContainer]: activeItems.filter((id) => id !== activeIdStr),
+        [overContainer]: [
+          ...overItems.slice(0, newIndex),
+          activeIdStr,
+          ...overItems.slice(newIndex),
+        ],
+      };
+
+      // Update ref synchronously BEFORE setState
+      itemsRef.current = next;
+      setItemsState(next);
     },
-    [resolveContainer],
+    [],
   );
 
   const onDragCancel = useCallback(() => {
@@ -366,7 +373,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
 
       try {
         const snap = snapshotRef.current;
-        let working = itemsRef.current;
         const { over } = event;
 
         if (!over) {
@@ -374,26 +380,31 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           return;
         }
 
-        const activeContainer =
-          resolveContainer(activeIdStr) ?? findLeadColumnDynamic(working, activeIdStr);
-        const overContainer =
-          resolveContainer(over.id as string) ?? findLeadColumnDynamic(working, over.id as string);
+        // Use itemsRef.current — always reflects latest DragOver state
+        const current = itemsRef.current;
+
+        const activeContainer = findLeadColumnDynamic(current, activeIdStr);
+        const overIdStr = over.id as string;
+        const overContainer = current[overIdStr] !== undefined
+          ? overIdStr
+          : findLeadColumnDynamic(current, overIdStr);
 
         if (!activeContainer || !overContainer) {
           if (snap) setItems(snap.items);
           return;
         }
 
+        // Same column reorder
         if (activeContainer === overContainer) {
-          const colItems = working[activeContainer] ?? [];
+          const colItems = current[activeContainer] ?? [];
           const oldIndex = colItems.indexOf(activeIdStr);
-          const newIndex = colItems.indexOf(over.id as string);
+          const newIndex = colItems.indexOf(overIdStr);
           if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-            working = {
-              ...working,
+            const reordered = {
+              ...current,
               [activeContainer]: arrayMove(colItems, oldIndex, newIndex),
             };
-            setItems(working);
+            setItems(reordered);
           }
         }
 
@@ -401,18 +412,16 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
 
         const destNow = findLeadColumnDynamic(itemsRef.current, activeIdStr);
 
-        // DEBUG — rimuovere dopo il fix
         console.log("[DnD end]", {
           destNow,
           source: snap.sourceColumn,
           sameColumn: snap.sourceColumn === destNow,
-          workingKeys: Object.keys(working),
+          workingKeys: Object.keys(itemsRef.current),
           cols: columnsRef.current?.map((c) => ({ id: c.id, statusKey: c.statusKey })),
         });
 
         if (!destNow || snap.sourceColumn === destNow) return;
 
-        // Resolve DB status from destination column UUID → status_key
         const cols = columnsRef.current;
         let status: string | null = null;
         if (cols && cols.length > 0) {
@@ -421,7 +430,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           status = columnIdToDbStatus(destNow);
         }
 
-        console.log("[DnD] resolved status:", status, "for destNow:", destNow);
+        console.log("[DnD] resolved status:", status);
 
         if (!status) {
           toast.error("Stage personalizzato: spostamento non ancora supportato");
@@ -475,7 +484,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
         dragLockLeadIdRef.current = null;
       }
     },
-    [setItems, resolveContainer],
+    [setItems],
   );
 
   const activeLead = activeId ? leadsById[activeId] : null;
