@@ -76,11 +76,13 @@ export default async function LeadDetailPage({ params }: Props) {
   const whatsappDisplay = lead.whatsapp?.trim() || NON_SPECIFICATO;
   const aiScoreDisplay = lead.aiScore != null ? String(lead.aiScore) : NON_SPECIFICATO;
 
-  // Nome agente e agenzia per WhatsApp template
+ // Nome agente e agenzia per WhatsApp template
+  const rawProfiles = agentData?.data?.profiles;
+  const rawAgencies = agentData?.data?.agencies;
   const agentName =
-    (agentData?.data?.profiles as { full_name: string | null } | null)?.full_name ?? "Agente";
+    (Array.isArray(rawProfiles) ? rawProfiles[0]?.full_name : (rawProfiles as { full_name?: string } | null)?.full_name) ?? "Agente";
   const agencyName =
-    (agentData?.data?.agencies as { name: string | null } | null)?.name ?? "Habiquo";
+    (Array.isArray(rawAgencies) ? rawAgencies[0]?.name : (rawAgencies as { name?: string } | null)?.name) ?? "Habiquo";
 
   return (
     <div className="px-4 sm:px-8 py-8 max-w-6xl mx-auto">
