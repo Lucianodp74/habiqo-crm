@@ -21,7 +21,7 @@ import {
   DragOverlay,
   type DragStartEvent,
   PointerSensor,
-  closestCorners,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -75,9 +75,7 @@ function realtimeFingerprint(lead: PipelineLead): string {
 }
 
 function resolveColId(id: string, items: Record<string, string[]>): string | undefined {
-  // If id is itself a column key, return it directly
   if (id in items) return id;
-  // Otherwise find which column contains this lead id
   return findLeadColumnDynamic(items, id);
 }
 
@@ -319,7 +317,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
 
     let newIndex: number;
     if (overIdStr in current) {
-      // Dropped directly onto a column — append at end
       newIndex = overItems.length;
     } else {
       const overIndex = overItems.indexOf(overIdStr);
@@ -344,7 +341,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
       ],
     };
 
-    // Update ref synchronously before React state update
     itemsRef.current = next;
     setItemsState(next);
   }, []);
@@ -372,17 +368,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
 
         const current = itemsRef.current;
         const dropTargetId = over.id as string;
-
-        // Destination = column of the drop target (or the target itself if it's a column)
         const destNow = resolveColId(dropTargetId, current);
-
-        console.log("[DnD end]", {
-          dropTargetId,
-          destNow,
-          source: snap?.sourceColumn,
-          sameColumn: snap?.sourceColumn === destNow,
-          cols: columnsRef.current?.map((c) => ({ id: c.id, sk: c.statusKey })),
-        });
 
         if (!snap || !destNow) {
           if (snap) setItems(snap.items);
@@ -403,7 +389,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           return;
         }
 
-        // Cross-column move — resolve DB status
+        // Cross-column move — resolve DB status from destNow UUID
         const cols = columnsRef.current;
         let status: string | null = null;
         if (cols && cols.length > 0) {
@@ -411,8 +397,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
         } else if (isPipelineColumnId(destNow)) {
           status = columnIdToDbStatus(destNow);
         }
-
-        console.log("[DnD] resolved status:", status, "for destNow:", destNow);
 
         if (!status) {
           toast.error("Stage personalizzato: spostamento non ancora supportato");
@@ -488,7 +472,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={pointerWithin}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
