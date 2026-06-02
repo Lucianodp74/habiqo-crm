@@ -399,7 +399,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
 
         if (!snap) return;
 
-        const destNow = findLeadColumnDynamic(working, activeIdStr);
+        const destNow = findLeadColumnDynamic(itemsRef.current, activeIdStr);
 
         // DEBUG — rimuovere dopo il fix
         console.log("[DnD end]", {
