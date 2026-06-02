@@ -1,7 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 
-// ─── Types ────────────────────────────────────────────────────────
-
 export type PipelineStage = {
   id: string;
   agencyId: string;
@@ -49,6 +47,11 @@ function mapRow(row: DbRow): PipelineStage {
   };
 }
 
+/**
+ * Returns pipeline stages for the current user's primary agency.
+ * Priority: owner > admin > agent > viewer.
+ * This ensures multi-agency users always see the agency they own.
+ */
 export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   const supabase = await createClient();
 
@@ -57,15 +60,20 @@ export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Use limit(1) array form — avoids .single() crash with multiple memberships.
+  // Fetch all memberships, prefer owner role
   const { data: memberships } = await supabase
     .from("agency_members")
-    .select("agency_id")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1);
+    .select("agency_id, role")
+    .eq("user_id", user.id);
 
-  const agencyId = memberships?.[0]?.agency_id;
+  if (!memberships || memberships.length === 0) return null;
+
+  // Pick agency where user is owner first, then admin, then any
+  const roleOrder = ["owner", "admin", "agent", "viewer"];
+  const sorted = [...memberships].sort(
+    (a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role),
+  );
+  const agencyId = sorted[0]?.agency_id;
   if (!agencyId) return null;
 
   const { data, error } = await supabase
@@ -84,6 +92,10 @@ export async function getPipelineStages(): Promise<PipelineStage[] | null> {
   return (data ?? []).map(mapRow);
 }
 
+/**
+ * Fetches stages for a specific agency (used in admin pages where
+ * agency_id is known explicitly).
+ */
 export async function getPipelineStagesForAgency(
   agencyId: string,
 ): Promise<PipelineStage[] | null> {
