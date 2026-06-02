@@ -441,7 +441,7 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           const res = await fetch("/api/leads/update-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ leadId: activeIdStr, status: destNow }),
+            body: JSON.stringify({ leadId: activeIdStr, status: status }),
           });
           if (!res.ok) {
             const body: unknown = await res.json().catch(() => ({}));
