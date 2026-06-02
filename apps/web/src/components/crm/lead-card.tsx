@@ -9,6 +9,7 @@ import {
   urgencyLabel,
 } from "@/lib/crm/lead-presenter";
 import type { PipelineLead } from "@/lib/crm/pipeline";
+import { StaleBadge } from "@/components/funnel/StaleBadge";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { formatRelative } from "@habiquo/utils";
@@ -101,6 +102,13 @@ export function LeadCard({ lead, surfacePulse = false }: LeadCardProps) {
             >
               {sourceLabel}
             </span>
+            {/* Staleness badge — visibile solo se il lead è inattivo */}
+            <StaleBadge
+              status={lead.status}
+              lastActivityAt={lead.lastContactAt}
+              updatedAt={lead.updatedAt}
+              createdAt={null}
+            />
           </div>
 
           <Link

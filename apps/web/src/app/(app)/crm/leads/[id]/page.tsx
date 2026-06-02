@@ -7,6 +7,8 @@ import { LeadNotesForm } from "@/components/crm/lead-notes-form";
 import { LeadQuickActions } from "@/components/crm/lead-quick-actions";
 import { LeadTasksFollowUp } from "@/components/crm/lead-tasks-follow-up";
 import { LeadStatusSelect } from "@/components/lead-status-select";
+import { NextActionBanner } from "@/components/funnel/NextActionBanner";
+import { WhatsAppLinkButton } from "@/components/funnel/WhatsAppLinkButton";
 import { synthesizeLeadInsight } from "@/lib/crm/lead-insight-synthesis";
 import {
   formatBudgetRange,
@@ -19,6 +21,7 @@ import {
 import { NON_SPECIFICATO } from "@/lib/crm/missing-value";
 import { listLeadEventsForLead } from "@/lib/queries/lead-events";
 import { getLeadByIdForAgency } from "@/lib/queries/leads";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -46,11 +49,24 @@ function FieldValue({ value }: { value: string }) {
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const [lead, events] = await Promise.all([getLeadByIdForAgency(id), listLeadEventsForLead(id)]);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!lead) {
-    notFound();
-  }
+  // Recupera nome agente e agenzia per il WhatsApp template
+  const [lead, events, agentData] = await Promise.all([
+    getLeadByIdForAgency(id),
+    listLeadEventsForLead(id),
+    user
+      ? supabase
+          .from("agency_members")
+          .select("agencies(name), profiles(full_name)")
+          .eq("user_id", user.id)
+          .limit(1)
+          .single()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  if (!lead) notFound();
 
   const urgency = resolveDisplayUrgency(lead);
   const insight = synthesizeLeadInsight(lead, events);
@@ -59,6 +75,12 @@ export default async function LeadDetailPage({ params }: Props) {
   const phoneDisplay = lead.phone?.trim() || NON_SPECIFICATO;
   const whatsappDisplay = lead.whatsapp?.trim() || NON_SPECIFICATO;
   const aiScoreDisplay = lead.aiScore != null ? String(lead.aiScore) : NON_SPECIFICATO;
+
+  // Nome agente e agenzia per WhatsApp template
+  const agentName =
+    (agentData?.data?.profiles as { full_name: string | null } | null)?.full_name ?? "Agente";
+  const agencyName =
+    (agentData?.data?.agencies as { name: string | null } | null)?.name ?? "Habiquo";
 
   return (
     <div className="px-4 sm:px-8 py-8 max-w-6xl mx-auto">
@@ -113,6 +135,27 @@ export default async function LeadDetailPage({ params }: Props) {
             Stato pipeline
           </label>
           <LeadStatusSelect leadId={lead.id} currentStatus={lead.status} />
+        </div>
+
+        {/* Next Action Banner — visibile solo se il lead è stale */}
+        <NextActionBanner
+          status={lead.status}
+          lastActivityAt={lead.lastContactAt}
+          updatedAt={lead.updatedAt}
+          createdAt={null}
+          leadName={lead.fullName}
+        />
+
+        {/* WhatsApp Link Button — messaggio precompilato per lo stage corrente */}
+        <div className="flex items-center gap-3 pt-1">
+          <WhatsAppLinkButton
+            phone={lead.phone}
+            whatsapp={lead.whatsapp}
+            status={lead.status}
+            leadName={lead.fullName}
+            agentName={agentName}
+            agencyName={agencyName}
+          />
         </div>
       </header>
 
@@ -169,19 +212,18 @@ export default async function LeadDetailPage({ params }: Props) {
           </section>
 
           <LeadPreferencesForm
-          leadId={lead.id}
-          initial={{
-            preferredCity:        lead.preferredCity,
-            preferredListingType: lead.preferredListingType,
-            preferredRoomsMin:    lead.preferredRoomsMin,
-            preferredSqmMin:      lead.preferredSqmMin,
-          }}
-        />
-        <LeadTasksFollowUp leadId={lead.id} />
-
+            leadId={lead.id}
+            initial={{
+              preferredCity: lead.preferredCity,
+              preferredListingType: lead.preferredListingType,
+              preferredRoomsMin: lead.preferredRoomsMin,
+              preferredSqmMin: lead.preferredSqmMin,
+            }}
+          />
+          <LeadTasksFollowUp leadId={lead.id} />
           <LeadNotesForm leadId={lead.id} />
-        <LeadDocumentsSection leadId={lead.id} />
-        <LeadMatchingProperties leadId={lead.id} />
+          <LeadDocumentsSection leadId={lead.id} />
+          <LeadMatchingProperties leadId={lead.id} />
 
           <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)] animate-in-card [animation-delay:120ms]">
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-6">
@@ -198,6 +240,3 @@ export default async function LeadDetailPage({ params }: Props) {
     </div>
   );
 }
-
-
-

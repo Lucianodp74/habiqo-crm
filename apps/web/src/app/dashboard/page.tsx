@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { getDashboardData } from '@/lib/queries/dashboard'
 import { KpiCard } from '@/components/dashboard/kpi-card'
 import { LeadsChart } from '@/components/dashboard/leads-chart'
+import { StaleLeadWidget } from '@/components/funnel/StaleLeadWidget'
+import { Suspense } from 'react'
 
 export const metadata = { title: 'Dashboard · Habiquo' }
 
@@ -54,6 +56,19 @@ function timeAgo(iso: string): string {
   return `${days}gg fa`
 }
 
+function StaleLeadWidgetSkeleton() {
+  return (
+    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-5 animate-pulse">
+      <div className="h-3 w-32 bg-[var(--bg-sunken)] rounded mb-4" />
+      <div className="space-y-2">
+        <div className="h-10 bg-[var(--bg-sunken)] rounded-xl" />
+        <div className="h-10 bg-[var(--bg-sunken)] rounded-xl" />
+        <div className="h-10 bg-[var(--bg-sunken)] rounded-xl" />
+      </div>
+    </div>
+  )
+}
+
 export default async function DashboardPage() {
   const data = await getDashboardData()
   if (!data) redirect('/login')
@@ -96,43 +111,12 @@ export default async function DashboardPage() {
 
       {/* KPI Grid */}
       <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        <KpiCard
-          label="Lead attivi"
-          value={kpis.activeLeads}
-          icon="👥"
-          sublabel="in pipeline"
-          accent
-        />
-        <KpiCard
-          label="Immobili"
-          value={kpis.publishedProps}
-          icon="🏠"
-          sublabel="pubblicati"
-        />
-        <KpiCard
-          label="Nuovi 30gg"
-          value={kpis.newLeads30d}
-          icon="📈"
-          sublabel="lead ricevuti"
-        />
-        <KpiCard
-          label="Render AI"
-          value={kpis.rendersCompleted}
-          icon="✨"
-          sublabel="completati"
-        />
-        <KpiCard
-          label="Appuntamenti"
-          value={kpis.appointmentsToday}
-          icon="📅"
-          sublabel="oggi"
-        />
-        <KpiCard
-          label="Match attivi"
-          value={kpis.leadsWithPrefs}
-          icon="🎯"
-          sublabel="lead con preferenze"
-        />
+        <KpiCard label="Lead attivi" value={kpis.activeLeads} icon="👥" sublabel="in pipeline" accent />
+        <KpiCard label="Immobili" value={kpis.publishedProps} icon="🏠" sublabel="pubblicati" />
+        <KpiCard label="Nuovi 30gg" value={kpis.newLeads30d} icon="📈" sublabel="lead ricevuti" />
+        <KpiCard label="Render AI" value={kpis.rendersCompleted} icon="✨" sublabel="completati" />
+        <KpiCard label="Appuntamenti" value={kpis.appointmentsToday} icon="📅" sublabel="oggi" />
+        <KpiCard label="Match attivi" value={kpis.leadsWithPrefs} icon="🎯" sublabel="lead con preferenze" />
       </section>
 
       {/* Grafico lead */}
@@ -236,6 +220,11 @@ export default async function DashboardPage() {
         {/* Right col — 1/3 */}
         <div className="space-y-6">
 
+          {/* Lead da ricontattare — Funnel Intelligence */}
+          <Suspense fallback={<StaleLeadWidgetSkeleton />}>
+            <StaleLeadWidget />
+          </Suspense>
+
           {/* Appuntamenti oggi */}
           <section>
             <div className="flex items-center justify-between mb-3">
@@ -284,9 +273,9 @@ export default async function DashboardPage() {
             <h2 className="font-display text-[18px] text-[var(--fg-primary)] mb-3">Azioni rapide</h2>
             <div className="space-y-2">
               {[
-                { href: '/crm/leads',          label: '+ Nuovo lead',          icon: '👤' },
-                { href: '/admin/properties/new-ai', label: '+ Nuovo immobile', icon: '🏠' },
-                { href: '/dashboard/agenda',    label: '+ Appuntamento',        icon: '📅' },
+                { href: '/crm/leads',               label: '+ Nuovo lead',     icon: '👤' },
+                { href: '/admin/properties/new-ai',  label: '+ Nuovo immobile', icon: '🏠' },
+                { href: '/dashboard/agenda',          label: '+ Appuntamento',   icon: '📅' },
               ].map(action => (
                 <Link key={action.href} href={action.href}
                   className="flex items-center gap-3 p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] hover:border-[var(--fg-primary)]/20 hover:bg-[var(--bg-sunken)] transition-all text-[13px] font-medium text-[var(--fg-secondary)]">
@@ -302,7 +291,3 @@ export default async function DashboardPage() {
     </div>
   )
 }
-
-
-
-
