@@ -26,20 +26,38 @@ export async function POST(req: Request) {
     if (!isUuid(leadId))
       return NextResponse.json({ error: "Identificativo lead non valido" }, { status: 400 });
 
-    const status = normalizeIncomingStatus(rawStatus);
-    if (!status)
-      return NextResponse.json({ error: "Stato non valido" }, { status: 400 });
-
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user)
       return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
 
-    // Passa p_user_id esplicitamente — auth.uid() è NULL nei contesti SECURITY DEFINER
+    // Se rawStatus è un UUID, risolvi il status_key dalla tabella pipeline_stages.
+    // Questo gestisce il caso in cui il board invia l'UUID dello stage invece del valore enum.
+    let resolvedStatus: string | null = null;
+
+    if (isUuid(rawStatus)) {
+      const { data: stage } = await supabase
+        .from("pipeline_stages")
+        .select("status_key")
+        .eq("id", rawStatus)
+        .single();
+
+      if (stage?.status_key) {
+        resolvedStatus = stage.status_key === "in_negotiation"
+          ? "in_negotiation"
+          : normalizeIncomingStatus(stage.status_key);
+      }
+    } else {
+      resolvedStatus = normalizeIncomingStatus(rawStatus);
+    }
+
+    if (!resolvedStatus)
+      return NextResponse.json({ error: "Stato non valido" }, { status: 400 });
+
     const { error } = await supabase.rpc("update_lead_status_with_event", {
       p_lead_id: leadId,
-      p_new_status: status,
+      p_new_status: resolvedStatus,
       p_user_id: user.id,
     });
 
