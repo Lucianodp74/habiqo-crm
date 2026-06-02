@@ -433,9 +433,11 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
         }
 
         if (!status) {
-          // Custom stage with no status_key → no DB update yet (Sprint 2)
-          return;
-        }
+  // Debug: log per capire perché status è null
+  console.log("[DnD] status null — destNow:", destNow, "cols:", JSON.stringify(cols?.map(c => ({ id: c.id, statusKey: c.statusKey }))));
+  return;
+}
+console.log("[DnD] calling update-status with:", { leadId: activeIdStr, status });
 
         try {
           const res = await fetch("/api/leads/update-status", {
