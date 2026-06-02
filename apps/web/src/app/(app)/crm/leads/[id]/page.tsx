@@ -77,12 +77,14 @@ export default async function LeadDetailPage({ params }: Props) {
   const aiScoreDisplay = lead.aiScore != null ? String(lead.aiScore) : NON_SPECIFICATO;
 
  // Nome agente e agenzia per WhatsApp template
-  const rawProfiles = agentData?.data?.profiles;
-  const rawAgencies = agentData?.data?.agencies;
-  const agentName =
-    (Array.isArray(rawProfiles) ? rawProfiles[0]?.full_name : (rawProfiles as { full_name?: string } | null)?.full_name) ?? "Agente";
-  const agencyName =
-    (Array.isArray(rawAgencies) ? rawAgencies[0]?.name : (rawAgencies as { name?: string } | null)?.name) ?? "Habiquo";
+  const rawData = agentData?.data as unknown as {
+    profiles?: { full_name?: string | null } | { full_name?: string | null }[];
+    agencies?: { name?: string | null } | { name?: string | null }[];
+  } | null;
+  const profilesRaw = rawData?.profiles;
+  const agenciesRaw = rawData?.agencies;
+  const agentName = (Array.isArray(profilesRaw) ? profilesRaw[0]?.full_name : profilesRaw?.full_name) ?? "Agente";
+  const agencyName = (Array.isArray(agenciesRaw) ? agenciesRaw[0]?.name : agenciesRaw?.name) ?? "Habiquo";
 
   return (
     <div className="px-4 sm:px-8 py-8 max-w-6xl mx-auto">
