@@ -74,6 +74,13 @@ function realtimeFingerprint(lead: PipelineLead): string {
   return `${lead.status}\0${lead.updatedAt ?? ""}\0${lead.assignedToId ?? ""}\0${lead.fullName}`;
 }
 
+function resolveColId(id: string, items: Record<string, string[]>): string | undefined {
+  // If id is itself a column key, return it directly
+  if (id in items) return id;
+  // Otherwise find which column contains this lead id
+  return findLeadColumnDynamic(items, id);
+}
+
 export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: PipelineBoardProps) {
   const isDynamic = columns !== undefined && columns.length > 0;
 
@@ -279,85 +286,68 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
     }),
   );
 
-  const resolveContainer = useCallback((id: string): string | undefined => {
-    if (id in itemsRef.current) return id;
-    return findLeadColumnDynamic(itemsRef.current, id);
+  const onDragStart = useCallback((event: DragStartEvent) => {
+    const activeIdStr = event.active.id as string;
+    const sourceColumn = resolveColId(activeIdStr, itemsRef.current);
+    if (!sourceColumn) return;
+    dragLockLeadIdRef.current = activeIdStr;
+    snapshotRef.current = {
+      items: structuredClone(itemsRef.current),
+      sourceColumn,
+    };
+    setActiveId(activeIdStr);
   }, []);
 
-  const onDragStart = useCallback(
-    (event: DragStartEvent) => {
-      const activeIdStr = event.active.id as string;
-      const sourceColumn = resolveContainer(activeIdStr);
-      if (!sourceColumn) return;
-      dragLockLeadIdRef.current = activeIdStr;
-      snapshotRef.current = {
-        items: structuredClone(itemsRef.current),
-        sourceColumn,
-      };
-      setActiveId(activeIdStr);
-    },
-    [resolveContainer],
-  );
+  const onDragOver = useCallback((event: DragOverEvent) => {
+    const { active, over } = event;
+    const overId = over?.id;
+    if (overId == null || active.id === overId) return;
 
-  const onDragOver = useCallback(
-    (event: DragOverEvent) => {
-      const { active, over } = event;
-      const overId = over?.id;
-      if (overId == null || active.id === overId) return;
+    const activeIdStr = active.id as string;
+    const overIdStr = overId as string;
+    const current = itemsRef.current;
 
-      const activeIdStr = active.id as string;
-      const overIdStr = overId as string;
+    const activeContainer = resolveColId(activeIdStr, current);
+    const overContainer = resolveColId(overIdStr, current);
 
-      // Resolve containers directly from itemsRef (always current)
-      const current = itemsRef.current;
-      const activeContainer = current[activeIdStr] !== undefined
-        ? activeIdStr
-        : findLeadColumnDynamic(current, activeIdStr);
-      const overContainer = current[overIdStr] !== undefined
-        ? overIdStr
-        : findLeadColumnDynamic(current, overIdStr);
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
 
-      console.log("[DnD over]", { activeContainer, overContainer, activeIdStr, overIdStr });
+    const activeItems = current[activeContainer] ?? [];
+    const overItems = current[overContainer] ?? [];
+    const activeIndex = activeItems.indexOf(activeIdStr);
+    if (activeIndex === -1) return;
 
-      if (!activeContainer || !overContainer || activeContainer === overContainer) return;
-
-      const activeItems = current[activeContainer] ?? [];
-      const overItems = current[overContainer] ?? [];
-      const activeIndex = activeItems.indexOf(activeIdStr);
-      if (activeIndex === -1) return;
-
-      let newIndex: number;
-      if (overIdStr in current) {
+    let newIndex: number;
+    if (overIdStr in current) {
+      // Dropped directly onto a column — append at end
+      newIndex = overItems.length;
+    } else {
+      const overIndex = overItems.indexOf(overIdStr);
+      if (overIndex === -1) {
         newIndex = overItems.length;
       } else {
-        const overIndex = overItems.indexOf(overIdStr);
-        if (overIndex === -1) {
-          newIndex = overItems.length;
-        } else {
-          const isBelowOverItem =
-            over &&
-            active.rect.current.translated &&
-            active.rect.current.translated.top > over.rect.top + over.rect.height;
-          newIndex = overIndex + (isBelowOverItem ? 1 : 0);
-        }
+        const isBelowOverItem =
+          over &&
+          active.rect.current.translated &&
+          active.rect.current.translated.top > over.rect.top + over.rect.height;
+        newIndex = overIndex + (isBelowOverItem ? 1 : 0);
       }
+    }
 
-      const next = {
-        ...current,
-        [activeContainer]: activeItems.filter((id) => id !== activeIdStr),
-        [overContainer]: [
-          ...overItems.slice(0, newIndex),
-          activeIdStr,
-          ...overItems.slice(newIndex),
-        ],
-      };
+    const next = {
+      ...current,
+      [activeContainer]: activeItems.filter((id) => id !== activeIdStr),
+      [overContainer]: [
+        ...overItems.slice(0, newIndex),
+        activeIdStr,
+        ...overItems.slice(newIndex),
+      ],
+    };
 
-      // Update ref synchronously BEFORE setState
-      itemsRef.current = next;
-      setItemsState(next);
-    },
-    [],
-  );
+    // Update ref synchronously before React state update
+    itemsRef.current = next;
+    setItemsState(next);
+  }, []);
 
   const onDragCancel = useCallback(() => {
     dragLockLeadIdRef.current = null;
@@ -380,48 +370,40 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           return;
         }
 
-        // Use itemsRef.current — always reflects latest DragOver state
         const current = itemsRef.current;
+        const dropTargetId = over.id as string;
 
-        const activeContainer = findLeadColumnDynamic(current, activeIdStr);
-        const overIdStr = over.id as string;
-        const overContainer = current[overIdStr] !== undefined
-          ? overIdStr
-          : findLeadColumnDynamic(current, overIdStr);
+        // Destination = column of the drop target (or the target itself if it's a column)
+        const destNow = resolveColId(dropTargetId, current);
 
-        if (!activeContainer || !overContainer) {
+        console.log("[DnD end]", {
+          dropTargetId,
+          destNow,
+          source: snap?.sourceColumn,
+          sameColumn: snap?.sourceColumn === destNow,
+          cols: columnsRef.current?.map((c) => ({ id: c.id, sk: c.statusKey })),
+        });
+
+        if (!snap || !destNow) {
           if (snap) setItems(snap.items);
           return;
         }
 
-        // Same column reorder
-        if (activeContainer === overContainer) {
-          const colItems = current[activeContainer] ?? [];
+        // Same column — handle reorder
+        if (snap.sourceColumn === destNow) {
+          const colItems = current[destNow] ?? [];
           const oldIndex = colItems.indexOf(activeIdStr);
-          const newIndex = colItems.indexOf(overIdStr);
+          const newIndex = colItems.indexOf(dropTargetId);
           if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-            const reordered = {
+            setItems({
               ...current,
-              [activeContainer]: arrayMove(colItems, oldIndex, newIndex),
-            };
-            setItems(reordered);
+              [destNow]: arrayMove(colItems, oldIndex, newIndex),
+            });
           }
+          return;
         }
 
-        if (!snap) return;
-
-        const destNow = findLeadColumnDynamic(itemsRef.current, activeIdStr);
-
-        console.log("[DnD end]", {
-          destNow,
-          source: snap.sourceColumn,
-          sameColumn: snap.sourceColumn === destNow,
-          workingKeys: Object.keys(itemsRef.current),
-          cols: columnsRef.current?.map((c) => ({ id: c.id, statusKey: c.statusKey })),
-        });
-
-        if (!destNow || snap.sourceColumn === destNow) return;
-
+        // Cross-column move — resolve DB status
         const cols = columnsRef.current;
         let status: string | null = null;
         if (cols && cols.length > 0) {
@@ -430,11 +412,11 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           status = columnIdToDbStatus(destNow);
         }
 
-        console.log("[DnD] resolved status:", status);
+        console.log("[DnD] resolved status:", status, "for destNow:", destNow);
 
         if (!status) {
           toast.error("Stage personalizzato: spostamento non ancora supportato");
-          if (snap) setItems(snap.items);
+          setItems(snap.items);
           return;
         }
 
@@ -461,14 +443,14 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           });
         } catch (e) {
           setItems(snap.items);
-          const col = findLeadColumnDynamic(snap.items, activeIdStr);
-          if (col) {
+          const revertCol = findLeadColumnDynamic(snap.items, activeIdStr);
+          if (revertCol) {
             const cols2 = columnsRef.current;
             const revertedStatus =
               cols2 && cols2.length > 0
-                ? dynamicColumnIdToDbStatus(col, cols2)
-                : isPipelineColumnId(col)
-                  ? columnIdToDbStatus(col)
+                ? dynamicColumnIdToDbStatus(revertCol, cols2)
+                : isPipelineColumnId(revertCol)
+                  ? columnIdToDbStatus(revertCol)
                   : null;
             if (revertedStatus) {
               setLeadsById((prev) => {
