@@ -4,6 +4,7 @@ import { getDashboardData } from '@/lib/queries/dashboard'
 import { KpiCard } from '@/components/dashboard/kpi-card'
 import { LeadsChart } from '@/components/dashboard/leads-chart'
 import { StaleLeadWidget } from '@/components/funnel/StaleLeadWidget'
+import { OpportunitaDelGiorno } from '@/components/funnel/OpportunitaDelGiorno'
 import { Suspense } from 'react'
 
 export const metadata = { title: 'Dashboard · Habiquo' }
@@ -69,6 +70,20 @@ function StaleLeadWidgetSkeleton() {
   )
 }
 
+function OpportunitaSkeleton() {
+  return (
+    <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/30 p-5 animate-pulse">
+      <div className="h-4 w-48 bg-amber-100 rounded mb-4" />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <div className="h-12 bg-amber-100 rounded-xl" />
+          <div className="h-12 bg-amber-100 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default async function DashboardPage() {
   const data = await getDashboardData()
   if (!data) redirect('/login')
@@ -129,6 +144,11 @@ export default async function DashboardPage() {
         </div>
         <LeadsChart data={chartData} />
       </section>
+
+      {/* Opportunità del Giorno — full width sopra il grid */}
+      <Suspense fallback={<OpportunitaSkeleton />}>
+        <OpportunitaDelGiorno />
+      </Suspense>
 
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -220,7 +240,7 @@ export default async function DashboardPage() {
         {/* Right col — 1/3 */}
         <div className="space-y-6">
 
-          {/* Lead da ricontattare — Funnel Intelligence */}
+          {/* Lead da ricontattare */}
           <Suspense fallback={<StaleLeadWidgetSkeleton />}>
             <StaleLeadWidget />
           </Suspense>
