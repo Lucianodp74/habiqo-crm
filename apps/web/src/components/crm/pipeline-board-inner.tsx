@@ -32,8 +32,6 @@ import { toast } from "sonner";
 import { LeadCard, LeadCardDragPreview } from "./lead-card";
 import { PipelineColumn } from "./pipeline-column";
 
-// ─── Types ────────────────────────────────────────────────────────
-
 type DragSnapshot = {
   items: Record<string, string[]>;
   sourceColumn: string;
@@ -41,17 +39,9 @@ type DragSnapshot = {
 
 export type PipelineBoardProps = {
   initialLeads: PipelineLead[];
-  /**
-   * Dynamic columns from DB pipeline_stages.
-   * When provided, the board uses these for labels/colors.
-   * When absent, falls back to static PIPELINE_COLUMNS.
-   */
   columns?: PipelineColumnDynamic[];
-  /** Realtime INSERT + post-UPDATE visibility: keep in sync with pipeline filters. */
   includeLeadInBoard?: (lead: PipelineLead) => boolean;
 };
-
-// ─── Helpers ─────────────────────────────────────────────────────
 
 function removeLeadFromAllColumnsDynamic(
   items: Record<string, string[]>,
@@ -84,13 +74,9 @@ function realtimeFingerprint(lead: PipelineLead): string {
   return `${lead.status}\0${lead.updatedAt ?? ""}\0${lead.assignedToId ?? ""}\0${lead.fullName}`;
 }
 
-// ─── Component ───────────────────────────────────────────────────
-
 export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: PipelineBoardProps) {
   const isDynamic = columns !== undefined && columns.length > 0;
 
-  // Unified items: Record<colId, leadId[]>
-  // colId is PipelineColumnId (static) or UUID string (dynamic)
   const buildInitialItems = useCallback(() => {
     if (isDynamic) {
       return buildColumnItemsFromLeadsDynamic(initialLeads, columns);
@@ -161,8 +147,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
     pulseTimeoutsRef.current.push(tid);
   }, []);
 
-  // ─── Realtime ──────────────────────────────────────────────────
-
   const resolveColumnForLead = useCallback((lead: PipelineLead): string => {
     const cols = columnsRef.current;
     if (cols && cols.length > 0) {
@@ -183,7 +167,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
         if (!isRecord(oldRow)) return;
         const id = oldRow.id;
         if (typeof id !== "string") return;
-
         setLeadsById((prev) => {
           if (!(id in prev)) return prev;
           const { [id]: _, ...rest } = prev;
@@ -290,8 +273,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
     };
   }, [applyRealtimePayload]);
 
-  // ─── DnD ────────────────────────────────────────────────────────
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -299,7 +280,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
   );
 
   const resolveContainer = useCallback((id: string): string | undefined => {
-    // Check if id is a column id
     if (id in itemsRef.current) return id;
     return findLeadColumnDynamic(itemsRef.current, id);
   }, []);
@@ -344,7 +324,6 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
 
         let newIndex: number;
         if (overIdStr in prev) {
-          // Dropped onto a column header
           newIndex = overItems.length;
         } else {
           const overIndex = overItems.indexOf(overIdStr);
@@ -421,9 +400,19 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
         if (!snap) return;
 
         const destNow = findLeadColumnDynamic(working, activeIdStr);
+
+        // DEBUG — rimuovere dopo il fix
+        console.log("[DnD end]", {
+          destNow,
+          source: snap.sourceColumn,
+          sameColumn: snap.sourceColumn === destNow,
+          workingKeys: Object.keys(working),
+          cols: columnsRef.current?.map((c) => ({ id: c.id, statusKey: c.statusKey })),
+        });
+
         if (!destNow || snap.sourceColumn === destNow) return;
 
-        // Resolve DB status from destination column
+        // Resolve DB status from destination column UUID → status_key
         const cols = columnsRef.current;
         let status: string | null = null;
         if (cols && cols.length > 0) {
@@ -432,18 +421,19 @@ export function PipelineBoard({ initialLeads, columns, includeLeadInBoard }: Pip
           status = columnIdToDbStatus(destNow);
         }
 
+        console.log("[DnD] resolved status:", status, "for destNow:", destNow);
+
         if (!status) {
-  // Debug: log per capire perché status è null
-  console.log("[DnD] status null — destNow:", destNow, "cols:", JSON.stringify(cols?.map(c => ({ id: c.id, statusKey: c.statusKey }))));
-  return;
-}
-console.log("[DnD] calling update-status with:", { leadId: activeIdStr, status });
+          toast.error("Stage personalizzato: spostamento non ancora supportato");
+          if (snap) setItems(snap.items);
+          return;
+        }
 
         try {
           const res = await fetch("/api/leads/update-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ leadId: activeIdStr, status: status }),
+            body: JSON.stringify({ leadId: activeIdStr, status }),
           });
           if (!res.ok) {
             const body: unknown = await res.json().catch(() => ({}));
@@ -488,11 +478,8 @@ console.log("[DnD] calling update-status with:", { leadId: activeIdStr, status }
     [setItems, resolveContainer],
   );
 
-  // ─── Render ─────────────────────────────────────────────────────
-
   const activeLead = activeId ? leadsById[activeId] : null;
 
-  // Resolve columns to render — dynamic from DB or static fallback
   const columnsToRender = isDynamic
     ? columns.map((col) => ({
         id: col.id,
