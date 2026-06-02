@@ -93,7 +93,8 @@ export default async function LeadDetailPage({ params }: Props) {
         ← Pipeline
       </Link>
 
-      <header className="mb-10 space-y-5 animate-in-card">
+      {/* Header — NO transform/animation su questo elemento per non intrappolare dropdown */}
+      <header className="mb-6 space-y-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-muted)]">
           Lead profile
         </p>
@@ -123,7 +124,7 @@ export default async function LeadDetailPage({ params }: Props) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-sunken)] px-3 py-1 text-[11px] text-[var(--fg-secondary)] transition-colors duration-200 hover:border-[var(--color-brass)]/25">
+            <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-sunken)] px-3 py-1 text-[11px] text-[var(--fg-secondary)]">
               Urgenza: {urgencyLabel(urgency)}
             </span>
           </div>
@@ -147,67 +148,53 @@ export default async function LeadDetailPage({ params }: Props) {
           createdAt={null}
           leadName={lead.fullName}
         />
-
-        {/* WhatsApp Quick Menu — 5 template contestuali */}
-        <div className="flex items-center gap-3 pt-1">
-          <WhatsAppQuickMenu
-            phone={lead.phone}
-            whatsapp={lead.whatsapp}
-            status={lead.status}
-            leadName={lead.fullName}
-            agentName={agentName}
-            agencyName={agencyName}
-          />
-        </div>
       </header>
+
+      {/* WhatsApp Quick Menu — fuori dall'header per evitare stacking context da transform/animation */}
+      <div className="mb-10 relative" style={{ zIndex: 100 }}>
+        <WhatsAppQuickMenu
+          phone={lead.phone}
+          whatsapp={lead.whatsapp}
+          status={lead.status}
+          leadName={lead.fullName}
+          agentName={agentName}
+          agencyName={agencyName}
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.18)] animate-in-card [animation-delay:80ms]">
+          <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.18)]">
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-5">
               Profilo richiesta
             </h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 text-[13px]">
               <div>
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  Email
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">Email</dt>
                 <FieldValue value={emailDisplay} />
               </div>
               <div>
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  Telefono
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">Telefono</dt>
                 <FieldValue value={phoneDisplay} />
               </div>
               <div>
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  WhatsApp
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">WhatsApp</dt>
                 <FieldValue value={whatsappDisplay} />
               </div>
               <div>
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  Budget
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">Budget</dt>
                 <FieldValue value={formatBudgetRange(lead)} />
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  Zone preferite
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">Zone preferite</dt>
                 <FieldValue value={formatZones(lead.preferredZones, 12)} />
               </div>
               <div>
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  Tipologia
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">Tipologia</dt>
                 <FieldValue value={formatPropertyType(lead.propertyType)} />
               </div>
               <div>
-                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">
-                  AI score
-                </dt>
+                <dt className="text-[var(--fg-muted)] text-[11px] font-mono uppercase tracking-wide mb-1.5">AI score</dt>
                 <FieldValue value={aiScoreDisplay} />
               </div>
             </dl>
@@ -227,7 +214,7 @@ export default async function LeadDetailPage({ params }: Props) {
           <LeadDocumentsSection leadId={lead.id} />
           <LeadMatchingProperties leadId={lead.id} />
 
-          <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)] animate-in-card [animation-delay:120ms]">
+          <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)]">
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-6">
               Timeline attività
             </h2>
