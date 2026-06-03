@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
+import { PropertyMatchingLeads } from "@/components/crm/property-matching-leads";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
+import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -29,7 +31,7 @@ export default async function PropertyPhotosPage({
   const { data: property } = await supabase
     .from("properties")
     .select(
-      "id, agency_id, title, city, listing_type, slug, is_public, photos",
+      "id, agency_id, title, city, listing_type, slug, is_public, photos, price_eur, rooms, sqm",
     )
     .eq("id", propertyId)
     .maybeSingle();
@@ -74,9 +76,10 @@ export default async function PropertyPhotosPage({
             ← Foto immobili
           </Link>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {property.title}
-        </h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-semibold tracking-tight">{property.title}</h1>
+          <DeletePropertyButton propertyId={property.id} propertyTitle={property.title} redirectAfter={true} />
+        </div>
         <p className="mt-2 text-sm text-neutral-600">
           {property.listing_type === "rent" ? "Affitto" : "Vendita"} ·{" "}
           {property.city}
@@ -110,6 +113,16 @@ export default async function PropertyPhotosPage({
         </div>
         <RenovationWizard propertyId={property.id} />
       </section>
+
+      {/* ── Lead compatibili con WhatsApp outreach ─────────────── */}
+      <PropertyMatchingLeads
+        propertyId={property.id}
+        propertyCity={property.city}
+        priceEur={property.price_eur ? Number(property.price_eur) : null}
+        rooms={property.rooms}
+        sqm={property.sqm}
+        listingType={property.listing_type}
+      />
     </div>
   );
 }
