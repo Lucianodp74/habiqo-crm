@@ -2,9 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
-import { PropertyMatchingLeads } from "@/components/crm/property-matching-leads";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
-import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -76,10 +74,9 @@ export default async function PropertyPhotosPage({
             ← Foto immobili
           </Link>
         </div>
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight">{property.title}</h1>
-          <DeletePropertyButton propertyId={property.id} propertyTitle={property.title} redirectAfter={true} />
-        </div>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {property.title}
+        </h1>
         <p className="mt-2 text-sm text-neutral-600">
           {property.listing_type === "rent" ? "Affitto" : "Vendita"} ·{" "}
           {property.city}
@@ -112,10 +109,7 @@ export default async function PropertyPhotosPage({
           </p>
         </div>
         <RenovationWizard propertyId={property.id} />
-      <PropertyMatchingLeads propertyId={property.id} />
       </section>
     </div>
   );
 }
-
-

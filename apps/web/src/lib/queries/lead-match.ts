@@ -1,6 +1,5 @@
 // lib/queries/lead-match.ts
-// Destinazione: apps/web/src/lib/queries/lead-match.ts
-// Matching semplice lead <-> immobili basato su preferenze
+// Matching lead <-> immobili basato su preferenze di ricerca
 
 import { createClient } from '@/lib/supabase/server'
 
@@ -18,11 +17,17 @@ export type MatchingProperty = {
 }
 
 export type MatchingLead = {
-  id:       string
-  fullName: string
-  email:    string | null
-  phone:    string | null
-  status:   string
+  id:              string
+  fullName:        string
+  email:           string | null
+  phone:           string | null
+  whatsapp:        string | null
+  status:          string
+  lastActivityAt:  string | null
+  updatedAt:       string | null
+  budgetMinEur:    number | null
+  budgetMaxEur:    number | null
+  preferredCity:   string | null
 }
 
 // ── Immobili compatibili con un lead ────────────────────────────
@@ -32,7 +37,6 @@ export async function getMatchingPropertiesForLead(
 ): Promise<MatchingProperty[]> {
   const supabase = await createClient()
 
-  // Recupera le preferenze del lead
   const { data: lead, error: leadError } = await supabase
     .from('leads')
     .select(`
@@ -49,7 +53,6 @@ export async function getMatchingPropertiesForLead(
 
   if (leadError || !lead) return []
 
-  // Costruisce la query in modo dinamico
   let query = supabase
     .from('properties')
     .select('id, title, city, price_eur, rooms, sqm, listing_type, photos')
@@ -99,7 +102,6 @@ export async function getMatchingLeadsForProperty(
 ): Promise<MatchingLead[]> {
   const supabase = await createClient()
 
-  // Recupera i dati dell'immobile
   const { data: property, error: propError } = await supabase
     .from('properties')
     .select('agency_id, city, price_eur, rooms, sqm, listing_type')
@@ -108,30 +110,28 @@ export async function getMatchingLeadsForProperty(
 
   if (propError || !property) return []
 
-  // Trova i lead compatibili
   let query = supabase
     .from('leads')
-    .select('id, full_name, email, phone, status')
+    .select(
+      'id, full_name, email, phone, whatsapp, status, last_activity_at, updated_at, budget_min_eur, budget_max_eur, preferred_city'
+    )
     .eq('agency_id', property.agency_id)
     .not('status', 'in', '("won","lost")')
     .order('created_at', { ascending: false })
     .limit(10)
 
-  // Match su città
   if (property.city) {
     query = query.or(
       `preferred_city.is.null,preferred_city.ilike.${property.city}`
     )
   }
 
-  // Match su listing_type
   if (property.listing_type) {
     query = query.or(
       `preferred_listing_type.is.null,preferred_listing_type.eq.${property.listing_type}`
     )
   }
 
-  // Match su budget
   if (property.price_eur) {
     const price = Number(property.price_eur)
     query = query
@@ -144,10 +144,16 @@ export async function getMatchingLeadsForProperty(
   if (error || !data) return []
 
   return data.map((l) => ({
-    id:       l.id,
-    fullName: l.full_name?.trim() || 'Senza nome',
-    email:    l.email,
-    phone:    l.phone,
-    status:   l.status ?? 'new',
+    id:             l.id,
+    fullName:       l.full_name?.trim() || 'Senza nome',
+    email:          l.email,
+    phone:          l.phone,
+    whatsapp:       l.whatsapp,
+    status:         l.status ?? 'new',
+    lastActivityAt: l.last_activity_at,
+    updatedAt:      l.updated_at,
+    budgetMinEur:   l.budget_min_eur ? Number(l.budget_min_eur) : null,
+    budgetMaxEur:   l.budget_max_eur ? Number(l.budget_max_eur) : null,
+    preferredCity:  l.preferred_city,
   }))
 }
