@@ -128,7 +128,7 @@ export default function AiAssistantPage() {
         <AiCard
           icon="📱"
           title="Messaggio WhatsApp"
-          description="Apri il menu WhatsApp dalla scheda di un lead con messaggi precompilati per ogni stage."
+          description="Seleziona un lead dalla pipeline, poi usa il menu WhatsApp verde per inviare un messaggio precompilato in un click."
           href="/crm/leads"
         />
 
