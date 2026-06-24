@@ -122,4 +122,57 @@ export async function createLead(input: unknown): Promise<ActionResult<{ id: str
   return { ok: true, data: { id: data.id } };
 }
 
+const deleteLeadSchema = z.object({
+  id: z.string().uuid(),
+});
 
+/**
+ * Elimina definitivamente un lead.
+ * RLS limita l'operazione ai soli lead dell'agenzia dell'utente autenticato —
+ * stesso meccanismo di sicurezza già usato in updateLead/createLead.
+ * Nessun controllo agency_id manuale: ci si appoggia alla policy DB,
+ * coerentemente con il resto di questo file.
+ */
+export async function deleteLead(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const parsed = deleteLeadSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: {
+        code: "validation_error",
+        message: "Identificativo lead non valido",
+        fields: parsed.error.flatten().fieldErrors,
+      },
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: { code: "unauthenticated", message: "Sessione scaduta" } };
+  }
+
+  const { id } = parsed.data;
+
+  const { error, count } = await supabase
+    .from("leads")
+    .delete({ count: "exact" })
+    .eq("id", id);
+
+  if (error) {
+    return { ok: false, error: { code: "db_error", message: "Eliminazione non riuscita" } };
+  }
+
+  if (!count) {
+    // RLS ha filtrato la riga (non appartiene all'agenzia) oppure non esiste.
+    return { ok: false, error: { code: "not_found", message: "Lead non trovato" } };
+  }
+
+  revalidatePath("/crm/leads");
+  revalidatePath("/crm");
+  revalidateTag(`lead-${id}`, 'max');
+
+  return { ok: true, data: { id } };
+}

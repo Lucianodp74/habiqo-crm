@@ -1,10 +1,13 @@
 "use client";
 
 import { NON_SPECIFICATO } from "@/lib/crm/missing-value";
-import { CalendarPlus, Mail, MessageSquarePlus, Phone, StickyNote } from "lucide-react";
-import { useCallback } from "react";
+import { deleteLead } from "@/lib/actions/leads";
+import { CalendarPlus, Loader2, Mail, MessageSquarePlus, Phone, StickyNote, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 
 type Props = {
+  leadId: string;
   fullName: string;
   email: string | null;
   phone: string | null;
@@ -13,6 +16,9 @@ type Props = {
 
 const actionBase =
   "group inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/80 px-3.5 py-2.5 text-[12px] font-medium text-[var(--fg-secondary)] transition-all duration-200 ease-out hover:border-[var(--color-brass)]/35 hover:bg-[var(--bg-sunken)]/90 hover:text-[var(--fg-primary)] hover:shadow-[0_8px_24px_-12px_rgba(24,20,16,0.25)] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]/40";
+
+const deleteActionBase =
+  "group inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-negative)]/25 bg-[var(--bg-elevated)]/80 px-3.5 py-2.5 text-[12px] font-medium text-[var(--color-negative)] transition-all duration-200 ease-out hover:border-[var(--color-negative)]/50 hover:bg-[var(--color-negative)]/10 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-negative)]/40 disabled:cursor-not-allowed disabled:opacity-50";
 
 function digitsForWa(raw: string | null): string {
   if (!raw) return "";
@@ -26,7 +32,10 @@ function buildWhatsAppHref(phone: string | null, whatsapp: string | null): strin
   return `https://wa.me/${e164}`;
 }
 
-export function LeadQuickActions({ fullName, email, phone, whatsapp }: Props) {
+export function LeadQuickActions({ leadId, fullName, email, phone, whatsapp }: Props) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const scrollToNotes = useCallback(() => {
     const el = document.getElementById("lead-notes-section");
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -34,6 +43,28 @@ export function LeadQuickActions({ fullName, email, phone, whatsapp }: Props) {
       document.getElementById("lead-note-input")?.focus();
     }, 400);
   }, []);
+
+  const handleDelete = useCallback(async () => {
+    const confirmed = window.confirm(
+      `Eliminare definitivamente il lead "${fullName}"?\n\nQuesta azione non può essere annullata.`,
+    );
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteLead({ id: leadId });
+      if (!result.ok) {
+        window.alert(result.error.message || "Eliminazione non riuscita.");
+        setIsDeleting(false);
+        return;
+      }
+      router.push("/crm/leads");
+      router.refresh();
+    } catch {
+      window.alert("Si è verificato un errore imprevisto. Riprova.");
+      setIsDeleting(false);
+    }
+  }, [fullName, leadId, router]);
 
   const visitTitle = encodeURIComponent(`Visita · ${fullName}`);
   const visitDetails = encodeURIComponent(
@@ -107,6 +138,19 @@ export function LeadQuickActions({ fullName, email, phone, whatsapp }: Props) {
           aria-hidden
         />
         Nuova nota
+      </button>
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={isDeleting}
+        className={deleteActionBase}
+      >
+        {isDeleting ? (
+          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+        ) : (
+          <Trash2 className="size-3.5" aria-hidden />
+        )}
+        {isDeleting ? "Eliminazione..." : "Elimina lead"}
       </button>
     </div>
   );

@@ -104,6 +104,7 @@ export default async function LeadDetailPage({ params }: Props) {
               {lead.fullName}
             </h1>
             <LeadQuickActions
+              leadId={lead.id}
               fullName={lead.fullName}
               email={lead.email}
               phone={lead.phone}
@@ -229,3 +230,4 @@ export default async function LeadDetailPage({ params }: Props) {
     </div>
   );
 }
+
