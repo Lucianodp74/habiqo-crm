@@ -59,6 +59,11 @@ export default async function AgencyLayout({
                     Chi siamo
                   </a>
                 </li>
+                  <li>
+                    <a href={`/${agencySlug}#chi-siamo`} className="hover:text-[var(--fg-primary)] transition-colors">
+                      Sedi
+                    </a>
+                  </li>
                 <li>
                   <a href={`/${agencySlug}#contatti`}
                     className="hover:text-[var(--fg-primary)] transition-colors">
@@ -77,3 +82,4 @@ export default async function AgencyLayout({
     </div>
   );
 }
+
