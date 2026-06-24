@@ -97,11 +97,50 @@ async function enrichLeads(supabase: Awaited<ReturnType<typeof createClient>>, r
   );
 }
 
+/**
+ * Recupera l'agency_id dell'utente attualmente loggato.
+ * Stesso pattern usato in lib/queries/dashboard.ts — single source of truth
+ * per evitare che ogni query reinventi la logica di risoluzione agenzia.
+ */
+async function getCurrentAgencyId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data: member } = await supabase
+    .from("agency_members")
+    .select("agency_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  return member?.agency_id ?? null;
+}
+
 export async function listLeadsForAgency(options?: { assignedTo?: string }): Promise<PipelineLead[]> {
   const supabase = await createClient();
 
-  let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
-  if (options?.assignedTo) { query = query.eq("assigned_to", options.assignedTo); }
+  const agencyId = await getCurrentAgencyId(supabase);
+  if (!agencyId) {
+    // Nessuna agenzia associata all'utente: nessun dato da mostrare.
+    // Non torniamo errore per non rompere la UI, ma nemmeno dati di altri.
+    return [];
+  }
+
+  let query = supabase
+    .from("leads")
+    .select("*")
+    .eq("agency_id", agencyId)
+    .order("created_at", { ascending: false });
+
+  if (options?.assignedTo) {
+    query = query.eq("assigned_to", options.assignedTo);
+  }
+
   const { data: rows, error } = await query;
 
   if (error) {
@@ -115,7 +154,15 @@ export async function listLeadsForAgency(options?: { assignedTo?: string }): Pro
 export async function getLeadByIdForAgency(id: string): Promise<PipelineLead | null> {
   const supabase = await createClient();
 
-  const { data: row, error } = await supabase.from("leads").select("*").eq("id", id).single();
+  const agencyId = await getCurrentAgencyId(supabase);
+  if (!agencyId) return null;
+
+  const { data: row, error } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", id)
+    .eq("agency_id", agencyId)
+    .single();
 
   if (error || !row) {
     return null;
@@ -139,7 +186,17 @@ export async function getLeadById(id: string): Promise<{
   createdAt: Date;
 } | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("leads").select("*").eq("id", id).single();
+
+  const agencyId = await getCurrentAgencyId(supabase);
+  if (!agencyId) return null;
+
+  const { data, error } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", id)
+    .eq("agency_id", agencyId)
+    .single();
+
   if (error || !data) return null;
   return {
     id: data.id,
@@ -164,4 +221,3 @@ export async function listEventsForLead(leadId: string) {
     occurredAt: new Date(e.occurredAt),
   }));
 }
-
