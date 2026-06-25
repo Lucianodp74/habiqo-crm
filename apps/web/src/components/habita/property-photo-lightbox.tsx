@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 type Props = {
   photos: string[];
   alt: string;
-  initialIndex?: number;
 };
 
 /**
@@ -14,7 +13,7 @@ type Props = {
  * Si attiva al click su qualsiasi foto (cover o thumbnail).
  * Navigazione: freccette on-screen, tasti ←/→, chiusura con X o ESC.
  */
-export function PropertyPhotoLightbox({ photos, alt, initialIndex = 0 }: Props) {
+export function PropertyPhotoLightbox({ photos, alt }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const close = useCallback(() => setOpenIndex(null), []);
