@@ -5,6 +5,7 @@ import { PropertyPhotosManager } from "@/components/admin/property-photos-manage
 import { PropertyMatchingLeads } from "@/components/crm/property-matching-leads";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
+import { PropertyInternalCodeField } from "@/components/admin/property-internal-code-field";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -31,7 +32,7 @@ export default async function PropertyPhotosPage({
   const { data: property } = await supabase
     .from("properties")
     .select(
-      "id, agency_id, title, city, listing_type, slug, is_public, photos, price_eur, rooms, sqm",
+      "id, agency_id, title, city, listing_type, slug, is_public, photos, price_eur, rooms, sqm, internal_code",
     )
     .eq("id", propertyId)
     .maybeSingle();
@@ -94,6 +95,13 @@ export default async function PropertyPhotosPage({
             Apri pagina pubblica ↗
           </a>
         )}
+
+        <div className="mt-4">
+          <PropertyInternalCodeField
+            propertyId={property.id}
+            initialCode={property.internal_code ?? null}
+          />
+        </div>
       </header>
 
       <PropertyPhotosManager
