@@ -123,6 +123,10 @@ export function PropertyPhotosManager({
 
     const reordered = [...photos];
     const [moved] = reordered.splice(dragIndex, 1);
+    if (moved === undefined) {
+      handleDragEnd();
+      return;
+    }
     reordered.splice(dropIndex, 0, moved);
 
     setPhotos(reordered);
