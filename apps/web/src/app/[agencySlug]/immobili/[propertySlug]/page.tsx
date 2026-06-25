@@ -5,6 +5,7 @@ import { getAnonClient } from "@/lib/habita/supabase-anon";
 import { getAgencyBySlug } from "@/lib/habita/tenant";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 import { LeadForm } from "@/components/habita/lead-form";
+import { PropertyPhotoLightbox } from "@/components/habita/property-photo-lightbox";
 
 type Params = Promise<{ agencySlug: string; propertySlug: string }>;
 
@@ -139,7 +140,10 @@ export default async function PropertyDetailPage({ params }: { params: Params })
         {/* Foto principale */}
         {photos[0] && (
           <div className="w-full px-8 md:px-16 mb-2">
-            <div className="aspect-[16/9] relative overflow-hidden rounded-sm">
+            <div
+              className="aspect-[16/9] relative overflow-hidden rounded-sm cursor-pointer"
+              data-photo-index="0"
+            >
               <div className="absolute top-3 left-3 z-10">
                 <span className="px-3 py-1 text-xs font-medium bg-[var(--bg-canvas)]/90 text-[var(--fg-primary)] rounded-sm backdrop-blur-sm">
                   {property.listing_type === "rent" ? "Affitto" : "Vendita"}
@@ -162,7 +166,11 @@ export default async function PropertyDetailPage({ params }: { params: Params })
           <div className="w-full px-8 md:px-16 mb-8">
             <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
               {photos.slice(1, 5).map((url: string, i: number) => (
-                <div key={i} className="aspect-[4/3] relative overflow-hidden rounded-sm">
+                <div
+                  key={i}
+                  className="aspect-[4/3] relative overflow-hidden rounded-sm cursor-pointer"
+                  data-photo-index={i + 1}
+                >
                   <Image
                     src={url}
                     alt={`${property.title} — foto ${i + 2}`}
@@ -180,6 +188,8 @@ export default async function PropertyDetailPage({ params }: { params: Params })
             </div>
           </div>
         )}
+
+        <PropertyPhotoLightbox photos={photos} alt={property.title} />
 
         {/* Layout 2 colonne */}
         <div className="w-full px-8 md:px-16">
