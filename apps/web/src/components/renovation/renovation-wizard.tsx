@@ -391,6 +391,9 @@ export function RenovationWizard({ propertyId }: Props) {
                 Nuovo render
               </button>
             </div>
+            {galleryError && (
+              <p className="mt-2 text-xs text-red-600">{galleryError}</p>
+            )}
           </div>
 
           {/* ── Form contatto lead ──────────────────────────────── */}
