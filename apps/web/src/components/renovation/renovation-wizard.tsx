@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { BeforeAfterSlider } from './before-after-slider'
 import { createRenovationLead } from '@/lib/actions/create-renovation-lead'
+import { addRenovationToGallery } from '@/lib/actions/add-renovation-to-gallery'
 
 // ── Config ────────────────────────────────────────────────────────
 
@@ -59,6 +60,9 @@ interface Props {
 
 export function RenovationWizard({ propertyId }: Props) {
   const [step,            setStep]           = useState<Step>('configure')
+  const [isSavingToGallery, setIsSavingToGallery] = useState(false)
+  const [gallerySaved,      setGallerySaved]      = useState(false)
+  const [galleryError,      setGalleryError]      = useState<string | null>(null)
   const [file,            setFile]           = useState<File | null>(null)
   const [previewUrl,      setPreviewUrl]     = useState<string | null>(null)
   const [roomType,        setRoomType]       = useState('living_room')
@@ -362,6 +366,26 @@ export function RenovationWizard({ propertyId }: Props) {
                 className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors">
                 Scarica
               </a>
+              {propertyId && afterImageUrl && (
+                <button
+                  type="button"
+                  disabled={isSavingToGallery || gallerySaved}
+                  onClick={() => {
+                    setIsSavingToGallery(true)
+                    setGalleryError(null)
+                    addRenovationToGallery({ propertyId, afterImageUrl }).then((result) => {
+                      setIsSavingToGallery(false)
+                      if (!result.ok) {
+                        setGalleryError(result.error.message)
+                        return
+                      }
+                      setGallerySaved(true)
+                    })
+                  }}
+                  className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {gallerySaved ? 'Aggiunto alla galleria âœ“' : isSavingToGallery ? 'Aggiungoâ€¦' : 'Aggiungi alla galleria'}
+                </button>
+              )}
               <button onClick={handleReset}
                 className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors">
                 Nuovo render
