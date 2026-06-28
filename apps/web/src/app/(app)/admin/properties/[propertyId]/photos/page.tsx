@@ -107,6 +107,7 @@ export default async function PropertyPhotosPage({
       <PropertyPhotosManager
         propertyId={property.id}
         initialPhotos={property.photos ?? []}
+        internalCode={property.internal_code}
       />
 
       {/* ── Valorizza Casa AI ──────────────────────────────────── */}
