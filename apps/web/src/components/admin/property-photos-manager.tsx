@@ -17,9 +17,11 @@ const MAX_MB = Math.round(PROPERTY_PHOTO_MAX_BYTES / (1024 * 1024));
 export function PropertyPhotosManager({
   propertyId,
   initialPhotos,
+  internalCode,
 }: {
   propertyId: string;
   initialPhotos: string[];
+  internalCode?: string | null;
 }) {
   const [photos, setPhotos] = useState<string[]>(initialPhotos);
   const [error, setError] = useState<string | null>(null);
@@ -229,8 +231,15 @@ export function PropertyPhotosManager({
 
                 {/* Cover badge */}
                 {isCover && (
-                  <div className="absolute left-2 top-2 rounded bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">
-                    Cover
+                  <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
+                    <div className="rounded bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">
+                      Cover
+                    </div>
+                    {internalCode && (
+                      <div className="rounded bg-white/90 px-2 py-0.5 text-[10px] font-medium text-neutral-900 backdrop-blur-sm">
+                        {internalCode}
+                      </div>
+                    )}
                   </div>
                 )}
 
