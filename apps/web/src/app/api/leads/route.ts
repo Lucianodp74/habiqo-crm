@@ -6,13 +6,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const supabase = await createClient();
 
-    // Ricava l'utente autenticato
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
     }
 
-    // Ricava l'agency_id dall'appartenenza dell'utente
     const { data: membership, error: memberError } = await supabase
       .from("agency_members")
       .select("agency_id")
@@ -25,6 +23,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nessuna agenzia trovata" }, { status: 403 });
     }
 
+    const parseBudget = (v: unknown): number | null => {
+      if (v == null || v === "") return null;
+      const n = parseInt(String(v), 10);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    };
+
     const { data, error } = await supabase
       .from("leads")
       .insert([
@@ -33,8 +37,8 @@ export async function POST(req: Request) {
           full_name:      body.full_name,
           email:          body.email ?? null,
           phone:          body.phone ?? null,
-          budget_min:     body.budget_min != null && body.budget_min !== "" ? parseInt(String(body.budget_min), 10) || null : null,
-budget_max:     body.budget_max != null && body.budget_max !== "" ? parseInt(String(body.budget_max), 10) || null : null,
+          budget_min_eur: parseBudget(body.budget_min),
+          budget_max_eur: parseBudget(body.budget_max),
           preferred_city: body.preferred_city ?? null,
           source:         body.source,
           status:         body.status || "new",
