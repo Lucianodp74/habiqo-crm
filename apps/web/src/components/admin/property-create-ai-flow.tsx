@@ -81,6 +81,8 @@ const PROPERTY_TYPES = [
   "Ufficio",
   "Negozio",
   "Box / Garage",
+  "Terreno",
+  "Altro",
 ];
 const ENERGY_CLASSES = ["A4", "A3", "A2", "A1", "B", "C", "D", "E", "F", "G"];
 
