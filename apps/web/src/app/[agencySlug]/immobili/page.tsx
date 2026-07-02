@@ -61,6 +61,31 @@ export default async function ImmobiliListPage({
         <h1 className="font-display text-4xl text-[var(--fg-primary)] mb-1">
           {tipo === "sale" ? "In vendita" : tipo === "rent" ? "In affitto" : "Tutti gli immobili"}
         </h1>
+        {/* Filtro sedi */}
+        <div className="flex flex-wrap gap-2 mt-4 mb-2">
+          {[
+            { label: "Tutte le sedi", value: undefined as string | undefined },
+            { label: "San Giorgio Ionico", value: "San Giorgio Ionico" },
+            { label: "Taranto", value: "Taranto" },
+          ].map(({ label, value }) => (
+            <Link
+              key={label}
+              href={
+                value
+                  ? `/${agencySlug}/immobili?${tipo ? `tipo=${tipo}&` : ""}citta=${encodeURIComponent(value)}`
+                  : `/${agencySlug}/immobili${tipo ? `?tipo=${tipo}` : ""}`
+              }
+              className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                citta === value || (!citta && !value)
+                  ? "bg-[var(--fg-primary)] text-[var(--bg-canvas)] border-[var(--fg-primary)]"
+                  : "bg-transparent text-[var(--fg-secondary)] border-[var(--border-subtle)] hover:border-[var(--fg-primary)] hover:text-[var(--fg-primary)]"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
         <p className="text-sm text-[var(--fg-secondary)]">
           {filtered.length} {filtered.length === 1 ? "immobile" : "immobili"}
           {citta ? ` a ${citta}` : ""}
