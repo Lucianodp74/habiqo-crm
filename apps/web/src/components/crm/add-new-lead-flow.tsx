@@ -187,8 +187,8 @@ export function AddNewLeadFlow() {
                   id="new-lead-budget-min"
                   type="number"
                   min={1}
-                  step={1000}
-                  placeholder="€ …"
+                  step={1}
+                  placeholder="es. 50000"
                   aria-invalid={!!errors.budget_min}
                   {...register("budget_min")}
                 />
@@ -204,8 +204,8 @@ export function AddNewLeadFlow() {
                   id="new-lead-budget-max"
                   type="number"
                   min={1}
-                  step={1000}
-                  placeholder="€ …"
+                  step={1}
+                  placeholder="es. 50000"
                   aria-invalid={!!errors.budget_max}
                   {...register("budget_max")}
                 />
