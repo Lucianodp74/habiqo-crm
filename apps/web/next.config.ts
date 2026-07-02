@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -39,8 +38,20 @@ const config: NextConfig = {
       },
     ];
   },
+  // Card digitale Habitami (biglietto da visita QR): sito statico separato,
+  // pubblicato come progetto Vercel indipendente. Questo rewrite lo espone
+  // su habiquo.it/habitami senza toccare nessun'altra route del CRM.
+  async rewrites() {
+    return [
+      {
+        source: "/habitami",
+        destination: "https://habitamicard.vercel.app/",
+      },
+      {
+        source: "/habitami/:path*",
+        destination: "https://habitamicard.vercel.app/:path*",
+      },
+    ];
+  },
 };
-
 export default config;
-
-
