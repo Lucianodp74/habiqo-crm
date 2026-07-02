@@ -206,6 +206,7 @@ export function PropertyPhotosManager({
             const isCover = index === 0;
             const isDragging = dragIndex === index;
             const isDragOver = dragOverIndex === index && dragIndex !== index;
+            const isAiRender = path.includes("ai-render-");
 
             return (
               <div
@@ -229,15 +230,22 @@ export function PropertyPhotosManager({
                   loading="lazy"
                 />
 
-                {/* Cover badge */}
-                {isCover && (
+                {/* Cover + Render AI badges */}
+                {(isCover || isAiRender) && (
                   <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
-                    <div className="rounded bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">
-                      Cover
-                    </div>
-                    {internalCode && (
+                    {isCover && (
+                      <div className="rounded bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">
+                        Cover
+                      </div>
+                    )}
+                    {isCover && internalCode && (
                       <div className="rounded bg-white/90 px-2 py-0.5 text-[10px] font-medium text-neutral-900 backdrop-blur-sm">
                         {internalCode}
+                      </div>
+                    )}
+                    {isAiRender && (
+                      <div className="rounded bg-violet-600 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">
+                        Render AI
                       </div>
                     )}
                   </div>
