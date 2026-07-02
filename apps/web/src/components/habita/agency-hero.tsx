@@ -13,6 +13,19 @@ interface HeroProperty {
 
 async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
   const supabase = getAnonClient();
+
+  const { data: featuredData } = await supabase
+    .from("properties")
+    .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
+    .eq("agency_id", agencyId)
+    .eq("status", "active")
+    .eq("is_public", true)
+    .eq("is_featured", true)
+    .limit(1)
+    .maybeSingle();
+
+  if (featuredData) return featuredData;
+
   const { data } = await supabase
     .from("properties")
     .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
@@ -40,8 +53,6 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
 
   return (
     <section className="relative min-h-[85vh] flex flex-col justify-end overflow-hidden">
-
-      {/* ── Foto di sfondo full-screen ──────────────────────────── */}
       {featuredPhotoUrl ? (
         <Image
           src={featuredPhotoUrl}
@@ -54,14 +65,8 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
       ) : (
         <div className="absolute inset-0 bg-[var(--fg-primary)]" />
       )}
-
-      {/* ── Gradiente overlay ───────────────────────────────────── */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-
-      {/* ── Contenuto sovrapposto — posizionato in basso ────────── */}
       <div className="relative px-8 md:px-16 pb-10 md:pb-14 pt-32">
-
-        {/* Badge immobile in evidenza */}
         {featured && (
           <div className="mb-4">
             <span className="inline-block px-3 py-1 text-[10px] uppercase tracking-widest font-medium bg-white/20 text-white/90 backdrop-blur-sm rounded-full border border-white/20">
@@ -69,21 +74,15 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
             </span>
           </div>
         )}
-
-        {/* Titolo agenzia */}
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl leading-none text-white mb-2">
           {agency.name}
         </h1>
         <p className="font-display italic text-lg md:text-2xl text-white/75 mb-6 md:mb-8">
           {agency.tagline ?? "Immobili scelti uno a uno."}
         </p>
-
-        {/* Search bar dark */}
         <div className="max-w-lg">
           <PropertySearchBar agencySlug={agency.slug} variant="dark" />
         </div>
-
-        {/* Info immobile in evidenza */}
         {featured && (
           <Link
             href={`/${agency.slug}/immobili/${featured.slug}`}
@@ -101,10 +100,8 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
           </Link>
         )}
       </div>
-
-      {/* ── CTA telefono in alto a dx su mobile ─────────────────── */}
       {agency.phone && (
-        <a
+        
           href={`tel:${agency.phone}`}
           className="absolute top-6 right-6 md:hidden px-4 py-2 bg-white/15 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/20 hover:bg-white/25 transition-colors"
         >
