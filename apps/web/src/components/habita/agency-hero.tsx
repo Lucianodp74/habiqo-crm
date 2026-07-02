@@ -101,7 +101,7 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
         )}
       </div>
       {agency.phone && (
-        
+        <a
           href={`tel:${agency.phone}`}
           className="absolute top-6 right-6 md:hidden px-4 py-2 bg-white/15 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/20 hover:bg-white/25 transition-colors"
         >
