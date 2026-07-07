@@ -1,4 +1,14 @@
 import { NextResponse } from "next/server";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
 import { getAnonClient } from "@/lib/habita/supabase-anon";
 
 export async function POST(req: Request) {
@@ -7,10 +17,10 @@ export async function POST(req: Request) {
     const { agencyId, fullName, email, phone, message, source } = body;
 
     if (!agencyId || !fullName || fullName.trim().length < 2) {
-      return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
+      return NextResponse.json({ error: "Dati non validi" }, { status: 400, headers: CORS_HEADERS });
     }
     if (!email?.trim() && !phone?.trim()) {
-      return NextResponse.json({ error: "Email o telefono obbligatorio" }, { status: 400 });
+      return NextResponse.json({ error: "Email o telefono obbligatorio" }, { status: 400, headers: CORS_HEADERS });
     }
 
     const sourceMap: Record<string, { source: string; sourceDetail: string }> = {
@@ -35,12 +45,12 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error("[api/public/leads]", error);
-      return NextResponse.json({ error: "Errore server" }, { status: 500 });
+      return NextResponse.json({ error: "Errore server" }, { status: 500, headers: CORS_HEADERS });
     }
 
-    return NextResponse.json({ ok: true, leadId: data });
+    return NextResponse.json({ ok: true, leadId: data }, { headers: CORS_HEADERS });
   } catch (err) {
     console.error("[api/public/leads] unexpected:", err);
-    return NextResponse.json({ error: "Errore interno" }, { status: 500 });
+    return NextResponse.json({ error: "Errore interno" }, { status: 500, headers: CORS_HEADERS });
   }
 }
