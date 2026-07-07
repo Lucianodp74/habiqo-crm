@@ -65,6 +65,10 @@ export function mimeToExtension(mime: string): string {
  * doesn't require an async boundary.
  */
 export function getPropertyPhotoUrl(path: string): string {
+  // Se è già un URL assoluto (es. foto hero caricate nella root del bucket), usalo direttamente.
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!supabaseUrl) {
     throw new Error(
