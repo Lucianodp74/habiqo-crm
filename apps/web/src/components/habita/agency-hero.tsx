@@ -19,7 +19,6 @@ async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
     .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
     .eq("agency_id", agencyId)
     .eq("status", "active")
-    .eq("is_public", true)
     .eq("is_featured", true)
     .limit(1)
     .maybeSingle();
