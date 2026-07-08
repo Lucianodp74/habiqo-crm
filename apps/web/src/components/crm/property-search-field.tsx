@@ -14,13 +14,12 @@ interface PropertyResult {
 }
 
 interface Props {
-  leadId: string;
   initialPropertyId?: string | null;
   initialPropertyTitle?: string | null;
   onSave: (propertyId: string | null) => Promise<void>;
 }
 
-export function PropertySearchField({ leadId, initialPropertyId, initialPropertyTitle, onSave }: Props) {
+export function PropertySearchField({ initialPropertyId, initialPropertyTitle, onSave }: Props) {
   const [query, setQuery] = useState(initialPropertyTitle ?? "");
   const [results, setResults] = useState<PropertyResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
