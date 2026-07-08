@@ -117,7 +117,7 @@ export function PropertySearchField({ initialPropertyId, initialPropertyTitle, o
       {isSaving && <p className="mt-1 text-xs text-[var(--fg-muted)]">Salvataggio...</p>}
       {saved && !isSaving && <p className="mt-1 text-xs text-green-600">Immobile collegato ✓</p>}
       {isOpen && results.length > 0 && (
-        <div className="absolute z-[200] mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] shadow-lg overflow-hidden">
+        <div className="absolute z-[200] mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] shadow-lg overflow-y-auto max-h-72">
           {results.map((p) => (
             <button
               key={p.id}
