@@ -4,6 +4,7 @@ import { isPipelineColumnId } from "./pipeline";
 export const NEW_LEAD_SOURCE_VALUES = [
   "valuation",
   "portal",
+  "immobiliare",
   "idealista",
   "facebook",
   "manual",

@@ -29,6 +29,7 @@ import { toast } from "sonner";
 const SOURCE_LABELS: Record<string, string> = {
   valuation: "Valutazione",
   portal: "Portale",
+  immobiliare: "Immobiliare.it",
   idealista: "Idealista",
   facebook: "Facebook",
   manual: "Manuale",
