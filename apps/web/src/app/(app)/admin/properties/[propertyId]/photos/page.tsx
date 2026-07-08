@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
 import { PropertyMatchingLeads } from "@/components/crm/property-matching-leads";
+import { PropertyLinkedLeads } from "@/components/admin/property-linked-leads";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { PropertyInternalCodeField } from "@/components/admin/property-internal-code-field";
@@ -109,6 +110,9 @@ export default async function PropertyPhotosPage({
         initialPhotos={property.photos ?? []}
         internalCode={property.internal_code}
       />
+
+      {/* ── Lead collegati ─────────────────────────────────────── */}
+      <PropertyLinkedLeads propertyId={property.id} />
 
       {/* ── Valorizza Casa AI ──────────────────────────────────── */}
       <section className="mt-16">
