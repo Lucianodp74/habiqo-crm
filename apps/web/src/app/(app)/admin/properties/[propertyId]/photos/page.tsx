@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
 import { PropertyMatchingLeads } from "@/components/crm/property-matching-leads";
 import { PropertyLinkedLeads } from "@/components/admin/property-linked-leads";
+import { PropertyVisits } from "@/components/admin/property-visits";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { PropertyInternalCodeField } from "@/components/admin/property-internal-code-field";
@@ -39,6 +40,12 @@ export default async function PropertyPhotosPage({
     .maybeSingle();
 
   if (!property) notFound();
+
+  const { data: visits } = await supabase
+    .from("property_visits")
+    .select("id, full_name, phone, email, visit_date, notes, outcome")
+    .eq("property_id", propertyId)
+    .order("visit_date", { ascending: false });
 
   const { data: membership } = await supabase
     .from("agency_members")
@@ -110,6 +117,9 @@ export default async function PropertyPhotosPage({
         initialPhotos={property.photos ?? []}
         internalCode={property.internal_code}
       />
+
+      {/* ── Registro visite ─────────────────────────────────────── */}
+      <PropertyVisits propertyId={property.id} initialVisits={visits ?? []} />
 
       {/* ── Lead collegati ─────────────────────────────────────── */}
       <PropertyLinkedLeads propertyId={property.id} />
