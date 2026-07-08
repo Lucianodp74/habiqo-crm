@@ -78,6 +78,7 @@ export function mergeLeadRecordIntoPipelineLead(
     preferredListingType: null,
     preferredRoomsMin: null,
     preferredSqmMin: null,
+    sourcePropertyId: null,
   };
 }
 
