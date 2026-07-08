@@ -23,7 +23,6 @@ export function LeadPropertyLink({ leadId, sourcePropertyId }: Props) {
         Collega questo lead a un immobile specifico del catalogo.
       </p>
       <PropertySearchField
-        leadId={leadId}
         initialPropertyId={sourcePropertyId}
         onSave={handleSave}
       />
