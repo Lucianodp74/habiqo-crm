@@ -63,6 +63,7 @@ function mapDbLead(
     preferredListingType: row.preferred_listing_type ?? null,
     preferredRoomsMin: row.preferred_rooms_min ?? null,
     preferredSqmMin: row.preferred_sqm_min ?? null,
+    sourcePropertyId: row.source_property_id ?? null,
   };
 }
 

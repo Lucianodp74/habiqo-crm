@@ -1,4 +1,5 @@
 import { LeadDocumentsSection } from "@/components/crm/lead-documents-section";
+import { LeadPropertyLink } from "@/components/crm/lead-property-link";
 import { LeadMatchingProperties } from "@/components/crm/lead-matching-properties";
 import { LeadPreferencesForm } from "@/components/crm/lead-preferences-form";
 import { LeadActivityTimeline } from "@/components/crm/lead-activity-timeline";
@@ -210,6 +211,7 @@ export default async function LeadDetailPage({ params }: Props) {
               preferredSqmMin: lead.preferredSqmMin,
             }}
           />
+          <LeadPropertyLink leadId={lead.id} sourcePropertyId={lead.sourcePropertyId ?? null} />
           <LeadTasksFollowUp leadId={lead.id} />
           <LeadNotesForm leadId={lead.id} />
           <LeadDocumentsSection leadId={lead.id} />

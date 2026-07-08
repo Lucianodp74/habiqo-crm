@@ -62,6 +62,7 @@ export type PipelineLead = {
   preferredListingType: string | null;
   preferredRoomsMin: number | null;
   preferredSqmMin: number | null;
+  sourcePropertyId: string | null;
 };
 
 const COLUMN_SET = new Set<string>(PIPELINE_COLUMN_IDS);
