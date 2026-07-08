@@ -215,7 +215,6 @@ export default async function LeadDetailPage({ params }: Props) {
           <LeadNotesForm leadId={lead.id} />
           <LeadDocumentsSection leadId={lead.id} />
           <LeadMatchingProperties leadId={lead.id} />
-          <LeadPropertyLink leadId={lead.id} sourcePropertyId={lead.sourcePropertyId ?? null} />
 
           <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)]">
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-6">
