@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://habiquo.com"),
+  metadataBase: new URL("https://www.habiquo.it"),
   title: {
     default: "Habiquo — Smart living. Smart real estate.",
     template: "%s · Habiquo",
