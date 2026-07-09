@@ -49,6 +49,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap"
         />
+      <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "Habiquo",
+              "applicationCategory": "BusinessApplication",
+              "operatingSystem": "Web",
+              "url": "https://www.habiquo.it",
+              "description": "L'unica piattaforma di cui un'agenzia immobiliare ha bisogno.",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "EUR"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Habiquo",
+                "url": "https://www.habiquo.it"
+              }
+            })
+          }}
+        />
       </head>
       <body className="transition-colors duration-300">
         <ThemeProvider storageKey="habiquo-theme">
