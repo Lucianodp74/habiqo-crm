@@ -29,6 +29,7 @@ export default async function ImmobiliListPage({
     .eq("agency_id", agency.id)
     .eq("status", "active")
     .eq("is_public", true)
+    .neq("slug", "hero-image-placeholder")
     .order("created_at", { ascending: false });
 
   if (tipo === "sale") query = query.eq("listing_type", "sale");
