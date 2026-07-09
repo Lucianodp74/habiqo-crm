@@ -13,6 +13,9 @@ interface HeroProperty {
 
 async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
   const supabase = getAnonClient();
+  // Forza dati freschi — no cache Vercel
+  const { unstable_noStore } = await import("next/cache");
+  unstable_noStore();
 
   const { data: featuredData } = await supabase
     .from("properties")
