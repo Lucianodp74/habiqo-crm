@@ -54,7 +54,7 @@ export function PropertyVisits({ propertyId, initialVisits }: Props) {
         setError(result.error.message);
         return;
       }
-      setVisits([{ id: result.data.id, full_name: fullName, phone: phone || null, email: email || null, visit_date: visitDate, notes: notes || null, outcome }, ...visits]);
+      setVisits([{ id: result.data.id, full_name: fullName, phone: phone || null, email: email || null, visit_date: visitDate ?? new Date().toISOString().split("T")[0] as string, notes: notes || null, outcome }, ...visits]);
       setFullName(""); setPhone(""); setEmail(""); setNotes(""); setOutcome("interested");
       setShowForm(false);
     });
