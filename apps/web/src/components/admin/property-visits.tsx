@@ -46,7 +46,7 @@ export function PropertyVisits({ propertyId, initialVisits }: Props) {
         fullName,
         phone: phone || null,
         email: email || null,
-        visitDate: visitDate ?? new Date().toISOString().split("T")[0],
+        visitDate: visitDate ?? (new Date().toISOString().split("T")[0] as string),
         notes: notes || null,
         outcome,
       });
