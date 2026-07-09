@@ -26,7 +26,6 @@ async function getHeroProperty(agencyId: string): Promise<HeroProperty | null> {
     .limit(1)
     .maybeSingle();
 
-  console.log("[AgencyHero] featuredData:", JSON.stringify(featuredData));
   if (featuredData) return featuredData;
 
   const { data } = await supabase
