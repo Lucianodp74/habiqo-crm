@@ -10,8 +10,11 @@ export async function addPropertyVisit(input: {
   phone: string | null;
   email: string | null;
   visitDate: string;
+  visitTime: string | null;
+  visitType: string;
   notes: string | null;
   outcome: string;
+  leadId: string | null;
 }): Promise<ActionResult<{ id: string }>> {
   if (!input.fullName || input.fullName.trim().length < 2) {
     return { ok: false, error: { code: "validation_error", message: "Nome obbligatorio" } };
@@ -43,15 +46,18 @@ export async function addPropertyVisit(input: {
       phone: input.phone?.trim() || null,
       email: input.email?.trim() || null,
       visit_date: input.visitDate,
+      visit_time: input.visitTime || null,
+      visit_type: input.visitType,
       notes: input.notes?.trim() || null,
       outcome: input.outcome,
-      created_by: user.id,
+      lead_id: input.leadId || null,
+      agent_id: user.id,
     })
     .select("id")
     .single();
 
   if (error || !data) {
-    return { ok: false, error: { code: "db_error", message: "Impossibile salvare la visita" } };
+    return { ok: false, error: { code: "db_error", message: "Impossibile salvare" } };
   }
 
   revalidatePath(`/admin/properties/${input.propertyId}/photos`);
@@ -74,7 +80,7 @@ export async function deletePropertyVisit(input: {
     .eq("id", input.visitId);
 
   if (error) {
-    return { ok: false, error: { code: "db_error", message: "Impossibile eliminare la visita" } };
+    return { ok: false, error: { code: "db_error", message: "Impossibile eliminare" } };
   }
 
   revalidatePath(`/admin/properties/${input.propertyId}/photos`);

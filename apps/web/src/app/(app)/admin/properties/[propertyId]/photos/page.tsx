@@ -43,7 +43,7 @@ export default async function PropertyPhotosPage({
 
   const { data: visits } = await supabase
     .from("property_visits")
-    .select("id, full_name, phone, email, visit_date, notes, outcome")
+    .select("id, full_name, phone, email, visit_date, visit_time, visit_type, notes, outcome, lead_id, leads(full_name)")
     .eq("property_id", propertyId)
     .order("visit_date", { ascending: false });
 
@@ -119,7 +119,15 @@ export default async function PropertyPhotosPage({
       />
 
       {/* ── Registro visite ─────────────────────────────────────── */}
-      <PropertyVisits propertyId={property.id} initialVisits={visits ?? []} />
+      <PropertyVisits
+        propertyId={property.id}
+        initialVisits={(visits ?? []).map((v: any) => ({
+          ...v,
+          visit_time: v.visit_time ?? null,
+          visit_type: v.visit_type ?? "visita",
+          lead_name: v.leads?.full_name ?? null,
+        }))}
+      />
 
       {/* ── Lead collegati ─────────────────────────────────────── */}
       <PropertyLinkedLeads propertyId={property.id} />
