@@ -1,4 +1,5 @@
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { signOut } from "@/lib/actions/auth";
 import { initials } from "@habiquo/utils";
 import Link from "next/link";
 
@@ -126,6 +127,19 @@ export function Sidebar({ userName, avatarUrl, agencySlug }: SidebarProps) {
           <div className="flex-1 min-w-0">
             <div className="text-[12px] font-medium truncate">{userName}</div>
           </div>
+          <form action={signOut}>
+            <button
+              type="submit"
+              title="Esci"
+              className="p-1.5 rounded-md text-[var(--fg-muted)] hover:text-[var(--fg-primary)] hover:bg-[var(--bg-sunken)] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </button>
+          </form>
         </div>
       </div>
     </aside>
