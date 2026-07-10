@@ -1,5 +1,6 @@
 import { LeadDocumentsSection } from "@/components/crm/lead-documents-section";
 import { LeadPropertyLink } from "@/components/crm/lead-property-link";
+import { LeadVisitedProperties } from "@/components/crm/lead-visited-properties";
 import { LeadMatchingProperties } from "@/components/crm/lead-matching-properties";
 import { LeadPreferencesForm } from "@/components/crm/lead-preferences-form";
 import { LeadActivityTimeline } from "@/components/crm/lead-activity-timeline";
@@ -215,6 +216,7 @@ export default async function LeadDetailPage({ params }: Props) {
           <LeadNotesForm leadId={lead.id} />
           <LeadDocumentsSection leadId={lead.id} />
           <LeadMatchingProperties leadId={lead.id} />
+          <LeadVisitedProperties leadId={lead.id} />
 
           <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)]">
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-6">
