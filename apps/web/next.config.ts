@@ -5,7 +5,7 @@ const config: NextConfig = {
   experimental: {
     typedRoutes: true,
     serverActions: {
-      bodySizeLimit: "2mb",
+      bodySizeLimit: "6mb",
     },
   },
   transpilePackages: [
