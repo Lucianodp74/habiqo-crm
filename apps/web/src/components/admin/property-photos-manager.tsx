@@ -11,6 +11,7 @@ import {
   PROPERTY_PHOTO_MAX_BYTES,
   getPropertyPhotoUrl,
 } from "@/lib/storage/property-photos";
+import { validateImageFile } from "@/lib/validation/image-file";
 
 const MAX_MB = Math.round(PROPERTY_PHOTO_MAX_BYTES / (1024 * 1024));
 
@@ -46,6 +47,19 @@ export function PropertyPhotosManager({
       // Upload sequentially: each action reads-modifies-writes the photos
       // array, so parallel uploads would race on the array.
       for (const file of Array.from(files)) {
+        // Client-side validation first: keeps oversized files from ever
+        // reaching the Server Action body size limit, which would
+        // otherwise surface as a generic Next.js error page instead of
+        // this clear message.
+        const validation = validateImageFile(file, {
+          maxBytes: PROPERTY_PHOTO_MAX_BYTES,
+          allowedMimes: PROPERTY_PHOTO_ALLOWED_MIMES,
+        });
+        if (!validation.ok) {
+          setError(validation.message);
+          break;
+        }
+
         const fd = new FormData();
         fd.append("propertyId", propertyId);
         fd.append("file", file);

@@ -11,6 +11,7 @@ import {
   AGENCY_HERO_PHOTO_ALLOWED_MIMES,
   AGENCY_HERO_PHOTO_MAX_BYTES,
 } from "@/lib/storage/agency-photos";
+import { validateImageFile } from "@/lib/validation/image-file";
 
 const MAX_MB = Math.round(AGENCY_HERO_PHOTO_MAX_BYTES / (1024 * 1024));
 
@@ -30,6 +31,16 @@ export function AgencyCoverPhotoManager({
     const file = files?.[0];
     if (!file) return;
     setError(null);
+
+    const validation = validateImageFile(file, {
+      maxBytes: AGENCY_HERO_PHOTO_MAX_BYTES,
+      allowedMimes: AGENCY_HERO_PHOTO_ALLOWED_MIMES,
+    });
+    if (!validation.ok) {
+      setError(validation.message);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     startTransition(async () => {
       const fd = new FormData();
