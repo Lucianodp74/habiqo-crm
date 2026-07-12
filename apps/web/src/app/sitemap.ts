@@ -32,11 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.9,
         });
 
-        // Immobili pubblici dell'agenzia
+        // Immobili pubblici e attivi dell'agenzia
         const { data: properties } = await supabase
           .from("properties")
           .select("slug, updated_at")
           .eq("agency_id", agency.id)
+          .eq("status", "active")
           .eq("is_public", true)
           .not("slug", "is", null);
 

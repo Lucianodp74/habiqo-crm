@@ -6,6 +6,7 @@ import { getAgencyBySlug } from "@/lib/habita/tenant";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 import { LeadForm } from "@/components/habita/lead-form";
 import { PropertyPhotoLightbox } from "@/components/habita/property-photo-lightbox";
+import { buildRealEstateListingSchema, jsonLdScript } from "@/lib/seo/schema";
 
 type Params = Promise<{ agencySlug: string; propertySlug: string }>;
 
@@ -15,14 +16,26 @@ export async function generateMetadata({ params }: { params: Params }) {
   const supabase = getAnonClient();
   const { data } = await supabase
     .from("properties")
-    .select("title, seo_title, description")
+    .select("title, seo_title, seo_description, description, photos, listing_type")
     .eq("slug", propertySlug)
     .eq("is_public", true)
     .maybeSingle();
   if (!data) return { title: "Immobile non trovato" };
+
+  const url = `https://www.habiquo.it/${agencySlug}/immobili/${propertySlug}`;
+  const firstPhoto = data.photos?.[0] ? getPropertyPhotoUrl(data.photos[0]) : undefined;
+  const metaDescription = data.seo_description ?? data.description?.slice(0, 160) ?? undefined;
+
   return {
     title: data.seo_title ?? `${data.title} — ${agency?.name ?? ""}`,
-    description: data.description?.slice(0, 160) ?? undefined,
+    description: metaDescription,
+    alternates: { canonical: url },
+    openGraph: {
+      title: data.seo_title ?? data.title,
+      description: metaDescription,
+      url,
+      images: firstPhoto ? [firstPhoto] : undefined,
+    },
   };
 }
 
@@ -92,8 +105,28 @@ export default async function PropertyDetailPage({ params }: { params: Params })
   const location = [property.address, property.city, property.region].filter(Boolean).join(", ");
   const whatsappUrl = formatWhatsApp(agency.phone, property.title);
 
+  const propertySchema = buildRealEstateListingSchema({
+    title: property.title,
+    description: property.description,
+    price_eur: property.price_eur,
+    listing_type: property.listing_type,
+    city: property.city,
+    address: property.address,
+    region: property.region,
+    sqm: property.sqm,
+    rooms: property.rooms,
+    photos,
+    slug: property.slug,
+    agencySlug,
+  });
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript(propertySchema)}
+      />
+
       {/* ── Sticky bottom bar mobile ──────────────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--bg-canvas)] border-t border-[var(--border-subtle)] px-4 py-3 flex gap-3">
         {whatsappUrl && (

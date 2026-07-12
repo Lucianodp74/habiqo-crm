@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { buildSoftwareApplicationSchema, jsonLdScript } from '@/lib/seo/schema'
 import { MarketingNav } from './marketing-nav'
 import { MarketingProblem } from './marketing-problem'
 import { MarketingScreenshots } from './marketing-screenshots'
@@ -21,6 +22,11 @@ const SCREENSHOT_URL = 'https://jwivrcofmxnpgkdolnuo.supabase.co/storage/v1/obje
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript(buildSoftwareApplicationSchema())}
+      />
 
       <MarketingNav />
 
