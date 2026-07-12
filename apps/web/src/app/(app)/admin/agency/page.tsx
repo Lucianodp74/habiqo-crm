@@ -4,6 +4,7 @@ import {
   AgencyPublicForm,
   type AgencyPublicFormInitial,
 } from "@/components/admin/agency-public-form";
+import { AgencyCoverPhotoManager } from "@/components/admin/agency-cover-photo-manager";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -11,7 +12,7 @@ export const metadata = {
 };
 
 type LoadResult =
-  | { kind: "ok"; agency: AgencyPublicFormInitial }
+  | { kind: "ok"; agency: AgencyPublicFormInitial; coverImagePath: string | null }
   | { kind: "unauthenticated" }
   | { kind: "no_agency" }
   | { kind: "forbidden" };
@@ -52,7 +53,7 @@ async function loadAgencyForAdmin(): Promise<LoadResult> {
 
   const { data: agency } = await supabase
     .from("agencies")
-    .select("id, name, slug, is_public, tagline, description, city, region, phone")
+    .select("id, name, slug, is_public, tagline, description, city, region, phone, cover_image_path")
     .eq("id", agencyId)
     .single();
 
@@ -73,6 +74,7 @@ async function loadAgencyForAdmin(): Promise<LoadResult> {
       region: agency.region,
       phone: agency.phone,
     },
+    coverImagePath: agency.cover_image_path,
   };
 }
 
@@ -132,7 +134,16 @@ export default async function AdminAgencyPage() {
         </p>
       </header>
 
-      <AgencyPublicForm agency={result.agency} />
+      <div className="space-y-12">
+        <AgencyCoverPhotoManager
+          agencyId={result.agency.id}
+          initialCoverImagePath={result.coverImagePath}
+        />
+
+        <div className="border-t border-neutral-200 pt-10">
+          <AgencyPublicForm agency={result.agency} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -49,15 +49,23 @@ function formatPrice(price: number, listingType: "sale" | "rent"): string {
 
 export async function AgencyHero({ agency }: { agency: PublicAgency }) {
   const featured = await getHeroProperty(agency.id);
-  const featuredPhotoUrl = featured?.photos?.[0]
-    ? getPropertyPhotoUrl(featured.photos[0])
-    : null;
+
+  // La foto di sfondo è indipendente dal teaser immobile: se l'agenzia ha
+  // impostato una foto Hero fissa (branding), quella ha priorità. Altrimenti
+  // fallback identico a prima (foto dell'immobile featured/più recente).
+  // Il teaser sotto (badge, prezzo, link) resta sempre legato a un immobile
+  // reale, indipendentemente da quale immagine sia usata come sfondo.
+  const backgroundPhotoUrl = agency.coverImagePath
+    ? getPropertyPhotoUrl(agency.coverImagePath)
+    : featured?.photos?.[0]
+      ? getPropertyPhotoUrl(featured.photos[0])
+      : null;
 
   return (
     <section className="relative min-h-[85vh] flex flex-col justify-end overflow-hidden">
-      {featuredPhotoUrl ? (
+      {backgroundPhotoUrl ? (
         <Image
-          src={featuredPhotoUrl}
+          src={backgroundPhotoUrl}
           alt={agency.name}
           fill
           priority
