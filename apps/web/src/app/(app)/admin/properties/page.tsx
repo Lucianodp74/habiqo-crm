@@ -17,6 +17,7 @@ type PropertyRow = {
   isPublic: boolean;
   agencyName: string;
   publishedTo: string[];
+  locationName: string | null;
 };
 
 const WRITE_ROLES = ["owner", "admin", "agent"] as const;
@@ -36,19 +37,23 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
 
   const agencyIds = memberships.map((m) => m.agency_id);
 
-  const [propertiesQuery, agenciesQuery] = await Promise.all([
+  const [propertiesQuery, agenciesQuery, locationsQuery] = await Promise.all([
     supabase
       .from("properties")
-      .select("id, title, city, listing_type, price_eur, photos, slug, is_public, agency_id, published_to")
+      .select("id, title, city, listing_type, price_eur, photos, slug, is_public, agency_id, published_to, agency_location_id")
       .in("agency_id", agencyIds)
       .order("created_at", { ascending: false }),
     supabase.from("agencies").select("id, name").in("id", agencyIds),
+    supabase.from("agency_locations").select("id, name").in("agency_id", agencyIds),
   ]);
 
   if (!propertiesQuery.data) return [];
 
   const agencyNameById = new Map(
     (agenciesQuery.data ?? []).map((a) => [a.id, a.name])
+  );
+  const locationNameById = new Map(
+    (locationsQuery.data ?? []).map((l) => [l.id, l.name])
   );
 
   return propertiesQuery.data.map((p) => ({
@@ -62,6 +67,9 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
     isPublic: p.is_public,
     agencyName: agencyNameById.get(p.agency_id) ?? "—",
     publishedTo: p.published_to ?? [],
+    locationName: p.agency_location_id
+      ? locationNameById.get(p.agency_location_id) ?? null
+      : null,
   }));
 }
 
@@ -136,6 +144,7 @@ export default async function AdminPropertiesPage() {
             isPublic={p.isPublic}
             agencyName={p.agencyName}
             publishedTo={p.publishedTo}
+            locationName={p.locationName}
           />
         ))}
       </div>

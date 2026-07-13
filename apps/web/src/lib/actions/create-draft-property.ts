@@ -9,6 +9,7 @@ const MSG = {
   VALIDATION: "Dati immobile incompleti o non validi.",
   UNAUTHENTICATED: "Sessione scaduta. Effettua di nuovo l'accesso.",
   FORBIDDEN: "Non hai i permessi per creare immobili in nessuna agenzia.",
+  LOCATION_NOT_FOUND: "Sede non valida per questa agenzia.",
   INSERT_FAILED: "Errore nella creazione dell'immobile bozza. Riprova.",
 } as const;
 
@@ -29,6 +30,13 @@ export type CreateDraftPropertyInput = {
   /** Maps to properties.rooms */
   bedrooms: number;
   bathrooms: number;
+  /**
+   * Sede che gestisce l'immobile — indipendente dal Comune (city).
+   * Obbligatorio solo se l'agenzia ha gia' almeno una sede configurata
+   * (validato lato client); vuoto altrimenti, per non bloccare le
+   * agenzie che non hanno ancora sedi impostate.
+   */
+  agencyLocationId: string;
 };
 
 type CreateResult = ActionResult<{ propertyId: string }>;
@@ -41,6 +49,7 @@ type CreateResult = ActionResult<{ propertyId: string }>;
  *   - is_public = false (schema default)
  *   - photos = [] (schema default)
  *   - placeholder title and address (NOT NULL, filled later by AI/manual edit)
+ *   - agency_location_id se fornito e verificato appartenente all'agenzia
  *
  * Returns the new property's id so the client can pass it to the photo
  * upload step.
@@ -95,6 +104,28 @@ export async function createDraftProperty(
     };
   }
 
+  // 3b) Se e' stata passata una sede, verifica esplicitamente che
+  // appartenga alla stessa agenzia — nessuna deduzione automatica.
+  // Se agencyLocationId e' vuoto (agenzia senza sedi configurate),
+  // semplicemente non lo impostiamo: nessun blocco.
+  let agencyLocationId: string | null = null;
+  if (input.agencyLocationId?.trim()) {
+    const { data: location } = await supabase
+      .from("agency_locations")
+      .select("id")
+      .eq("id", input.agencyLocationId)
+      .eq("agency_id", writeMembership.agency_id)
+      .maybeSingle();
+
+    if (!location) {
+      return {
+        ok: false,
+        error: { code: "validation_error", message: MSG.LOCATION_NOT_FOUND },
+      };
+    }
+    agencyLocationId = location.id;
+  }
+
   // 4) Build draft payload.
   // title and address are NOT NULL in schema: we use placeholders until
   // the AI step (Step 3) rewrites the title and the user fills the
@@ -114,6 +145,7 @@ export async function createDraftProperty(
       sqm: Math.round(input.sqm),
       rooms: input.bedrooms,
       bathrooms: input.bathrooms,
+      agency_location_id: agencyLocationId,
     })
     .select("id")
     .single();

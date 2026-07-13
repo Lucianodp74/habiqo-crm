@@ -8,6 +8,8 @@ import { PropertyVisits } from "@/components/admin/property-visits";
 import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { PropertyInternalCodeField } from "@/components/admin/property-internal-code-field";
+import { PropertyLocationField } from "@/components/admin/property-location-field";
+import { listAgencyLocationsForAgency } from "@/lib/actions/list-agency-locations";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -34,7 +36,7 @@ export default async function PropertyPhotosPage({
   const { data: property } = await supabase
     .from("properties")
     .select(
-      "id, agency_id, title, city, listing_type, slug, is_public, photos, price_eur, rooms, sqm, internal_code",
+      "id, agency_id, title, city, listing_type, slug, is_public, photos, price_eur, rooms, sqm, internal_code, agency_location_id",
     )
     .eq("id", propertyId)
     .maybeSingle();
@@ -68,6 +70,8 @@ export default async function PropertyPhotosPage({
     .select("slug, is_public")
     .eq("id", property.agency_id)
     .maybeSingle();
+
+  const locations = await listAgencyLocationsForAgency(property.agency_id);
 
   const publicUrl =
     agency?.is_public && agency.slug && property.slug && property.is_public
@@ -104,10 +108,15 @@ export default async function PropertyPhotosPage({
           </a>
         )}
 
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-6">
           <PropertyInternalCodeField
             propertyId={property.id}
             initialCode={property.internal_code ?? null}
+          />
+          <PropertyLocationField
+            propertyId={property.id}
+            initialLocationId={property.agency_location_id ?? null}
+            locations={locations}
           />
         </div>
       </header>

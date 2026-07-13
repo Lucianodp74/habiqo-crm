@@ -24,11 +24,13 @@ type Props = {
   isPublic: boolean;
   agencyName: string;
   publishedTo: string[];
+  /** Nome della Sede che gestisce l'immobile, se assegnata. */
+  locationName: string | null;
 };
 
 export function PropertyListItem({
   id, title, city, listingType, priceFormatted,
-  coverUrl, photoCount, isPublic, agencyName, publishedTo,
+  coverUrl, photoCount, isPublic, agencyName, publishedTo, locationName,
 }: Props) {
   const [portals, setPortals] = useState<string[]>(
     publishedTo.length > 0 ? publishedTo : ["website"]
@@ -87,6 +89,12 @@ export function PropertyListItem({
           {/* Status + portali attivi */}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-xs text-neutral-500">{agencyName}</span>
+            {locationName && (
+              <>
+                <span className="text-neutral-300">·</span>
+                <span className="text-xs text-neutral-500">📍 {locationName}</span>
+              </>
+            )}
             <span className="text-neutral-300">·</span>
             <span className="text-xs text-neutral-500">{photoCount} foto</span>
             <span className="text-neutral-300">·</span>
@@ -212,4 +220,3 @@ export function PropertyListItem({
     </div>
   );
 }
-

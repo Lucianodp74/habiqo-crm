@@ -9,6 +9,7 @@ import {
 import { updatePropertyContent } from "@/lib/actions/update-property-content";
 import { publishProperty } from "@/lib/actions/publish-property";
 import { PropertyPhotosManager } from "@/components/admin/property-photos-manager";
+import type { AgencyLocationOption } from "@/lib/actions/list-agency-locations";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types & constants
@@ -23,6 +24,8 @@ type FormData = {
   sqm: string;
   bedrooms: number;
   bathrooms: number;
+  /** Sede che gestisce l'immobile — indipendente dal Comune (city). */
+  agencyLocationId: string;
 };
 type AdvancedData = {
   address: string;
@@ -47,6 +50,7 @@ const INITIAL_DATA: FormData = {
   sqm: "",
   bedrooms: 2,
   bathrooms: 1,
+  agencyLocationId: "",
 };
 const INITIAL_ADVANCED: AdvancedData = {
   address: "",
@@ -90,9 +94,24 @@ const ENERGY_CLASSES = ["A4", "A3", "A2", "A1", "B", "C", "D", "E", "F", "G"];
 // Main component
 // ──────────────────────────────────────────────────────────────────────────────
 
-export function PropertyCreateAIFlow() {
+export function PropertyCreateAIFlow({
+  locations,
+}: {
+  /**
+   * Sedi disponibili per l'agenzia dell'utente corrente. Se vuoto,
+   * il campo Sede non viene mostrato e non e' richiesto — nessun blocco
+   * per le agenzie che non hanno ancora configurato sedi.
+   */
+  locations: AgencyLocationOption[];
+}) {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [formData, setFormData] = useState<FormData>(INITIAL_DATA);
+  // Se l'agenzia ha esattamente una sede, la preseleziona automaticamente
+  // (nessuna scelta richiesta). Se ne ha 0, resta vuoto (campo non
+  // mostrato). Se ne ha 2+, resta vuoto e la scelta diventa obbligatoria.
+  const [formData, setFormData] = useState<FormData>(() => ({
+    ...INITIAL_DATA,
+    agencyLocationId: locations.length === 1 ? locations[0].id : "",
+  }));
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [aiContent, setAiContent] = useState<PropertyAIContent | null>(null);
   const [advancedData, setAdvancedData] =
@@ -123,12 +142,20 @@ export function PropertyCreateAIFlow() {
     );
   }
 
+  // La scelta della Sede e' obbligatoria SOLO se l'agenzia ha 2 o piu'
+  // sedi configurate. Con 0 sedi il campo non compare (nessun blocco).
+  // Con esattamente 1 sede, e' gia' preselezionata automaticamente sopra,
+  // quindi la condizione risulta comunque soddisfatta senza intervento.
+  const isLocationValid =
+    locations.length < 2 || formData.agencyLocationId.length > 0;
+
   const isStep1Valid =
     formData.contractType !== null &&
     formData.propertyType.length > 0 &&
     formData.city.trim().length > 0 &&
     Number(formData.price) > 0 &&
-    Number(formData.sqm) > 0;
+    Number(formData.sqm) > 0 &&
+    isLocationValid;
 
   const canAdvance =
     !isPending &&
@@ -155,6 +182,7 @@ export function PropertyCreateAIFlow() {
           sqm: Number(formData.sqm),
           bedrooms: formData.bedrooms,
           bathrooms: formData.bathrooms,
+          agencyLocationId: formData.agencyLocationId,
         });
         if (result.ok) {
           setPropertyId(result.data.propertyId);
@@ -303,7 +331,7 @@ export function PropertyCreateAIFlow() {
       {/* ─── Step content ────────────────────────────────────────────────── */}
       <div className="min-h-[320px] sm:min-h-[400px]">
         {currentStep === 1 && (
-          <Step1Form formData={formData} update={update} />
+          <Step1Form formData={formData} update={update} locations={locations} />
         )}
         {currentStep === 2 && propertyId && (
           <Step2Photos propertyId={propertyId} />
@@ -366,9 +394,11 @@ export function PropertyCreateAIFlow() {
 function Step1Form({
   formData,
   update,
+  locations,
 }: {
   formData: FormData;
   update: <K extends keyof FormData>(key: K, value: FormData[K]) => void;
+  locations: AgencyLocationOption[];
 }) {
   const priceLabel =
     formData.contractType === "rent" ? "Prezzo (€/mese)" : "Prezzo (€)";
@@ -413,6 +443,40 @@ function Step1Form({
           ))}
         </select>
       </Field>
+
+      {/* Sede — indipendente dal Comune: indica chi gestisce l'immobile,
+          non dove si trova.
+          0 sedi: campo non mostrato, nessun blocco.
+          1 sede: preselezionata automaticamente, mostrata come info fissa.
+          2+ sedi: scelta interattiva e obbligatoria. */}
+      {locations.length === 1 && (
+        <Field label="Sede">
+          <div className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-elevated)] text-[var(--fg-secondary)] text-base">
+            {locations[0].name}
+            <span className="ml-2 text-xs text-[var(--fg-secondary)]/70">
+              (unica sede disponibile)
+            </span>
+          </div>
+        </Field>
+      )}
+      {locations.length > 1 && (
+        <Field label="Sede">
+          <select
+            value={formData.agencyLocationId}
+            onChange={(e) => update("agencyLocationId", e.target.value)}
+            className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
+          >
+            <option value="" disabled>
+              Seleziona sede…
+            </option>
+            {locations.map((loc) => (
+              <option key={loc.id} value={loc.id}>
+                {loc.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
 
       <Field label="Città">
         <input
