@@ -110,7 +110,7 @@ export function PropertyCreateAIFlow({
   // mostrato). Se ne ha 2+, resta vuoto e la scelta diventa obbligatoria.
   const [formData, setFormData] = useState<FormData>(() => ({
     ...INITIAL_DATA,
-    agencyLocationId: locations.length === 1 ? locations[0].id : "",
+    agencyLocationId: locations.length === 1 ? (locations[0]?.id ?? "") : "",
   }));
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [aiContent, setAiContent] = useState<PropertyAIContent | null>(null);
@@ -402,6 +402,7 @@ function Step1Form({
 }) {
   const priceLabel =
     formData.contractType === "rent" ? "Prezzo (€/mese)" : "Prezzo (€)";
+  const soleLocation = locations.length === 1 ? locations[0] : undefined;
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -449,10 +450,10 @@ function Step1Form({
           0 sedi: campo non mostrato, nessun blocco.
           1 sede: preselezionata automaticamente, mostrata come info fissa.
           2+ sedi: scelta interattiva e obbligatoria. */}
-      {locations.length === 1 && (
+      {soleLocation && (
         <Field label="Sede">
           <div className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-elevated)] text-[var(--fg-secondary)] text-base">
-            {locations[0].name}
+            {soleLocation.name}
             <span className="ml-2 text-xs text-[var(--fg-secondary)]/70">
               (unica sede disponibile)
             </span>
