@@ -9,6 +9,7 @@ import { RenovationWizard } from "@/components/renovation/renovation-wizard";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { PropertyInternalCodeField } from "@/components/admin/property-internal-code-field";
 import { PropertyLocationField } from "@/components/admin/property-location-field";
+import { PropertyDetailsEditor } from "@/components/admin/property-details-editor";
 import { listAgencyLocationsForAgency } from "@/lib/actions/list-agency-locations";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,7 +37,7 @@ export default async function PropertyPhotosPage({
   const { data: property } = await supabase
     .from("properties")
     .select(
-      "id, agency_id, title, city, listing_type, slug, is_public, photos, price_eur, rooms, sqm, internal_code, agency_location_id",
+      "id, agency_id, title, description, city, address, postal_code, region, listing_type, slug, is_public, photos, price_eur, rooms, bathrooms, sqm, floor, has_elevator, has_garage, energy_class, internal_code, agency_location_id",
     )
     .eq("id", propertyId)
     .maybeSingle();
@@ -117,6 +118,26 @@ export default async function PropertyPhotosPage({
             propertyId={property.id}
             initialLocationId={property.agency_location_id ?? null}
             locations={locations}
+          />
+        </div>
+
+        <div className="mt-4">
+          <PropertyDetailsEditor
+            initial={{
+              propertyId: property.id,
+              price: property.price_eur ?? 0,
+              sqm: property.sqm ?? 0,
+              rooms: property.rooms ?? 0,
+              bathrooms: property.bathrooms ?? 1,
+              city: property.city,
+              address: property.address ?? "",
+              postalCode: property.postal_code,
+              region: property.region,
+              floor: property.floor,
+              hasElevator: property.has_elevator,
+              hasGarage: property.has_garage,
+              energyClass: property.energy_class,
+            }}
           />
         </div>
       </header>
