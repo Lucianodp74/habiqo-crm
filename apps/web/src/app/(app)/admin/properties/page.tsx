@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
-import { PropertyListItem } from "@/components/admin/property-list-item";
+import { PropertySearchList } from "@/components/admin/property-search-list";
 
 export const metadata = { title: "Immobili · Habiquo" };
 
@@ -18,6 +18,7 @@ type PropertyRow = {
   agencyName: string;
   publishedTo: string[];
   locationName: string | null;
+  internalCode: string | null;
 };
 
 const WRITE_ROLES = ["owner", "admin", "agent"] as const;
@@ -40,7 +41,7 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
   const [propertiesQuery, agenciesQuery, locationsQuery] = await Promise.all([
     supabase
       .from("properties")
-      .select("id, title, city, listing_type, price_eur, photos, slug, is_public, agency_id, published_to, agency_location_id")
+      .select("id, title, city, listing_type, price_eur, photos, slug, is_public, agency_id, published_to, agency_location_id, internal_code")
       .in("agency_id", agencyIds)
       .order("created_at", { ascending: false }),
     supabase.from("agencies").select("id, name").in("id", agencyIds),
@@ -70,6 +71,7 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
     locationName: p.agency_location_id
       ? locationNameById.get(p.agency_location_id) ?? null
       : null,
+    internalCode: p.internal_code ?? null,
   }));
 }
 
@@ -130,24 +132,11 @@ export default async function AdminPropertiesPage() {
         </div>
       </header>
 
-      <div className="space-y-3">
-        {properties.map((p) => (
-          <PropertyListItem
-            key={p.id}
-            id={p.id}
-            title={p.title}
-            city={p.city}
-            listingType={p.listingType}
-            priceFormatted={formatPrice(p.priceEur, p.listingType)}
-            coverUrl={p.photos[0] ? getPropertyPhotoUrl(p.photos[0]) : null}
-            photoCount={p.photos.length}
-            isPublic={p.isPublic}
-            agencyName={p.agencyName}
-            publishedTo={p.publishedTo}
-            locationName={p.locationName}
-          />
-        ))}
-      </div>
+      <PropertySearchList
+        properties={properties}
+        formatPrice={formatPrice}
+        getPropertyPhotoUrl={getPropertyPhotoUrl}
+      />
     </div>
   );
 }
