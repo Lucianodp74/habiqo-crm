@@ -13,12 +13,37 @@ import { NextResponse } from "next/server";
  * so keep it lean.
  */
 
-const APP_PREFIXES = ["/dashboard", "/crm", "/immobili", "/valutazioni", "/impostazioni"];
-const AUTH_PREFIXES = ["/login", "/register", "/registrazione", "/recupero-password"];
+const APP_PREFIXES = [
+  "/dashboard",
+  "/crm",
+  "/immobili",
+  "/valutazioni",
+  "/impostazioni",
+];
+
+const AUTH_PREFIXES = [
+  "/login",
+  "/register",
+  "/registrazione",
+  "/recupero-password",
+];
 
 export async function middleware(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
+
+  // Redirect Habitami domain to the Habitami landing page
+  const host = request.headers.get("host")?.split(":")[0];
+
+  if (
+    (host === "habitami-ta.it" || host === "www.habitami-ta.it") &&
+    pathname === "/"
+  ) {
+    return NextResponse.redirect(
+      new URL("https://www.habiquo.it/habitami"),
+      308
+    );
+  }
 
   const isAppRoute = APP_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuthRoute = AUTH_PREFIXES.some((p) => pathname.startsWith(p));
