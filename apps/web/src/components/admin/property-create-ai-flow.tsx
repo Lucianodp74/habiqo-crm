@@ -431,7 +431,17 @@ function Step1Form({
       <Field label="Tipologia">
         <select
           value={formData.propertyType}
-          onChange={(e) => update("propertyType", e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            update("propertyType", next);
+            // Un terreno non ha camere/bagni: azzeriamo i valori così
+            // non restano residui (es. 1 bagno) se l'utente aveva già
+            // scelto un'altra tipologia e poi passa a "Terreno".
+            if (next === "Terreno") {
+              update("bedrooms", 0);
+              update("bathrooms", 0);
+            }
+          }}
           className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-md bg-[var(--bg-canvas)] text-[var(--fg-primary)] text-base focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
         >
           <option value="" disabled>
@@ -508,22 +518,27 @@ function Step1Form({
         </Field>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Field label="Camere">
-          <RoomCount
-            value={formData.bedrooms}
-            onChange={(v) => update("bedrooms", v)}
-            min={0}
-          />
-        </Field>
-        <Field label="Bagni">
-          <RoomCount
-            value={formData.bathrooms}
-            onChange={(v) => update("bathrooms", v)}
-            min={1}
-          />
-        </Field>
-      </div>
+      {/* Camere/Bagni non hanno senso per un terreno: il campo viene
+          nascosto e i valori restano a 0 (azzerati sopra alla selezione
+          della tipologia). */}
+      {formData.propertyType !== "Terreno" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Field label="Camere">
+            <RoomCount
+              value={formData.bedrooms}
+              onChange={(v) => update("bedrooms", v)}
+              min={0}
+            />
+          </Field>
+          <Field label="Bagni">
+            <RoomCount
+              value={formData.bathrooms}
+              onChange={(v) => update("bathrooms", v)}
+              min={1}
+            />
+          </Field>
+        </div>
+      )}
     </div>
   );
 }
