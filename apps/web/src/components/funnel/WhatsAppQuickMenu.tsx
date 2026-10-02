@@ -57,6 +57,16 @@ const TEMPLATE_ACTIONS: TemplateAction[] = [
   },
 ];
 
+const CUSTOM_TEMPLATE = ({
+  first,
+  agentName,
+  agencyName,
+}: {
+  first: string;
+  agentName: string;
+  agencyName: string;
+}) => `Ciao ${first}, sono ${agentName} di ${agencyName}. `;
+
 export function WhatsAppQuickMenu({
   phone,
   whatsapp,
@@ -66,6 +76,8 @@ export function WhatsAppQuickMenu({
   agencyName,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [customMode, setCustomMode] = useState(false);
+  const [customText, setCustomText] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
   const first = leadName.split(" ")[0] ?? leadName;
   const hasNumber = !!(whatsapp || phone);
@@ -75,11 +87,24 @@ export function WhatsAppQuickMenu({
     function handler(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setCustomMode(false);
       }
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
+
+  function openCustomMode() {
+    setCustomText(CUSTOM_TEMPLATE({ first, agentName, agencyName }));
+    setCustomMode(true);
+  }
+
+  function sendCustomMessage() {
+    const href = buildWhatsAppLink(phone, whatsapp, customText);
+    if (href) window.open(href, "_blank", "noopener,noreferrer");
+    setOpen(false);
+    setCustomMode(false);
+  }
 
   function isRecommended(id: string): boolean {
     switch (status) {
@@ -167,11 +192,98 @@ export function WhatsAppQuickMenu({
           <div style={dropdownStyle}>
             <div style={{ padding: "8px 12px", borderBottom: "1px solid #f3f4f6", backgroundColor: "#f9fafb" }}>
               <p style={{ fontSize: "10px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: "#9ca3af", margin: 0 }}>
-                Scegli il messaggio per {first}
+                {customMode ? `Messaggio per ${first}` : `Scegli il messaggio per ${first}`}
               </p>
             </div>
 
+            {customMode ? (
+              <div style={{ padding: "12px" }}>
+                <textarea
+                  autoFocus
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  rows={5}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    border: "1px solid #e5e7eb",
+                    fontSize: "13px",
+                    fontFamily: "inherit",
+                    color: "#111827",
+                  }}
+                />
+                <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setCustomMode(false)}
+                    style={{
+                      flex: "0 0 auto",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      border: "1px solid #e5e7eb",
+                      backgroundColor: "#fff",
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ← Indietro
+                  </button>
+                  <button
+                    type="button"
+                    onClick={sendCustomMessage}
+                    disabled={!customText.trim()}
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      border: "1px solid #15803d",
+                      backgroundColor: customText.trim() ? "#15803d" : "#d1fae5",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "#fff",
+                      cursor: customText.trim() ? "pointer" : "not-allowed",
+                    }}
+                  >
+                    Apri in WhatsApp →
+                  </button>
+                </div>
+              </div>
+            ) : (
             <ul style={{ listStyle: "none", padding: "4px 0", margin: 0 }}>
+              <li>
+                <button
+                  type="button"
+                  onClick={openCustomMode}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "12px",
+                    width: "100%",
+                    padding: "10px 12px",
+                    border: "none",
+                    background: "transparent",
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#f9fafb"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}
+                >
+                  <span style={{ fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>✏️</span>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <span style={{ fontSize: "13px", fontWeight: 500, color: "#111827" }}>
+                      Messaggio personalizzato
+                    </span>
+                    <p style={{ fontSize: "11px", color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.5 }}>
+                      Scrivi un testo libero prima di aprire WhatsApp
+                    </p>
+                  </div>
+                </button>
+              </li>
+              <li aria-hidden style={{ borderTop: "1px solid #f3f4f6", margin: "4px 0" }} />
               {TEMPLATE_ACTIONS.map((action) => {
                 const recommended = isRecommended(action.id);
                 const message = action.message({ first, agentName, agencyName });
@@ -224,6 +336,7 @@ export function WhatsAppQuickMenu({
                 );
               })}
             </ul>
+            )}
 
             <div style={{ padding: "8px 12px", borderTop: "1px solid #f3f4f6", backgroundColor: "#f9fafb" }}>
               <p style={{ fontSize: "10px", color: "#9ca3af", margin: 0 }}>
