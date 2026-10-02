@@ -19,6 +19,7 @@ type PropertyRow = {
   publishedTo: string[];
   locationName: string | null;
   internalCode: string | null;
+  isFeatured: boolean;
 };
 
 const WRITE_ROLES = ["owner", "admin", "agent"] as const;
@@ -41,7 +42,7 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
   const [propertiesQuery, agenciesQuery, locationsQuery] = await Promise.all([
     supabase
       .from("properties")
-      .select("id, title, city, listing_type, price_eur, photos, slug, is_public, agency_id, published_to, agency_location_id, internal_code")
+      .select("id, title, city, listing_type, price_eur, photos, slug, is_public, agency_id, published_to, agency_location_id, internal_code, is_featured")
       .in("agency_id", agencyIds)
       .order("created_at", { ascending: false }),
     supabase.from("agencies").select("id, name").in("id", agencyIds),
@@ -72,6 +73,7 @@ async function loadProperties(): Promise<PropertyRow[] | null> {
       ? locationNameById.get(p.agency_location_id) ?? null
       : null,
     internalCode: p.internal_code ?? null,
+    isFeatured: p.is_featured ?? false,
   }));
 }
 

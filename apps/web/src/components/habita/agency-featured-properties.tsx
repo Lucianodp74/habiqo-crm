@@ -19,6 +19,11 @@ async function getAgencyFeaturedProperties(
   // questo numero la sezione mostra solo 6 card e sembra che l'agenzia
   // abbia pochissimi immobili disponibili, quando in realtà ne ha molti
   // di più (es. 68+). Mostrare il totale reale risolve il problema.
+  // Ordina prima gli immobili scelti manualmente dall'agenzia
+  // (is_featured), poi riempie gli slot restanti con i più recenti —
+  // così se l'agenzia non ha ancora scelto nulla il comportamento resta
+  // identico a prima (i 6 più recenti), e se sceglie 1-6 immobili questi
+  // compaiono sempre per primi.
   const [{ data }, { count }] = await Promise.all([
     supabase
       .from("properties")
@@ -26,6 +31,7 @@ async function getAgencyFeaturedProperties(
       .eq("agency_id", agencyId)
       .eq("status", "active")
       .eq("is_public", true)
+      .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(6),
     supabase

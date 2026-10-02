@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { DeletePropertyButton } from "@/components/admin/delete-property-button";
 import { updatePropertyPortals } from "@/lib/actions/update-portals";
+import { togglePropertyFeatured } from "@/lib/actions/toggle-property-featured";
 
 const PORTALS = [
   { id: "website",      label: "Sito",          color: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -26,11 +27,14 @@ type Props = {
   publishedTo: string[];
   /** Nome della Sede che gestisce l'immobile, se assegnata. */
   locationName: string | null;
+  /** Scelto manualmente per comparire in evidenza sulla home pubblica. */
+  isFeatured: boolean;
 };
 
 export function PropertyListItem({
   id, title, city, listingType, priceFormatted,
   coverUrl, photoCount, isPublic, agencyName, publishedTo, locationName,
+  isFeatured,
 }: Props) {
   const [portals, setPortals] = useState<string[]>(
     publishedTo.length > 0 ? publishedTo : ["website"]
@@ -38,6 +42,22 @@ export function PropertyListItem({
   const [showSelector, setShowSelector] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [featured, setFeatured] = useState(isFeatured);
+  const [featuredError, setFeaturedError] = useState<string | null>(null);
+  const [isFeaturedPending, startFeaturedTransition] = useTransition();
+
+  function handleToggleFeatured() {
+    const next = !featured;
+    setFeaturedError(null);
+    startFeaturedTransition(async () => {
+      const result = await togglePropertyFeatured({ propertyId: id, isFeatured: next });
+      if (result.ok) {
+        setFeatured(next);
+      } else {
+        setFeaturedError(result.error.message);
+      }
+    });
+  }
 
   function togglePortal(portalId: string) {
     if (portalId === "website") return;
@@ -138,11 +158,21 @@ export function PropertyListItem({
           >
             {showSelector ? "Chiudi" : "Portali ↗"}
           </button>
+          <button
+            type="button"
+            onClick={handleToggleFeatured}
+            disabled={isFeaturedPending}
+            className={`text-xs transition-colors whitespace-nowrap disabled:opacity-50 ${
+              featured ? "text-amber-600 hover:text-amber-800" : "text-neutral-400 hover:text-neutral-700"
+            }`}
+          >
+            {featured ? "★ In evidenza" : "☆ Metti in evidenza"}
+          </button>
         </div>
       </div>
 
       {/* ── Mobile actions ────────────────────────────────────── */}
-      <div className="md:hidden flex gap-3 px-4 pb-3">
+      <div className="md:hidden flex flex-wrap gap-3 px-4 pb-3">
         <Link
           href={`/admin/properties/${id}/photos`}
           className="text-sm text-neutral-600"
@@ -156,7 +186,19 @@ export function PropertyListItem({
         >
           {showSelector ? "Chiudi" : "Portali"}
         </button>
+        <button
+          type="button"
+          onClick={handleToggleFeatured}
+          disabled={isFeaturedPending}
+          className={`text-sm disabled:opacity-50 ${featured ? "text-amber-600" : "text-neutral-500"}`}
+        >
+          {featured ? "★ In evidenza" : "☆ Metti in evidenza"}
+        </button>
       </div>
+
+      {featuredError && (
+        <p className="px-4 pb-3 text-xs text-red-600">{featuredError}</p>
+      )}
 
       {/* ── Pannello portali (inline) ─────────────────────────── */}
       {showSelector && (

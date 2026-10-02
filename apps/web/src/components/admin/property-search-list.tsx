@@ -18,6 +18,7 @@ type PropertyRow = {
   internalCode: string | null;
   priceFormatted: string;
   coverUrl: string | null;
+  isFeatured: boolean;
 };
 
 export function PropertySearchList({
@@ -76,6 +77,7 @@ export function PropertySearchList({
               agencyName={p.agencyName}
               publishedTo={p.publishedTo}
               locationName={p.locationName}
+              isFeatured={p.isFeatured}
             />
           ))}
         </div>
