@@ -214,17 +214,27 @@ export default async function LeadDetailPage({ params }: Props) {
           />
           <LeadTasksFollowUp leadId={lead.id} />
           <LeadNotesForm leadId={lead.id} />
-          <LeadDocumentsSection leadId={lead.id} />
-          <LeadMatchingProperties leadId={lead.id} />
-          <LeadVisitedProperties leadId={lead.id} />
 
-          <section className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)]">
+          {/* Timeline subito sotto il box note: una nota appena pubblicata
+              deve comparire vicino a dove è stata scritta, non dopo
+              Documenti/Immobili corrispondenti/Visitati — altrimenti il
+              salvataggio riesce (si vede "Nota aggiunta") ma la nota
+              sembra sparita perché la casella si svuota e l'unico posto
+              in cui compare è lontano, più in basso nella pagina. */}
+          <section
+            id="lead-timeline-section"
+            className="glass-panel rounded-2xl p-5 sm:p-6 transition-shadow duration-300 hover:shadow-[0_14px_44px_-24px_rgba(24,20,16,0.16)]"
+          >
             <h2 className="font-display text-[20px] text-[var(--fg-primary)] mb-6">
               Timeline attività
             </h2>
             <LeadActivityTimeline events={events} />
           <LeadPropertyLink leadId={lead.id} sourcePropertyId={lead.sourcePropertyId ?? null} />
           </section>
+
+          <LeadDocumentsSection leadId={lead.id} />
+          <LeadMatchingProperties leadId={lead.id} />
+          <LeadVisitedProperties leadId={lead.id} />
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">

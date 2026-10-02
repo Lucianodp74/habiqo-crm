@@ -30,6 +30,14 @@ export function LeadNotesForm({ leadId }: Props) {
       setText("");
       toast.success("Nota aggiunta");
       router.refresh();
+      // La nota appena pubblicata appare nella Timeline qui sotto: lo
+      // scroll evita che sembri "sparita" solo perché la casella si è
+      // svuotata e la Timeline è un po' più in basso nella pagina.
+      window.setTimeout(() => {
+        document
+          .getElementById("lead-timeline-section")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Errore");
     } finally {
