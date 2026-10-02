@@ -54,6 +54,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // La nota iniziale viene salvata anche in `leads.notes`, ma quel campo
+    // non viene mai letto/mostrato nella scheda lead: l'unico posto in cui
+    // le note sono visibili è la timeline attività (lead_events, type
+    // "note"), alimentata dal box "Aggiungi nota". Senza questo inserimento
+    // la nota scritta in creazione risultava salvata ma invisibile.
+    const initialNote = typeof body.notes === "string" ? body.notes.trim() : "";
+    if (initialNote) {
+      const { error: noteError } = await supabase.from("lead_events").insert({
+        lead_id: data.id,
+        agency_id: membership.agency_id,
+        type: "note",
+        title: "Nota",
+        detail: initialNote,
+        actor_id: user.id,
+        occurred_at: new Date().toISOString(),
+      });
+      if (noteError) {
+        // Il lead è comunque creato correttamente: logghiamo soltanto,
+        // senza far fallire la risposta per un problema sulla nota.
+        console.error("[api/leads POST] initial note insert failed", noteError);
+      }
+    }
+
     return NextResponse.json(data);
   } catch (err) {
     console.error("[api/leads POST] unexpected:", err);

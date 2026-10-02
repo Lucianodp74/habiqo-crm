@@ -32,7 +32,7 @@ export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
       }`}
     >
       {/* Tipo contratto */}
-      <div className="flex gap-1 px-4 pt-3 pb-1.5">
+      <div className="flex gap-1.5 px-5 md:px-6 pt-4 md:pt-5 pb-2">
         {(
           [
             { value: "all",  label: "Tutti" },
@@ -44,7 +44,7 @@ export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
             key={value}
             type="button"
             onClick={() => setListing(value)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
               listing === value
                 ? isDark
                   ? "bg-white text-black"
@@ -60,13 +60,13 @@ export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
       </div>
 
       {/* Input + CTA */}
-      <div className="flex items-center gap-3 px-4 pb-3">
+      <div className="flex items-center gap-3 px-5 md:px-6 pb-4 md:pb-5">
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="Città o zona…"
-          className={`flex-1 text-sm py-1.5 bg-transparent focus:outline-none ${
+          className={`flex-1 text-base md:text-lg py-2.5 bg-transparent focus:outline-none ${
             isDark
               ? "text-white placeholder:text-white/40"
               : "text-[var(--fg-primary)] placeholder:text-[var(--fg-muted)]"
@@ -74,7 +74,7 @@ export function PropertySearchBar({ agencySlug, variant = "light" }: Props) {
         />
         <button
           type="submit"
-          className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+          className={`px-8 py-3.5 rounded-lg text-base font-semibold transition-all ${
             isDark
               ? "bg-white text-black hover:bg-white/90 shadow-lg"
               : "bg-[var(--fg-primary)] text-[var(--bg-canvas)] hover:opacity-90"

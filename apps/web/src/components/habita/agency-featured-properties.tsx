@@ -10,17 +10,33 @@ interface FeaturedProperty {
   listing_type: "sale" | "rent"; slug: string;
 }
 
-async function getAgencyFeaturedProperties(agencyId: string): Promise<FeaturedProperty[]> {
+async function getAgencyFeaturedProperties(
+  agencyId: string,
+): Promise<{ properties: FeaturedProperty[]; totalCount: number }> {
   const supabase = getAnonClient();
-  const { data } = await supabase
-    .from("properties")
-    .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
-    .eq("agency_id", agencyId)
-    .eq("status", "active")
-    .eq("is_public", true)
-    .order("created_at", { ascending: false })
-    .limit(6);
-  return data ?? [];
+
+  // Conteggio reale degli annunci attivi e pubblici dell'agenzia: senza
+  // questo numero la sezione mostra solo 6 card e sembra che l'agenzia
+  // abbia pochissimi immobili disponibili, quando in realtà ne ha molti
+  // di più (es. 68+). Mostrare il totale reale risolve il problema.
+  const [{ data }, { count }] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("id, title, price_eur, city, sqm, rooms, photos, listing_type, slug")
+      .eq("agency_id", agencyId)
+      .eq("status", "active")
+      .eq("is_public", true)
+      .order("created_at", { ascending: false })
+      .limit(6),
+    supabase
+      .from("properties")
+      .select("id", { count: "exact", head: true })
+      .eq("agency_id", agencyId)
+      .eq("status", "active")
+      .eq("is_public", true),
+  ]);
+
+  return { properties: data ?? [], totalCount: count ?? 0 };
 }
 
 function formatPrice(price: number, listingType: "sale" | "rent"): string {
@@ -31,8 +47,10 @@ function formatPrice(price: number, listingType: "sale" | "rent"): string {
 }
 
 export async function AgencyFeaturedProperties({ agency }: { agency: PublicAgency }) {
-  const properties = await getAgencyFeaturedProperties(agency.id);
+  const { properties, totalCount } = await getAgencyFeaturedProperties(agency.id);
   if (properties.length === 0) return null;
+
+  const hasMore = totalCount > properties.length;
 
   return (
     <section className="border-b border-[var(--border-subtle)]">
@@ -40,10 +58,14 @@ export async function AgencyFeaturedProperties({ agency }: { agency: PublicAgenc
         <div className="flex items-baseline justify-between mb-10">
           <div>
             <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-1">Selezione</p>
-            <h2 className="font-display text-3xl text-[var(--fg-primary)]">Immobili in evidenza</h2>
+            <h2 className="font-display text-3xl text-[var(--fg-primary)]">
+              {hasMore
+                ? `Una selezione dai nostri ${totalCount} immobili`
+                : "Immobili in evidenza"}
+            </h2>
           </div>
           <Link href={`/${agency.slug}/immobili`}
-            className="text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors hover:underline underline-offset-4">
+            className="hidden sm:inline text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-colors hover:underline underline-offset-4">
             Vedi tutti →
           </Link>
         </div>
@@ -89,6 +111,17 @@ export async function AgencyFeaturedProperties({ agency }: { agency: PublicAgenc
             );
           })}
         </div>
+
+        {hasMore && (
+          <div className="mt-10 flex justify-center">
+            <Link
+              href={`/${agency.slug}/immobili`}
+              className="px-8 py-3.5 rounded-lg text-sm font-semibold border border-[var(--fg-primary)] text-[var(--fg-primary)] hover:bg-[var(--fg-primary)] hover:text-[var(--bg-canvas)] transition-colors"
+            >
+              Vedi tutti i {totalCount} immobili →
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

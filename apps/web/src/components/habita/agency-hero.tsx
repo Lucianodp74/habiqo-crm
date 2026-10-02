@@ -75,7 +75,7 @@ export async function AgencyHero({ agency }: { agency: PublicAgency }) {
         <p className="font-display italic text-lg md:text-2xl text-white/75 mb-6 md:mb-8">
           {agency.tagline ?? "Immobili scelti uno a uno."}
         </p>
-        <div className="max-w-lg">
+        <div className="max-w-2xl">
           <PropertySearchBar agencySlug={agency.slug} variant="dark" />
         </div>
       </div>
