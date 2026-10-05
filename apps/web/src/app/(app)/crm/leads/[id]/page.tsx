@@ -6,6 +6,8 @@ import { LeadPreferencesForm } from "@/components/crm/lead-preferences-form";
 import { LeadActivityTimeline } from "@/components/crm/lead-activity-timeline";
 import { LeadInsightPanel } from "@/components/crm/lead-insight-panel";
 import { LeadNotesForm } from "@/components/crm/lead-notes-form";
+import { LeadSellerRequests } from "@/components/crm/lead-seller-requests";
+import { listSellerRequestsForLead } from "@/lib/queries/lead-seller-requests";
 import { LeadQuickActions } from "@/components/crm/lead-quick-actions";
 import { LeadTasksFollowUp } from "@/components/crm/lead-tasks-follow-up";
 import { LeadStatusSelect } from "@/components/lead-status-select";
@@ -54,9 +56,10 @@ export default async function LeadDetailPage({ params }: Props) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [lead, events, agentData] = await Promise.all([
+  const [lead, events, sellerRequests, agentData] = await Promise.all([
     getLeadByIdForAgency(id),
     listLeadEventsForLead(id),
+    listSellerRequestsForLead(id),
     user
       ? supabase
           .from("agency_members")
@@ -202,6 +205,8 @@ export default async function LeadDetailPage({ params }: Props) {
               </div>
             </dl>
           </section>
+
+          <LeadSellerRequests requests={sellerRequests} />
 
           <LeadPreferencesForm
             leadId={lead.id}

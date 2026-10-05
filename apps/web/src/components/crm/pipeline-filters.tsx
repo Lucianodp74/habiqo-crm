@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 
 const SOURCE_OPTIONS = [
   { value: "", label: "Tutte le fonti" },
-  { value: "valuation", label: "Valutazione" },
+  { value: "valuation", label: "Proprietari (vendita/valutazione)" },
   { value: "portal", label: "Portale" },
   { value: "idealista", label: "Idealista" },
   { value: "facebook", label: "Facebook" },

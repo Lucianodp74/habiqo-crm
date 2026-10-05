@@ -36,6 +36,8 @@ type FormData = {
   fullName: string;
   phone: string;
   email: string;
+  consentPrivacy: boolean;
+  consentMarketing: boolean;
 };
 
 const INITIAL: FormData = {
@@ -44,6 +46,7 @@ const INITIAL: FormData = {
   rooms: null, bathrooms: null, floor: "",
   condition: "",
   fullName: "", phone: "", email: "",
+  consentPrivacy: false, consentMarketing: false,
 };
 
 const STEPS = [
@@ -60,7 +63,7 @@ export function ValuationFlow({ agencyId, agencyName }: Props) {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  function set(key: keyof FormData, value: string | number | null) {
+  function set(key: keyof FormData, value: string | number | boolean | null) {
     setForm((f) => ({ ...f, [key]: value }));
     setError("");
   }
@@ -80,6 +83,7 @@ export function ValuationFlow({ agencyId, agencyName }: Props) {
   function handleSubmit() {
     if (!form.fullName.trim()) { setError("Inserisci il tuo nome."); return; }
     if (!form.phone.trim()) { setError("Inserisci il tuo telefono."); return; }
+    if (!form.consentPrivacy) { setError("Per inviare la richiesta devi accettare l'informativa privacy."); return; }
 
     startTransition(async () => {
       const result = await submitValuation({
@@ -95,6 +99,8 @@ export function ValuationFlow({ agencyId, agencyName }: Props) {
         fullName: form.fullName,
         phone: form.phone,
         email: form.email || undefined,
+        consentPrivacy: form.consentPrivacy,
+        consentMarketing: form.consentMarketing,
       });
 
       if (result.ok) {
@@ -337,10 +343,27 @@ export function ValuationFlow({ agencyId, agencyName }: Props) {
                   className="w-full px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-sm focus:outline-none focus:border-[var(--fg-primary)] transition-colors"
                 />
               </div>
-              <p className="text-xs text-[var(--fg-muted)] leading-relaxed pt-2">
-                I tuoi dati sono trattati nel rispetto della privacy e utilizzati
-                solo per contattarti con la valutazione richiesta.
-              </p>
+              <label className="flex items-start gap-3 pt-2 text-xs text-[var(--fg-secondary)] leading-relaxed cursor-pointer">
+                <input type="checkbox" checked={form.consentPrivacy}
+                  onChange={e => set("consentPrivacy", e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0"
+                />
+                <span>
+                  Ho letto l&apos;<a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline">informativa privacy</a> e
+                  acconsento al trattamento dei miei dati per essere contattato
+                  in merito alla valutazione richiesta. <span className="text-[var(--accent-deep)]">*</span>
+                </span>
+              </label>
+              <label className="flex items-start gap-3 text-xs text-[var(--fg-secondary)] leading-relaxed cursor-pointer">
+                <input type="checkbox" checked={form.consentMarketing}
+                  onChange={e => set("consentMarketing", e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0"
+                />
+                <span>
+                  Acconsento a ricevere da {agencyName} comunicazioni su immobili
+                  e novità, anche via WhatsApp (facoltativo).
+                </span>
+              </label>
             </div>
           </div>
         )}
