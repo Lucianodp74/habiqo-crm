@@ -10,6 +10,7 @@ import { DeletePropertyButton } from "@/components/admin/delete-property-button"
 import { PropertyInternalCodeField } from "@/components/admin/property-internal-code-field";
 import { PropertyLocationField } from "@/components/admin/property-location-field";
 import { PropertyDetailsEditor } from "@/components/admin/property-details-editor";
+import { PropertyVideoField } from "@/components/admin/property-video-field";
 import { listAgencyLocationsForAgency } from "@/lib/actions/list-agency-locations";
 import { createClient } from "@/lib/supabase/server";
 
@@ -43,6 +44,16 @@ export default async function PropertyPhotosPage({
     .maybeSingle();
 
   if (!property) notFound();
+
+  // Query separata: se la colonna video_url non esiste ancora (migration
+  // 0027 non applicata) la pagina continua a funzionare senza video.
+  const { data: videoRow } = await supabase
+    .from("properties")
+    .select("video_url")
+    .eq("id", propertyId)
+    .maybeSingle();
+  const videoUrl =
+    (videoRow as unknown as { video_url?: string | null } | null)?.video_url ?? null;
 
   const { data: visits } = await supabase
     .from("property_visits")
@@ -119,6 +130,10 @@ export default async function PropertyPhotosPage({
             initialLocationId={property.agency_location_id ?? null}
             locations={locations}
           />
+        </div>
+
+        <div className="mt-4">
+          <PropertyVideoField propertyId={property.id} initialUrl={videoUrl} />
         </div>
 
         <div className="mt-4">

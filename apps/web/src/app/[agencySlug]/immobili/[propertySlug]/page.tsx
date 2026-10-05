@@ -5,6 +5,7 @@ import { getAnonClient } from "@/lib/habita/supabase-anon";
 import { getAgencyBySlug } from "@/lib/habita/tenant";
 import { getPropertyPhotoUrl } from "@/lib/storage/property-photos";
 import { LeadForm } from "@/components/habita/lead-form";
+import { parseVideoEmbed } from "@/lib/video/embed";
 import { PropertyPhotoLightbox } from "@/components/habita/property-photo-lightbox";
 import { buildRealEstateListingSchema, jsonLdScript } from "@/lib/seo/schema";
 
@@ -88,6 +89,17 @@ export default async function PropertyDetailPage({ params }: { params: Params })
     .maybeSingle();
 
   if (!property) notFound();
+
+  // Query separata: se la colonna video_url non esiste ancora (migration
+  // 0027 non applicata) l'annuncio si vede comunque, solo senza video.
+  const { data: videoRow } = await supabase
+    .from("properties")
+    .select("video_url")
+    .eq("id", property.id)
+    .maybeSingle();
+  const video = parseVideoEmbed(
+    (videoRow as { video_url?: string | null } | null)?.video_url,
+  );
 
   // Immobili simili
   const { data: related } = await supabase
@@ -255,6 +267,26 @@ export default async function PropertyDetailPage({ params }: { params: Params })
                 {property.has_garage && <FeaturePill label="Garage" value="Incluso" />}
                 {property.energy_class && <FeaturePill label="Classe en." value={property.energy_class} />}
               </div>
+
+              {/* Video */}
+              {video && (
+                <div className="mb-8">
+                  <p className="text-xs uppercase tracking-widest text-[var(--accent-deep)] mb-4">
+                    Video
+                  </p>
+                  <div className="aspect-video w-full overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-black">
+                    <iframe
+                      src={video.embedUrl}
+                      title={`Video di ${property.title}`}
+                      loading="lazy"
+                      allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      className="h-full w-full"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Descrizione */}
               {property.description && (
