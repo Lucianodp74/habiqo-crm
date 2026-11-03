@@ -3,6 +3,7 @@ import { sendMatchNotificationForProperty } from "@/lib/email/send-match-notific
 
 import { revalidatePath } from "next/cache";
 
+import { generateUniqueSlug } from "@/lib/properties/property-slug";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@habiquo/types";
 
@@ -12,7 +13,20 @@ const MSG = {
   FORBIDDEN: "Non hai i permessi per pubblicare questo immobile.",
   PROPERTY_NOT_FOUND: "Immobile non trovato.",
   PUBLISH_FAILED: "Errore nella pubblicazione. Riprova.",
+  // 23514 check_violation: some field breaks a database rule.
+  INVALID_DATA:
+    "Alcuni dati dell'immobile non rispettano i requisiti per la pubblicazione. Controlla titolo e dati principali, poi riprova.",
+  // 23505 unique_violation: the generated web address is already used.
+  SLUG_TAKEN:
+    "L'indirizzo web dell'annuncio è già usato da un altro immobile. Riprova: ne verrà generato uno nuovo.",
 } as const;
+
+/**
+ * Postgres error codes we turn into a clear message. The SQL details stay
+ * in the server log only.
+ */
+const PG_CHECK_VIOLATION = "23514";
+const PG_UNIQUE_VIOLATION = "23505";
 
 const WRITE_ROLES = ["owner", "admin", "agent"] as const;
 
@@ -33,26 +47,6 @@ type PublishResult = ActionResult<{
   propertySlug: string;
   agencySlug: string;
 }>;
-
-// ──────────────────────────────────────────────────────────────────────
-// Slug generator
-// ──────────────────────────────────────────────────────────────────────
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .substring(0, 60);
-}
-
-function generateUniqueSlug(title: string): string {
-  const base = slugify(title) || "immobile";
-  const suffix = Math.random().toString(36).substring(2, 7);
-  return `${base}-${suffix}`;
-}
 
 // ──────────────────────────────────────────────────────────────────────
 // Server action
@@ -95,7 +89,7 @@ export async function publishProperty(
   // 2) Fetch property + verify write membership
   const { data: property } = await supabase
     .from("properties")
-    .select("id, agency_id, title, slug, city, price_eur, rooms, sqm, listing_type")
+    .select("id, agency_id, title, slug, is_public, city, price_eur, rooms, sqm, listing_type")
     .eq("id", input.propertyId)
     .maybeSingle();
 
@@ -123,7 +117,27 @@ export async function publishProperty(
     };
   }
 
-  // 3) Build update payload
+  // 2b) Already published: nothing to do. Avoids a second publication
+  // (published_at reset, lead notifications sent again) on a double click
+  // or a stale page.
+  if (property.is_public && property.slug) {
+    const { data: publishedAgency } = await supabase
+      .from("agencies")
+      .select("slug")
+      .eq("id", property.agency_id)
+      .maybeSingle();
+    return {
+      ok: true,
+      data: {
+        propertyId: property.id,
+        propertySlug: property.slug,
+        agencySlug: publishedAgency?.slug ?? "",
+      },
+    };
+  }
+
+  // 3) Build update payload. The slug comes from the title but never
+  // changes it; generateUniqueSlug keeps it within the 60-char DB limit.
   const propertySlug = property.slug || generateUniqueSlug(property.title);
 
   type UpdatePayload = {
@@ -166,7 +180,26 @@ export async function publishProperty(
     .eq("id", property.id);
 
   if (updateError) {
-    console.error("publishProperty: update failed", updateError);
+    // Technical details for the server log only, never for the user.
+    console.error("publishProperty: update failed", {
+      propertyId: property.id,
+      code: updateError.code,
+      message: updateError.message,
+      details: updateError.details,
+      hint: updateError.hint,
+    });
+    if (updateError.code === PG_CHECK_VIOLATION) {
+      return {
+        ok: false,
+        error: { code: "validation_error", message: MSG.INVALID_DATA },
+      };
+    }
+    if (updateError.code === PG_UNIQUE_VIOLATION) {
+      return {
+        ok: false,
+        error: { code: "conflict", message: MSG.SLUG_TAKEN },
+      };
+    }
     return {
       ok: false,
       error: { code: "unknown", message: MSG.PUBLISH_FAILED },

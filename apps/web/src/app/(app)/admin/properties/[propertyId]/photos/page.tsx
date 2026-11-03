@@ -11,6 +11,7 @@ import { PropertyInternalCodeField } from "@/components/admin/property-internal-
 import { PropertyLocationField } from "@/components/admin/property-location-field";
 import { PropertyDetailsEditor } from "@/components/admin/property-details-editor";
 import { PropertyVideoField } from "@/components/admin/property-video-field";
+import { PublishPropertyButton } from "@/components/admin/publish-property-button";
 import { listAgencyLocationsForAgency } from "@/lib/actions/list-agency-locations";
 import { createClient } from "@/lib/supabase/server";
 
@@ -109,6 +110,11 @@ export default async function PropertyPhotosPage({
           {property.listing_type === "rent" ? "Affitto" : "Vendita"} ·{" "}
           {property.city}
         </p>
+        <PublishPropertyButton
+          propertyId={property.id}
+          isPublic={property.is_public}
+          agencyIsPublic={agency?.is_public === true}
+        />
         {publicUrl && (
           <a
             href={publicUrl}
