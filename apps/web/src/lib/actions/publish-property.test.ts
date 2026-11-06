@@ -15,14 +15,43 @@ const db = {
   agency: { slug: "agenzia-test" } as { slug: string } | null,
   updateError: null as DbError | null,
   calls: [] as Call[],
+  /** Concurrency tests: hold every UPDATE until this many property reads happened. */
+  holdUpdatesUntilReads: 0,
+  propertyReads: 0,
 };
+
+let releaseUpdates: () => void = () => {};
+let updatesReleased: Promise<void> = Promise.resolve();
+
+/**
+ * Same semantics as PostgreSQL for `UPDATE ... WHERE id = $1 AND
+ * is_public = false RETURNING slug`: updates are applied one at a time and
+ * the condition is checked against the row as it is at that moment.
+ */
+function applyUpdate(call: Call) {
+  if (db.updateError) return { data: null, error: db.updateError };
+  const draftOnly = call.filters.some(([c, v]) => c === "is_public" && v === false);
+  if (!db.property || (draftOnly && db.property.is_public)) return { data: [], error: null };
+  db.property = { ...db.property, ...(call.payload as Record<string, unknown>) };
+  return { data: [{ slug: db.property.slug }], error: null };
+}
 
 function builder(table: string) {
   const call: Call = { table, op: "select", filters: [] };
   db.calls.push(call);
-  const result = () => {
-    if (call.op === "update") return { data: null, error: db.updateError };
-    if (table === "properties") return { data: db.property, error: null };
+  const result = async () => {
+    if (call.op === "update") {
+      await updatesReleased;
+      return applyUpdate(call);
+    }
+    if (table === "properties") {
+      // a snapshot, like a row read before another transaction commits
+      const snapshot = db.property ? { ...db.property } : null;
+      db.propertyReads += 1;
+      if (db.holdUpdatesUntilReads && db.propertyReads >= db.holdUpdatesUntilReads)
+        releaseUpdates();
+      return { data: snapshot, error: null };
+    }
     if (table === "agency_members") return { data: db.membership, error: null };
     if (table === "agencies") return { data: db.agency, error: null };
     return { data: null, error: null };
@@ -52,11 +81,11 @@ function builder(table: string) {
       call.filters.push([col, val]);
       return b;
     },
-    maybeSingle: () => Promise.resolve(result()),
-    single: () => Promise.resolve(result()),
+    maybeSingle: () => result(),
+    single: () => result(),
     // biome-ignore lint/suspicious/noThenProperty: mimics the awaitable Supabase query builder
     then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-      Promise.resolve(result()).then(resolve, reject),
+      result().then(resolve, reject),
   };
   return b;
 }
@@ -103,6 +132,9 @@ beforeEach(() => {
   db.agency = { slug: "agenzia-test" };
   db.updateError = null;
   db.calls = [];
+  db.holdUpdatesUntilReads = 0;
+  db.propertyReads = 0;
+  updatesReleased = Promise.resolve();
   notify.mockReset();
   errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 });
@@ -119,7 +151,10 @@ describe("publishProperty: publishing an existing draft", () => {
     expect(updates()).toHaveLength(1);
     const [update] = updates();
     expect(update?.table).toBe("properties");
-    expect(update?.filters).toEqual([["id", DRAFT_ID]]);
+    expect(update?.filters).toEqual([
+      ["id", DRAFT_ID],
+      ["is_public", false],
+    ]);
     expect(update?.payload).toMatchObject({ status: "active", is_public: true });
     expect(writesOtherThanUpdate()).toEqual([]);
   });
@@ -282,5 +317,96 @@ describe("publishProperty: database errors", () => {
       ok: false,
       error: { code: "unknown", message: "Errore nella pubblicazione. Riprova." },
     });
+  });
+});
+
+describe("publishProperty: two concurrent publications of the same draft", () => {
+  /** Both requests read the draft (still private) before either one updates it. */
+  function startTogether() {
+    db.holdUpdatesUntilReads = 2;
+    updatesReleased = new Promise<void>((resolve) => {
+      releaseUpdates = resolve;
+    });
+  }
+
+  it("only one request performs the transition and notifies; both get the same slug", async () => {
+    startTogether();
+    const [a, b] = await Promise.all([
+      publishProperty({ propertyId: DRAFT_ID }),
+      publishProperty({ propertyId: DRAFT_ID }),
+    ]);
+
+    expect(a.ok && b.ok).toBe(true);
+    const storedSlug = db.property?.slug as string;
+    expect(storedSlug).toMatch(DB_SLUG_CHECK);
+    if (a.ok && b.ok) {
+      expect(a.data.propertySlug).toBe(storedSlug);
+      expect(b.data.propertySlug).toBe(storedSlug);
+    }
+    expect(notify).toHaveBeenCalledTimes(1);
+    // both tried with their own generated slug, only one was written
+    const slugsTried = updates().map((u) => (u.payload as { slug: string }).slug);
+    expect(slugsTried).toHaveLength(2);
+    expect(slugsTried[0]).not.toBe(slugsTried[1]);
+    expect(slugsTried).toContain(storedSlug);
+  });
+
+  it("the second request does not overwrite the step-4 data saved by the first", async () => {
+    startTogether();
+    await Promise.all([
+      publishProperty({ propertyId: DRAFT_ID, address: "Via Roma 1", energyClass: "B" }),
+      publishProperty({ propertyId: DRAFT_ID, address: "Via Sbagliata 99", energyClass: "G" }),
+    ]);
+    expect(db.property).toMatchObject({
+      address: "Via Roma 1",
+      energy_class: "B",
+      is_public: true,
+    });
+    expect(notify).toHaveBeenCalledTimes(1);
+  });
+
+  it("a request that finds the draft already published (no row updated) does not notify", async () => {
+    // the draft is published by someone else between the read and the update
+    db.holdUpdatesUntilReads = 1;
+    updatesReleased = new Promise<void>((resolve) => {
+      releaseUpdates = () => {
+        db.property = {
+          ...db.property,
+          is_public: true,
+          status: "active",
+          slug: "pubblicato-altrove-abcde",
+        };
+        resolve();
+      };
+    });
+    const res = await publishProperty({ propertyId: DRAFT_ID });
+    expect(res).toEqual({
+      ok: true,
+      data: {
+        propertyId: DRAFT_ID,
+        propertySlug: "pubblicato-altrove-abcde",
+        agencySlug: "agenzia-test",
+      },
+    });
+    expect(db.property?.slug).toBe("pubblicato-altrove-abcde");
+    expect(updates()).toHaveLength(1); // the update ran and changed no row
+    expect(notify).not.toHaveBeenCalled();
+  });
+
+  it("no row updated and the property is not public: generic error, no notification", async () => {
+    db.holdUpdatesUntilReads = 1;
+    updatesReleased = new Promise<void>((resolve) => {
+      releaseUpdates = () => {
+        db.property = null; // deleted or hidden meanwhile
+        resolve();
+      };
+    });
+    const res = await publishProperty({ propertyId: DRAFT_ID });
+    expect(res).toEqual({
+      ok: false,
+      error: { code: "unknown", message: "Errore nella pubblicazione. Riprova." },
+    });
+    expect(updates()).toHaveLength(1);
+    expect(notify).not.toHaveBeenCalled();
   });
 });

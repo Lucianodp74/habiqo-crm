@@ -173,11 +173,16 @@ export async function publishProperty(
   }
   if (input.energyClass?.trim()) payload.energy_class = input.energyClass.trim();
 
-  // 4) Update
-  const { error: updateError } = await supabase
+  // 4) Update only while the row is still a draft. PostgreSQL re-checks
+  // `is_public = false` after a concurrent update commits, so when two
+  // requests publish at the same time exactly one of them gets the row
+  // back; the other updates nothing (no second slug, no second notification).
+  const { data: updatedRows, error: updateError } = await supabase
     .from("properties")
     .update(payload)
-    .eq("id", property.id);
+    .eq("id", property.id)
+    .eq("is_public", false)
+    .select("slug");
 
   if (updateError) {
     // Technical details for the server log only, never for the user.
@@ -205,6 +210,38 @@ export async function publishProperty(
       error: { code: "unknown", message: MSG.PUBLISH_FAILED },
     };
   }
+
+  const published = (updatedRows as Array<{ slug: string | null }> | null)?.[0];
+  if (!published?.slug) {
+    // Published meanwhile by another request: answer with what is stored,
+    // without notifying again.
+    const { data: current } = await supabase
+      .from("properties")
+      .select("slug, is_public")
+      .eq("id", property.id)
+      .maybeSingle();
+    if (current?.is_public && current.slug) {
+      const { data: publishedAgency } = await supabase
+        .from("agencies")
+        .select("slug")
+        .eq("id", property.agency_id)
+        .maybeSingle();
+      return {
+        ok: true,
+        data: {
+          propertyId: property.id,
+          propertySlug: current.slug,
+          agencySlug: publishedAgency?.slug ?? "",
+        },
+      };
+    }
+    console.error("publishProperty: no row updated", { propertyId: property.id });
+    return {
+      ok: false,
+      error: { code: "unknown", message: MSG.PUBLISH_FAILED },
+    };
+  }
+  const publishedSlug = published.slug;
 
   // 4b) Notify matching leads (fire and forget)
   void sendMatchNotificationForProperty(
@@ -236,14 +273,14 @@ export async function publishProperty(
   if (agencySlug) {
     revalidatePath(`/${agencySlug}`);
     revalidatePath(`/${agencySlug}/immobili`);
-    revalidatePath(`/${agencySlug}/immobili/${propertySlug}`);
+    revalidatePath(`/${agencySlug}/immobili/${publishedSlug}`);
   }
 
   return {
     ok: true,
     data: {
       propertyId: property.id,
-      propertySlug,
+      propertySlug: publishedSlug,
       agencySlug,
     },
   };
