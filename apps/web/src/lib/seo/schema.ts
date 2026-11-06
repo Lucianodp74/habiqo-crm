@@ -4,9 +4,27 @@
  * pagina immobile e home marketing.
  */
 
+/**
+ * Serializes data for an inline <script type="application/ld+json">.
+ *
+ * Plain JSON.stringify is not safe there: a value containing "</script>"
+ * (e.g. a property description) would close the tag and let the rest run
+ * as HTML. Escaping <, > and & as \uXXXX keeps the output valid JSON with
+ * the same data, but with no character the HTML parser can act on.
+ * U+2028/U+2029 are escaped too, for older JavaScript parsers.
+ */
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 export function jsonLdScript(data: Record<string, unknown>) {
   return {
-    __html: JSON.stringify(data),
+    __html: serializeJsonLd(data),
   };
 }
 
